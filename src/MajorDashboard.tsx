@@ -2139,6 +2139,7 @@ function MajorInvest({ userState, setUserState }: any) {
                           tick={{ fill: '#475569', fontSize: 10 }}
                           tickFormatter={(tick) => {
                             const date = new Date(tick);
+                            if (isNaN(date.getTime())) return tick; // Handle mock data strings
                             if (historyRange === '1h' || historyRange === '1j') {
                               return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                             }
@@ -2155,7 +2156,7 @@ function MajorInvest({ userState, setUserState }: any) {
                           contentStyle={{ backgroundColor: '#000', borderColor: '#334155', borderRadius: '12px' }}
                           itemStyle={{ color: '#fff' }}
                           labelFormatter={(label) => {
-                            if (typeof label === 'number') {
+                            if (typeof label === 'number' || !isNaN(new Date(label).getTime())) {
                               return new Date(label).toLocaleString();
                             }
                             return label;
