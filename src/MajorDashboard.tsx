@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Home, CreditCard, Shield, TrendingUp, User, Wallet, ChevronRight, CheckCircle2, Lock, Sparkles, Building2, Briefcase, Plus, ArrowRight, PieChart as PieChartIcon, Trash2, History, ArrowUpRight, ArrowDownRight, ArrowLeft, Download, Search, Car, HeartPulse, Landmark, Dog, ArrowRightLeft, CheckCircle, Trophy, BookOpen, X, XCircle, Pencil, Users, Coins, RefreshCw, Globe, AlertCircle, Sun, Moon } from 'lucide-react';
+import { Home, CreditCard, Shield, TrendingUp, User, Wallet, ChevronRight, CheckCircle2, Lock, Sparkles, Building2, Briefcase, Plus, ArrowRight, PieChart as PieChartIcon, Trash2, History, ArrowUpRight, ArrowDownRight, ArrowLeft, Download, Search, Car, HeartPulse, Landmark, Dog, ArrowRightLeft, CheckCircle, Trophy, BookOpen, X, XCircle, Pencil, Users, Coins, RefreshCw, Globe, AlertCircle, Sun, Moon, Info } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis, CartesianGrid, LineChart, Line } from 'recharts';
 import { GenesisLogo } from './components/GenesisLogo';
 import { GenesisAI } from './components/GenesisAI';
@@ -1766,7 +1766,8 @@ function MajorInvest({ userState, setUserState }: any) {
     }, 0);
     
     const totalInvested = holdings.reduce((acc: number, h: any) => acc + h.value, 0);
-    const globalPerf = totalInvested > 0 ? ((totalCurrentValue - totalInvested) / totalInvested) * 100 : 0;
+    const globalPerfAbsolute = totalCurrentValue - totalInvested;
+    const globalPerfPercentage = totalInvested > 0 ? (globalPerfAbsolute / totalInvested) * 100 : 0;
 
     // Helper for mini charts
     const generateSparklineData = (price: number, perf: number) => {
@@ -1807,10 +1808,10 @@ function MajorInvest({ userState, setUserState }: any) {
             <div className="flex items-baseline gap-3 mb-2">
               <h2 className="text-5xl font-mono font-bold text-white">{(totalCurrentValue || account.balance).toFixed(2)} €</h2>
             </div>
-            <div className={`flex items-center gap-2 font-medium ${globalPerf >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-              <span className="text-lg">{globalPerf >= 0 ? '+' : ''}{globalPerf.toFixed(2)} €</span>
-              <span className="text-sm opacity-80">({globalPerf >= 0 ? '+' : ''}{globalPerf.toFixed(2)}%)</span>
-              <span className="text-xs text-slate-500 ml-2">Aujourd'hui</span>
+            <div className={`flex items-center gap-2 font-medium ${globalPerfAbsolute >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              <span className="text-lg">{globalPerfAbsolute >= 0 ? '+' : ''}{globalPerfAbsolute.toFixed(2)} €</span>
+              <span className="text-sm opacity-80">({globalPerfPercentage >= 0 ? '+' : ''}{globalPerfPercentage.toFixed(2)}%)</span>
+              <span className="text-xs text-slate-500 ml-2">Depuis l'achat</span>
             </div>
           </div>
 
@@ -1819,8 +1820,8 @@ function MajorInvest({ userState, setUserState }: any) {
               <AreaChart data={MOCK_CHART_DATA}>
                 <defs>
                   <linearGradient id="colorGlobal" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={globalPerf >= 0 ? "#10b981" : "#ef4444"} stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor={globalPerf >= 0 ? "#10b981" : "#ef4444"} stopOpacity={0}/>
+                    <stop offset="5%" stopColor={globalPerfAbsolute >= 0 ? "#10b981" : "#ef4444"} stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor={globalPerfAbsolute >= 0 ? "#10b981" : "#ef4444"} stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <Tooltip 
@@ -1832,7 +1833,7 @@ function MajorInvest({ userState, setUserState }: any) {
                 <Area 
                   type="monotone" 
                   dataKey="value" 
-                  stroke={globalPerf >= 0 ? "#10b981" : "#ef4444"} 
+                  stroke={globalPerfAbsolute >= 0 ? "#10b981" : "#ef4444"} 
                   strokeWidth={4} 
                   fillOpacity={1} 
                   fill="url(#colorGlobal)" 
@@ -2090,31 +2091,51 @@ function MajorInvest({ userState, setUserState }: any) {
                   </div>
 
                   {/* Price & Perf */}
-                  <div className="mb-8">
-                    <div className="flex items-baseline gap-3 mb-2">
-                      <h4 className="text-5xl font-mono font-bold text-white">
-                        {displayMode === 'absolute' 
-                          ? `${(userState.realTimePrices[selectedHolding.ticker]?.price || (selectedHolding.value / selectedHolding.shares)).toFixed(2)} €`
-                          : `${((userState.realTimePrices[selectedHolding.ticker]?.price / (selectedHolding.value / selectedHolding.shares) - 1) * 100).toFixed(2)} %`
-                        }
-                      </h4>
-                      <button 
-                        onClick={() => setDisplayMode(prev => prev === 'absolute' ? 'percentage' : 'absolute')}
-                        className="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded hover:bg-slate-700 transition-colors"
-                      >
-                        {displayMode === 'absolute' ? '%' : '€'}
-                      </button>
-                    </div>
-                    <div className={`flex items-center gap-2 font-bold ${((userState.realTimePrices[selectedHolding.ticker]?.price || (selectedHolding.value / selectedHolding.shares)) >= (selectedHolding.value / selectedHolding.shares)) ? 'text-emerald-400' : 'text-red-400'}`}>
-                      <span>
-                        {displayMode === 'absolute' 
-                          ? `${((userState.realTimePrices[selectedHolding.ticker]?.price || (selectedHolding.value / selectedHolding.shares)) - (selectedHolding.value / selectedHolding.shares)).toFixed(2)} €`
-                          : `${((userState.realTimePrices[selectedHolding.ticker]?.price / (selectedHolding.value / selectedHolding.shares) - 1) * 100).toFixed(2)} %`
-                        }
-                      </span>
-                      <span className="text-xs opacity-60 uppercase tracking-widest">Depuis l'achat</span>
-                    </div>
-                  </div>
+                  {(() => {
+                    const pru = selectedHolding.value / selectedHolding.shares;
+                    const currentPrice = userState.realTimePrices[selectedHolding.ticker]?.price || (pru * (1 + selectedHolding.performance / 100));
+                    const totalCurrentValue = currentPrice * selectedHolding.shares;
+                    const totalPurchaseValue = selectedHolding.value;
+                    const totalProfitLossAbsolute = totalCurrentValue - totalPurchaseValue;
+                    const totalProfitLossPercentage = totalPurchaseValue > 0 ? (totalCurrentValue / totalPurchaseValue - 1) * 100 : 0;
+                    
+                    return (
+                      <>
+                        <div className="mb-8">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-sm text-slate-400 font-medium uppercase tracking-wider">Valeur de la position</span>
+                            <div className="relative group flex items-center">
+                              <Info className="w-4 h-4 text-slate-500 cursor-help" />
+                              <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-slate-800 text-xs text-slate-200 rounded-xl shadow-xl z-10 text-center border border-slate-700">
+                                <p className="font-bold mb-1 text-white">Détail du calcul</p>
+                                <p>{selectedHolding.shares.toFixed(4)} parts × {currentPrice.toFixed(2)} € (prix actuel)</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-baseline gap-3 mb-2">
+                            <h4 className="text-5xl font-mono font-bold text-white">
+                              {displayMode === 'absolute' 
+                                ? `${totalCurrentValue.toFixed(2)} €`
+                                : `${totalProfitLossPercentage.toFixed(2)} %`
+                              }
+                            </h4>
+                            <button 
+                              onClick={() => setDisplayMode(prev => prev === 'absolute' ? 'percentage' : 'absolute')}
+                              className="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded hover:bg-slate-700 transition-colors"
+                            >
+                              {displayMode === 'absolute' ? '%' : '€'}
+                            </button>
+                          </div>
+                          <div className={`flex items-center gap-2 font-bold ${totalProfitLossAbsolute >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            <span>
+                              {displayMode === 'absolute' 
+                                ? `${totalProfitLossAbsolute >= 0 ? '+' : ''}${totalProfitLossAbsolute.toFixed(2)} €`
+                                : `${totalProfitLossPercentage >= 0 ? '+' : ''}${totalProfitLossPercentage.toFixed(2)} %`
+                              }
+                            </span>
+                            <span className="text-xs opacity-60 uppercase tracking-widest">Depuis l'achat</span>
+                          </div>
+                        </div>
 
                   {/* Chart */}
                   <div className="h-64 w-full mb-8 relative">
@@ -2202,23 +2223,26 @@ function MajorInvest({ userState, setUserState }: any) {
                       <p className="text-white font-mono font-bold">{selectedHolding.shares.toFixed(4)}</p>
                     </div>
                     <div className="bg-slate-900/50 border border-slate-800 p-4 rounded-2xl">
-                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Prix de revient</p>
-                      <p className="text-white font-mono font-bold">{(selectedHolding.value / selectedHolding.shares).toFixed(2)} €</p>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Prix de revient unitaire</p>
+                      <p className="text-white font-mono font-bold">{pru.toFixed(2)} €</p>
                     </div>
                     <div className="bg-slate-900/50 border border-slate-800 p-4 rounded-2xl">
-                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Valeur actuelle</p>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Prix unitaire actuel</p>
                       <p className="text-white font-mono font-bold">
-                        {(selectedHolding.shares * (userState.realTimePrices[selectedHolding.ticker]?.price || (selectedHolding.value / selectedHolding.shares))).toFixed(2)} €
+                        {currentPrice.toFixed(2)} €
                       </p>
                     </div>
                     <div className="bg-slate-900/50 border border-slate-800 p-4 rounded-2xl">
-                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Plus-value</p>
-                      <p className={`font-mono font-bold ${((userState.realTimePrices[selectedHolding.ticker]?.price || (selectedHolding.value / selectedHolding.shares)) >= (selectedHolding.value / selectedHolding.shares)) ? 'text-emerald-400' : 'text-red-400'}`}>
-                        {((userState.realTimePrices[selectedHolding.ticker]?.price || (selectedHolding.value / selectedHolding.shares)) * selectedHolding.shares - selectedHolding.value).toFixed(2)} €
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Montant investi</p>
+                      <p className="font-mono font-bold text-white">
+                        {totalPurchaseValue.toFixed(2)} €
                       </p>
                     </div>
                   </div>
-                </div>
+                </>
+              );
+            })()}
+          </div>
 
                 <div className="p-6 sm:p-8 bg-slate-900/50 border-t border-slate-800 flex gap-4">
                   <button 
