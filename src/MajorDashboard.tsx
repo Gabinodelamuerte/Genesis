@@ -572,7 +572,7 @@ function MajorGestion({ userState, setUserState, onGoToInvest }: any) {
                     ))}
                   </Pie>
                   <Tooltip 
-                    formatter={(value: number) => `${value.toFixed(2)} €`}
+                    formatter={(value: number) => [`${value.toFixed(2)} €`, 'Valeur']}
                     contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '0.5rem', color: '#f8fafc' }}
                     itemStyle={{ color: '#f8fafc' }}
                   />
@@ -1689,13 +1689,16 @@ function MajorInvest({ userState, setUserState }: any) {
     
     const rtData = userState.realTimePrices[selectedHolding.ticker];
     const currentPrice = rtData?.price || (selectedHolding.value / selectedHolding.shares);
+    const currentMarketValue = selectedHolding.shares * currentPrice;
 
-    if (amount > selectedHolding.value) {
+    if (amount > currentMarketValue + 0.01) {
       alert("Montant supérieur à la valeur de la position.");
       return;
     }
 
-    const sharesToSell = amount / currentPrice;
+    // If the amount is very close to the total market value, assume they want to sell everything
+    const isSellingAll = Math.abs(amount - currentMarketValue) < 0.05;
+    const sharesToSell = isSellingAll ? selectedHolding.shares : Math.min(amount / currentPrice, selectedHolding.shares);
 
     setUserState((prev: any) => {
       // Update real balance
@@ -1722,8 +1725,8 @@ function MajorInvest({ userState, setUserState }: any) {
       // Update holding
       let newHoldings = prev.holdings.map((h: any) => {
         if (h.id === selectedHolding.id) {
-          const newShares = h.shares - sharesToSell;
-          const newValue = h.value - amount;
+          const newShares = isSellingAll ? 0 : h.shares - sharesToSell;
+          const newValue = isSellingAll ? 0 : h.value * (newShares / h.shares);
           if (newShares <= 0.0001) return null; // Remove if empty
           return { ...h, shares: newShares, value: newValue };
         }
@@ -1821,6 +1824,7 @@ function MajorInvest({ userState, setUserState }: any) {
                   </linearGradient>
                 </defs>
                 <Tooltip 
+                  formatter={(value: number) => [`${value.toFixed(2)} €`, 'Valeur']}
                   contentStyle={{ backgroundColor: '#000', borderColor: '#334155', borderRadius: '12px' }}
                   itemStyle={{ color: '#fff' }}
                   labelStyle={{ display: 'none' }}
@@ -2147,6 +2151,7 @@ function MajorInvest({ userState, setUserState }: any) {
                           domain={['auto', 'auto']}
                         />
                         <Tooltip 
+                          formatter={(value: number) => [`${value.toFixed(2)} €`, 'Valeur']}
                           contentStyle={{ backgroundColor: '#000', borderColor: '#334155', borderRadius: '12px' }}
                           itemStyle={{ color: '#fff' }}
                           labelFormatter={(label) => {
@@ -2274,11 +2279,11 @@ function MajorInvest({ userState, setUserState }: any) {
                       </div>
                       <div className="flex justify-between mt-2">
                         <p className="text-xs text-slate-500">
-                          Valeur dispo: <span className="text-white font-bold">{selectedHolding.value.toFixed(2)} €</span>
+                          Valeur dispo: <span className="text-white font-bold">{(selectedHolding.shares * (userState.realTimePrices[selectedHolding.ticker]?.price || (selectedHolding.value / selectedHolding.shares))).toFixed(2)} €</span>
                         </p>
                         <button 
                           type="button"
-                          onClick={() => setSellAmount(selectedHolding.value.toString())}
+                          onClick={() => setSellAmount((selectedHolding.shares * (userState.realTimePrices[selectedHolding.ticker]?.price || (selectedHolding.value / selectedHolding.shares))).toFixed(2))}
                           className="text-xs text-purple-400 font-bold hover:text-purple-300"
                         >
                           Tout vendre
@@ -2303,7 +2308,7 @@ function MajorInvest({ userState, setUserState }: any) {
 
                     <button 
                       type="submit" 
-                      disabled={!sellAmount || parseFloat(sellAmount) <= 0 || parseFloat(sellAmount) > selectedHolding.value}
+                      disabled={!sellAmount || parseFloat(sellAmount) <= 0 || parseFloat(sellAmount) > (selectedHolding.shares * (userState.realTimePrices[selectedHolding.ticker]?.price || (selectedHolding.value / selectedHolding.shares))) + 0.01}
                       className="w-full py-5 bg-red-600 hover:bg-red-500 text-white rounded-2xl font-bold transition-all disabled:opacity-50 shadow-lg shadow-red-900/20"
                     >
                       Confirmer la vente
