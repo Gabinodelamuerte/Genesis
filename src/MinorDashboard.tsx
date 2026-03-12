@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
-import { BookOpen, LineChart as ChartIcon, User, Home, Gift, Users, Link as LinkIcon, Lock, Sparkles, ChevronRight, Wallet, TrendingUp, Shield, Rocket, Target, CheckCircle2, XCircle, ArrowLeft, Share2, CreditCard } from 'lucide-react';
+import { BookOpen, LineChart as ChartIcon, User, Home, Gift, Users, Link as LinkIcon, Lock, Sparkles, ChevronRight, Wallet, TrendingUp, Shield, Rocket, Target, CheckCircle2, XCircle, ArrowLeft, Share2, CreditCard, Sun, Moon } from 'lucide-react';
 import { MODULES, ASSETS_CATALOG, REWARDS, THEMES } from './data/minorData';
 import { GenesisLogo } from './components/GenesisLogo';
 import { GenesisAI } from './components/GenesisAI';
@@ -725,6 +725,19 @@ function MinorInvest({ userState, totalPortfolioValue, onInvest }: any) {
 }
 
 function MinorProfile({ name, userState, level, onLogout, onLinkAccount }: any) {
+  const [isLightMode, setIsLightMode] = useState(() => document.documentElement.classList.contains('light-mode'));
+
+  const toggleTheme = () => {
+    const html = document.documentElement;
+    if (html.classList.contains('light-mode')) {
+      html.classList.remove('light-mode');
+      setIsLightMode(false);
+    } else {
+      html.classList.add('light-mode');
+      setIsLightMode(true);
+    }
+  };
+
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-6 max-w-3xl mx-auto space-y-6">
       <header className="pt-4 mb-6 flex justify-between items-center">
@@ -750,6 +763,25 @@ function MinorProfile({ name, userState, level, onLogout, onLinkAccount }: any) 
         <div className="p-2 bg-slate-800 rounded-lg text-slate-400">
           <Share2 className="w-5 h-5" />
         </div>
+      </div>
+
+      {/* Apparence */}
+      <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400">
+            {isLightMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </div>
+          <div>
+            <h3 className="font-bold">Apparence</h3>
+            <p className="text-sm text-slate-400">{isLightMode ? 'Mode Clair' : 'Mode Sombre'}</p>
+          </div>
+        </div>
+        <button 
+          onClick={toggleTheme}
+          className={`w-14 h-8 rounded-full p-1 transition-colors duration-300 ease-in-out ${isLightMode ? 'bg-purple-500' : 'bg-slate-700'}`}
+        >
+          <div className={`w-6 h-6 rounded-full bg-white shadow-md transform transition-transform duration-300 ease-in-out ${isLightMode ? 'translate-x-6' : 'translate-x-0'}`} />
+        </button>
       </div>
 
       <div className="space-y-4">

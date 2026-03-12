@@ -10,6 +10,21 @@ body {
   @apply bg-slate-950 text-slate-50 antialiased selection:bg-purple-500/30;
 }
 
+/* Light Mode Filter Hack */
+html.light-mode {
+  filter: invert(1) hue-rotate(180deg);
+  background-color: #020617; /* Inverted background color to ensure it flips to white/light */
+}
+
+/* Re-invert elements that shouldn't be inverted (images, charts, specific icons) */
+html.light-mode img,
+html.light-mode video,
+html.light-mode canvas,
+html.light-mode .recharts-wrapper,
+html.light-mode .keep-colors {
+  filter: invert(1) hue-rotate(180deg);
+}
+
 /* Hide scrollbar globally */
 ::-webkit-scrollbar {
   display: none;

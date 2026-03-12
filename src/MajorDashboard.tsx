@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Home, CreditCard, Shield, TrendingUp, User, Wallet, ChevronRight, CheckCircle2, Lock, Sparkles, Building2, Briefcase, Plus, ArrowRight, PieChart as PieChartIcon, Trash2, History, ArrowUpRight, ArrowDownRight, ArrowLeft, Download, Search, Car, HeartPulse, Landmark, Dog, ArrowRightLeft, CheckCircle, Trophy, BookOpen, X, XCircle, Pencil, Users, Coins, RefreshCw, Globe, AlertCircle } from 'lucide-react';
+import { Home, CreditCard, Shield, TrendingUp, User, Wallet, ChevronRight, CheckCircle2, Lock, Sparkles, Building2, Briefcase, Plus, ArrowRight, PieChart as PieChartIcon, Trash2, History, ArrowUpRight, ArrowDownRight, ArrowLeft, Download, Search, Car, HeartPulse, Landmark, Dog, ArrowRightLeft, CheckCircle, Trophy, BookOpen, X, XCircle, Pencil, Users, Coins, RefreshCw, Globe, AlertCircle, Sun, Moon } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis, CartesianGrid, LineChart, Line } from 'recharts';
 import { GenesisLogo } from './components/GenesisLogo';
 import { GenesisAI } from './components/GenesisAI';
@@ -2965,6 +2965,18 @@ function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamificat
   const [isLinking, setIsLinking] = useState(false);
   const [linkSuccess, setLinkSuccess] = useState(false);
   const [showLimitsModal, setShowLimitsModal] = useState(false);
+  const [isLightMode, setIsLightMode] = useState(() => document.documentElement.classList.contains('light-mode'));
+
+  const toggleTheme = () => {
+    const html = document.documentElement;
+    if (html.classList.contains('light-mode')) {
+      html.classList.remove('light-mode');
+      setIsLightMode(false);
+    } else {
+      html.classList.add('light-mode');
+      setIsLightMode(true);
+    }
+  };
 
   const toggleLink = (type: 'bank' | 'insurance' | 'investment', item: string) => {
     setUserState((prev: MajorState) => {
@@ -3019,6 +3031,25 @@ function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamificat
         </div>
         <button className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 transition-colors">
           <History className="w-5 h-5" />
+        </button>
+      </section>
+
+      {/* Apparence */}
+      <section className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400">
+            {isLightMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </div>
+          <div>
+            <h3 className="font-bold text-white">Apparence</h3>
+            <p className="text-sm text-slate-400">{isLightMode ? 'Mode Clair' : 'Mode Sombre'}</p>
+          </div>
+        </div>
+        <button 
+          onClick={toggleTheme}
+          className={`w-14 h-8 rounded-full p-1 transition-colors duration-300 ease-in-out ${isLightMode ? 'bg-blue-500' : 'bg-slate-700'}`}
+        >
+          <div className={`w-6 h-6 rounded-full bg-white shadow-md transform transition-transform duration-300 ease-in-out ${isLightMode ? 'translate-x-6' : 'translate-x-0'}`} />
         </button>
       </section>
 
