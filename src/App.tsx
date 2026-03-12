@@ -93,7 +93,7 @@ function LandingView({ onStart }: { onStart: () => void }) {
           transition={{ delay: 0.2 }}
           className="font-display text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-tight"
         >
-          Prends le contrôle de ton <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">avenir</span>
+          Prends le contrôle de ton <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">futur</span>
         </motion.h1>
 
         <motion.p 
