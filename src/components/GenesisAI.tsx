@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, X, Send, Bot, User, Loader2, ChevronDown, MessageSquare } from 'lucide-react';
 import { getFinancialAdvice, askFinancialQuestion } from '../services/geminiService';
+import { GenesisLogo } from './GenesisLogo';
 import Markdown from 'react-markdown';
 
 interface Message {
@@ -61,7 +62,7 @@ export function GenesisAI({ userContext }: { userContext: any }) {
         onClick={() => setIsOpen(true)}
         className="fixed bottom-24 right-6 z-[100] w-14 h-14 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 shadow-lg shadow-purple-500/30 flex items-center justify-center text-white border border-white/20"
       >
-        <Sparkles className="w-6 h-6" />
+        <GenesisLogo className="w-8 h-8" />
         <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-slate-950 animate-pulse"></div>
       </motion.button>
 
@@ -77,8 +78,8 @@ export function GenesisAI({ userContext }: { userContext: any }) {
             {/* Header */}
             <div className="p-4 bg-gradient-to-r from-purple-600/20 to-blue-600/20 border-b border-slate-800 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg">
-                  <Bot className="w-6 h-6 text-white" />
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg overflow-hidden">
+                  <GenesisLogo className="w-6 h-6" />
                 </div>
                 <div>
                   <h3 className="font-display font-bold text-white">Genesis AI</h3>
@@ -98,8 +99,8 @@ export function GenesisAI({ userContext }: { userContext: any }) {
               {messages.map((msg) => (
                 <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className={`flex gap-2 max-w-[85%] ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'user' ? 'bg-slate-800' : 'bg-purple-600/20 border border-purple-500/20'}`}>
-                      {msg.role === 'user' ? <User className="w-4 h-4 text-slate-400" /> : <Bot className="w-4 h-4 text-purple-400" />}
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 overflow-hidden ${msg.role === 'user' ? 'bg-slate-800' : 'bg-purple-600/20 border border-purple-500/20'}`}>
+                      {msg.role === 'user' ? <User className="w-4 h-4 text-slate-400" /> : <GenesisLogo className="w-5 h-5" />}
                     </div>
                     <div className={`p-3 rounded-2xl text-sm ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700'}`}>
                       <div className="prose prose-invert prose-sm max-w-none">
@@ -112,8 +113,8 @@ export function GenesisAI({ userContext }: { userContext: any }) {
               {isLoading && (
                 <div className="flex justify-start">
                   <div className="flex gap-2 max-w-[85%]">
-                    <div className="w-8 h-8 rounded-full bg-purple-600/20 border border-purple-500/20 flex items-center justify-center">
-                      <Bot className="w-4 h-4 text-purple-400" />
+                    <div className="w-8 h-8 rounded-full bg-purple-600/20 border border-purple-500/20 flex items-center justify-center overflow-hidden">
+                      <GenesisLogo className="w-5 h-5" />
                     </div>
                     <div className="p-3 rounded-2xl bg-slate-800 text-slate-400 rounded-tl-none border border-slate-700 flex items-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin" />
