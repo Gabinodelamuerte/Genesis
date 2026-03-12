@@ -907,6 +907,22 @@ function MinorAccount({ userState, age, onLinkAccount, onTransfer }: any) {
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [transferAmount, setTransferAmount] = useState<string>('');
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [requestAmount, setRequestAmount] = useState<string>('');
+  const [requestLabel, setRequestLabel] = useState<string>('');
+  const [requestMessage, setRequestMessage] = useState<string>('');
+
+  const handleRequestSubmit = () => {
+    const amount = parseFloat(requestAmount);
+    if (!isNaN(amount) && amount > 0) {
+      // In a real app, this would send a notification to the parent
+      alert(`Demande de ${amount}€ envoyée à ton parent !\nMotif : ${requestLabel}\nMessage : ${requestMessage}`);
+      setShowRequestModal(false);
+      setRequestAmount('');
+      setRequestLabel('');
+      setRequestMessage('');
+    }
+  };
 
   // Simulation parameters
   const interestRate = 0.03; // 3% annual
@@ -985,7 +1001,10 @@ function MinorAccount({ userState, age, onLinkAccount, onTransfer }: any) {
             <button onClick={() => setShowTransferModal(true)} className="flex-1 bg-white/10 hover:bg-white/20 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">
               Verser sur livret
             </button>
-            <button className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">
+            <button 
+              onClick={() => setShowRequestModal(true)}
+              className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium py-2.5 rounded-xl transition-colors"
+            >
               Demander de l'argent
             </button>
           </div>
@@ -1114,6 +1133,75 @@ function MinorAccount({ userState, age, onLinkAccount, onTransfer }: any) {
           ))}
         </div>
       )}
+
+      {/* Request Money Modal */}
+      <AnimatePresence>
+        {showRequestModal && (
+          <motion.div 
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed inset-x-0 bottom-0 z-[60] bg-slate-900 border-t border-slate-800 p-6 rounded-t-3xl max-w-3xl mx-auto shadow-2xl"
+          >
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h3 className="text-xl font-bold">Demander de l'argent</h3>
+                <p className="text-slate-400 text-sm">Envoie une demande d'argent à ton parent.</p>
+              </div>
+              <button onClick={() => setShowRequestModal(false)} className="p-2 bg-slate-800 rounded-full text-slate-400 hover:text-white">
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Montant (€)</label>
+                <input 
+                  type="number" 
+                  value={requestAmount}
+                  onChange={(e) => setRequestAmount(e.target.value)}
+                  placeholder="Ex: 15"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Motif / Libellé</label>
+                <select 
+                  value={requestLabel}
+                  onChange={(e) => setRequestLabel(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500"
+                >
+                  <option value="">Sélectionner un motif</option>
+                  <option value="Argent de poche">Argent de poche</option>
+                  <option value="Sortie entre amis">Sortie entre amis</option>
+                  <option value="Jeux Vidéo / Loisirs">Jeux Vidéo / Loisirs</option>
+                  <option value="Vêtements">Vêtements</option>
+                  <option value="Autre">Autre</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Message personnalisé (Optionnel)</label>
+                <textarea 
+                  value={requestMessage}
+                  onChange={(e) => setRequestMessage(e.target.value)}
+                  placeholder="Explique pourquoi tu as besoin de cet argent..."
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 h-24 resize-none"
+                />
+              </div>
+            </div>
+
+            <button 
+              onClick={handleRequestSubmit}
+              disabled={!requestAmount || parseFloat(requestAmount) <= 0 || !requestLabel}
+              className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-500 text-white rounded-xl font-bold transition-colors"
+            >
+              Envoyer la demande
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Simulation Modal */}
       <AnimatePresence>

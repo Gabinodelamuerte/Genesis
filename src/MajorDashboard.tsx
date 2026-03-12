@@ -110,6 +110,7 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
         type: Math.random() > 0.5 ? 'debit' : 'credit',
         amount: Math.floor(Math.random() * 50) + 10,
         label: Math.random() > 0.5 ? 'Achat Jeux Vidéo' : 'Argent de poche',
+        message: "Salut ! Est-ce que je peux avoir un peu d'argent pour m'acheter le nouveau jeu avec mes copains ? Merci !",
         timestamp: new Date().toLocaleTimeString()
       });
     }, 60000);
@@ -171,13 +172,31 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
               </div>
 
               <div className="bg-slate-950/50 border border-slate-800 rounded-2xl p-4 mb-6">
-                <p className="text-sm text-slate-300 mb-2">
+                <p className="text-sm text-slate-300 mb-3">
                   <span className="font-bold text-blue-400">{pendingChildRequest.childName}</span> souhaite effectuer un <span className="font-bold">{pendingChildRequest.type === 'debit' ? 'débit' : 'crédit'}</span> :
                 </p>
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-400 text-xs">{pendingChildRequest.label}</span>
-                  <span className="text-xl font-mono font-bold text-white">{pendingChildRequest.amount.toFixed(2)} €</span>
+                
+                <div className="flex justify-between items-center mb-4 pb-4 border-b border-slate-800/50">
+                  <div>
+                    <p className="text-[10px] uppercase text-slate-500 font-bold mb-1">Motif</p>
+                    <span className="text-slate-200 text-sm font-medium">{pendingChildRequest.label}</span>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] uppercase text-slate-500 font-bold mb-1">Montant</p>
+                    <span className="text-xl font-mono font-bold text-white">{pendingChildRequest.amount.toFixed(2)} €</span>
+                  </div>
                 </div>
+
+                {pendingChildRequest.message && (
+                  <div>
+                    <p className="text-[10px] uppercase text-slate-500 font-bold mb-1">Message de {pendingChildRequest.childName}</p>
+                    <div className="bg-blue-500/5 border border-blue-500/10 rounded-xl p-3">
+                      <p className="text-xs text-slate-300 italic leading-relaxed">
+                        "{pendingChildRequest.message}"
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-3">
