@@ -684,6 +684,8 @@ function MajorAccount({ userState, setUserState }: any) {
     setUserState((prev: any) => ({ ...prev, cardType: type }));
   };
 
+  const [initialToId, setInitialToId] = useState('');
+
   const handleTransfer = (amount: number, fromId: string, toId: string) => {
     setUserState((prev: any) => {
       const newState = { ...prev };
@@ -695,8 +697,18 @@ function MajorAccount({ userState, setUserState }: any) {
         newState.childAccount = { ...prev.childAccount };
       }
 
-      const fromName = fromId === 'main' ? 'Compte Courant' : fromId === 'child' ? `Compte de ${prev.childAccount?.name}` : prev.savingsAccounts.find((a: any) => a.id === fromId)?.name;
-      const toName = toId === 'main' ? 'Compte Courant' : toId === 'child' ? `Compte de ${prev.childAccount?.name}` : prev.savingsAccounts.find((a: any) => a.id === toId)?.name;
+      const getAccountName = (id: string) => {
+        if (id === 'main') return 'Compte Courant';
+        if (id === 'child') return `Compte de ${prev.childAccount?.name}`;
+        const savings = prev.savingsAccounts.find((a: any) => a.id === id);
+        if (savings) return savings.name;
+        const beneficiary = prev.beneficiaries.find((b: any) => b.id === id);
+        if (beneficiary) return beneficiary.name;
+        return 'Inconnu';
+      };
+
+      const fromName = getAccountName(fromId);
+      const toName = getAccountName(toId);
 
       // Helper to update balances and histories
       const updateAccount = (id: string, delta: number, label: string) => {
@@ -709,9 +721,8 @@ function MajorAccount({ userState, setUserState }: any) {
         } else if (id === 'child') {
           if (newState.childAccount) {
             newState.childAccount.balance = Number((newState.childAccount.balance + delta).toFixed(2));
-            // In a real app, the child would have their own transaction history
           }
-        } else {
+        } else if (id.startsWith('sav_') || prev.savingsAccounts.some((a: any) => a.id === id)) {
           newState.savingsAccounts = newState.savingsAccounts.map((acc: any) => {
             if (acc.id === id) {
               return {
@@ -726,14 +737,21 @@ function MajorAccount({ userState, setUserState }: any) {
             return acc;
           });
         }
+        // Beneficiaries don't have a balance in our app, so we just don't update anything for them
       };
 
       updateAccount(fromId, -amount, `Virement vers ${toName}`);
-      updateAccount(toId, amount, `Virement depuis ${fromName}`);
+      
+      // Only update destination if it's an internal account
+      const isInternal = toId === 'main' || toId === 'child' || toId.startsWith('sav_') || prev.savingsAccounts.some((a: any) => a.id === toId);
+      if (isInternal) {
+        updateAccount(toId, amount, `Virement depuis ${fromName}`);
+      }
 
       return newState;
     });
     setShowTransferModal(false);
+    setInitialToId('');
   };
 
   const handleOpenSavings = (name: string) => {
@@ -923,7 +941,15 @@ function MajorAccount({ userState, setUserState }: any) {
                   <p className="text-[10px] text-slate-500 font-mono">{beneficiary.iban}</p>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-600" />
+              <button 
+                onClick={() => {
+                  setInitialToId(beneficiary.id);
+                  setShowTransferModal(true);
+                }}
+                className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 hover:bg-blue-500 hover:text-white transition-all"
+              >
+                <ArrowRightLeft className="w-4 h-4" />
+              </button>
             </div>
           ))}
         </div>
@@ -1056,9 +1082,13 @@ function MajorAccount({ userState, setUserState }: any) {
 
       <TransferModal 
         isOpen={showTransferModal} 
-        onClose={() => setShowTransferModal(false)} 
+        onClose={() => {
+          setShowTransferModal(false);
+          setInitialToId('');
+        }} 
         onTransfer={handleTransfer}
         userState={userState}
+        initialToId={initialToId}
       />
 
       <RIBModal 
@@ -1082,10 +1112,17 @@ function MajorAccount({ userState, setUserState }: any) {
   );
 }
 
-function TransferModal({ isOpen, onClose, onTransfer, userState, initialFromId = 'main' }: any) {
+function TransferModal({ isOpen, onClose, onTransfer, userState, initialFromId = 'main', initialToId = '' }: any) {
   const [amount, setAmount] = useState('');
   const [fromId, setFromId] = useState(initialFromId);
-  const [toId, setToId] = useState('');
+  const [toId, setToId] = useState(initialToId);
+
+  // Update toId if initialToId changes
+  useEffect(() => {
+    if (initialToId) {
+      setToId(initialToId);
+    }
+  }, [initialToId]);
 
   const accounts = [
     { id: 'main', name: 'Compte Courant', balance: userState.realBalance },
@@ -1093,11 +1130,14 @@ function TransferModal({ isOpen, onClose, onTransfer, userState, initialFromId =
     ...(userState.childAccount?.linked ? [{ id: 'child', name: `Compte de ${userState.childAccount.name}`, balance: userState.childAccount.balance }] : [])
   ];
 
+  const beneficiaries = userState.beneficiaries;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!amount || !fromId || !toId || fromId === toId) return;
     onTransfer(parseFloat(amount), fromId, toId);
     setAmount('');
+    setToId('');
   };
 
   return (
@@ -1127,8 +1167,17 @@ function TransferModal({ isOpen, onClose, onTransfer, userState, initialFromId =
               <div>
                 <label className="block text-sm font-medium text-slate-400 mb-2">Vers</label>
                 <select value={toId} onChange={(e) => setToId(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500">
-                  <option value="">Sélectionner un compte</option>
-                  {accounts.filter(acc => acc.id !== fromId).map(acc => <option key={acc.id} value={acc.id}>{acc.name} ({acc.balance.toFixed(2)} €)</option>)}
+                  <option value="">Sélectionner un destinataire</option>
+                  <optgroup label="Mes Comptes" className="bg-slate-900 text-slate-400">
+                    {accounts.filter(acc => acc.id !== fromId).map(acc => (
+                      <option key={acc.id} value={acc.id} className="text-white">{acc.name} ({acc.balance.toFixed(2)} €)</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Mes Bénéficiaires" className="bg-slate-900 text-slate-400">
+                    {beneficiaries.map((b: any) => (
+                      <option key={b.id} value={b.id} className="text-white">{b.name}</option>
+                    ))}
+                  </optgroup>
                 </select>
               </div>
 
