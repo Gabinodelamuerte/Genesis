@@ -24,6 +24,7 @@ interface UserState {
   investments: Record<string, { amount: number, shares: number }>;
   isLinked: boolean;
   accountId: string;
+  realTimePrices: Record<string, { price: number, trend: string }>;
   limits: {
     payment: number;
     withdrawal: number;
@@ -46,6 +47,7 @@ export default function MinorDashboard({ name, age, onLogout }: { name: string, 
     investments: {},
     isLinked: false,
     accountId: "#QHG FUT",
+    realTimePrices: {},
     limits: {
       payment: 200,
       withdrawal: 50,
@@ -60,8 +62,43 @@ export default function MinorDashboard({ name, age, onLogout }: { name: string, 
   const currentLevelProgress = userState.xp % 500;
   const progressPercent = (currentLevelProgress / 500) * 100;
 
-  const totalInvested = Object.values(userState.investments).reduce((acc, inv) => acc + inv.amount, 0);
+  const totalInvested = useMemo(() => {
+    return Object.entries(userState.investments).reduce((acc, [assetId, inv]) => {
+      const asset = ASSETS_CATALOG.find(a => a.id === assetId);
+      const currentPrice = userState.realTimePrices[asset?.symbol || '']?.price || asset?.price || 0;
+      return acc + (inv.shares * currentPrice);
+    }, 0);
+  }, [userState.investments, userState.realTimePrices]);
+
   const totalPortfolioValue = userState.virtualBalance + totalInvested;
+
+  useEffect(() => {
+    const fetchPrices = async () => {
+      const symbols = ASSETS_CATALOG.map(a => a.symbol);
+      const priceData: Record<string, { price: number, trend: string }> = {};
+      
+      for (const symbol of symbols) {
+        try {
+          const res = await fetch(`/api/stock/${symbol}`);
+          if (res.ok) {
+            const data = await res.json();
+            priceData[symbol] = {
+              price: data.price,
+              trend: `${data.change >= 0 ? '+' : ''}${data.change.toFixed(2)}%`
+            };
+          }
+        } catch (err) {
+          console.error(`Failed to fetch price for ${symbol}`, err);
+        }
+      }
+      
+      setUserState(prev => ({ ...prev, realTimePrices: priceData }));
+    };
+
+    fetchPrices();
+    const interval = setInterval(fetchPrices, 60000); // Update every minute
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -88,9 +125,11 @@ export default function MinorDashboard({ name, age, onLogout }: { name: string, 
     setActiveModuleId(null);
   };
 
-  const handleInvest = (assetId: string, amount: number, price: number) => {
-    if (userState.virtualBalance >= amount && amount > 0) {
-      const asset = ASSETS_CATALOG.find(a => a.id === assetId);
+  const handleInvest = (assetId: string, amount: number) => {
+    const asset = ASSETS_CATALOG.find(a => a.id === assetId);
+    const price = userState.realTimePrices[asset?.symbol || '']?.price || asset?.price || 0;
+    
+    if (userState.virtualBalance >= amount && amount > 0 && price > 0) {
       const newTx: Transaction = {
         id: Date.now().toString(),
         date: new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }),
@@ -523,7 +562,7 @@ function MinorInvest({ userState, totalPortfolioValue, onInvest }: any) {
   const handleBuy = () => {
     const amount = parseFloat(investAmount);
     if (!isNaN(amount) && amount > 0 && amount <= userState.virtualBalance) {
-      onInvest(selectedAsset.id, amount, selectedAsset.price);
+      onInvest(selectedAsset.id, amount);
       setSelectedAsset(null);
       setInvestAmount('');
     }
@@ -579,8 +618,12 @@ function MinorInvest({ userState, totalPortfolioValue, onInvest }: any) {
       <div className="space-y-3">
         {ASSETS_CATALOG.map((asset) => {
           const invested = userState.investments[asset.id];
+          const rtData = userState.realTimePrices[asset.symbol];
+          const currentPrice = rtData?.price || asset.price;
+          const currentTrend = rtData?.trend || asset.trend;
+
           return (
-            <div key={asset.id} onClick={() => setSelectedAsset(asset)} className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 flex justify-between items-center hover:bg-slate-800/50 transition-colors cursor-pointer">
+            <div key={asset.id} onClick={() => setSelectedAsset({ ...asset, price: currentPrice, trend: currentTrend })} className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 flex justify-between items-center hover:bg-slate-800/50 transition-colors cursor-pointer">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xs border border-slate-700">
                   {asset.symbol.substring(0, 3)}
@@ -594,11 +637,11 @@ function MinorInvest({ userState, totalPortfolioValue, onInvest }: any) {
                 </div>
               </div>
               <div className="text-right">
-                <div className="font-mono text-sm font-bold">{(asset.price || 0).toFixed(2)} €</div>
-                <div className={`text-xs font-medium ${asset.trend.startsWith('+') ? 'text-emerald-400' : 'text-red-400'}`}>
-                  {asset.trend}
+                <div className="font-mono text-sm font-bold">{(currentPrice || 0).toFixed(2)} €</div>
+                <div className={`text-xs font-medium ${currentTrend.startsWith('+') ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {currentTrend}
                 </div>
-                {invested && <div className="text-[10px] text-purple-400 mt-1">Investi: {(invested.amount || 0).toFixed(2)} ¤</div>}
+                {invested && <div className="text-[10px] text-purple-400 mt-1">Investi: {(invested.shares * currentPrice || 0).toFixed(2)} ¤</div>}
               </div>
             </div>
           );

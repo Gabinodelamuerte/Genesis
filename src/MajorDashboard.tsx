@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Home, CreditCard, Shield, TrendingUp, User, Wallet, ChevronRight, CheckCircle2, Lock, Sparkles, Building2, Briefcase, Plus, ArrowRight, PieChart as PieChartIcon, Trash2, History, ArrowUpRight, ArrowDownRight, ArrowLeft, Download, Search, Car, HeartPulse, Landmark, Dog, ArrowRightLeft, CheckCircle, Trophy, BookOpen, X, XCircle, Pencil, Users, Coins, RefreshCw, Globe, AlertCircle } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis, CartesianGrid, LineChart, Line } from 'recharts';
 import { GenesisLogo } from './components/GenesisLogo';
 import { GenesisAI } from './components/GenesisAI';
 import { MAJOR_REWARDS, MAJOR_CHALLENGES } from './data/majorData';
@@ -25,6 +25,7 @@ interface MajorState {
   completedChallenges: string[];
   beneficiaries: { id: string; name: string; iban: string; bank: string }[];
   childAccount: { linked: boolean; id: string; name: string; balance: number; limits: { payment: number; withdrawal: number; onlinePurchase: boolean; atmWithdrawal: boolean } } | null;
+  realTimePrices: Record<string, { price: number; trend: string; name: string }>;
 }
 
 const BANKS = ["Banque populaire", "Caisse d'épargne", "Casden", "Oney", "Palatine", "Crédit Coopératif"];
@@ -88,7 +89,8 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
       name: "",
       balance: 0,
       limits: { payment: 200, withdrawal: 50, onlinePurchase: true, atmWithdrawal: false }
-    }
+    },
+    realTimePrices: {}
   });
 
   const level = Math.floor(userState.xp / 1000) + 1;
@@ -99,6 +101,43 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [activeTab]);
+
+  useEffect(() => {
+    const fetchPrices = async () => {
+      const tickers = Array.from(new Set([
+        ...ASSETS_TO_BUY.map(a => a.ticker),
+        ...userState.holdings.map(h => h.ticker)
+      ]));
+
+      const newPrices: Record<string, any> = { ...userState.realTimePrices };
+      let hasChanged = false;
+
+      for (const ticker of tickers) {
+        try {
+          const response = await fetch(`/api/stock/${ticker}`);
+          if (response.ok) {
+            const data = await response.json();
+            newPrices[ticker] = {
+              price: data.price,
+              trend: data.change >= 0 ? `+${data.change.toFixed(2)}%` : `${data.change.toFixed(2)}%`,
+              name: data.name
+            };
+            hasChanged = true;
+          }
+        } catch (error) {
+          console.error(`Error fetching price for ${ticker}:`, error);
+        }
+      }
+
+      if (hasChanged) {
+        setUserState(prev => ({ ...prev, realTimePrices: newPrices }));
+      }
+    };
+
+    fetchPrices();
+    const interval = setInterval(fetchPrices, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     // Simulate a child request after 45 seconds (shorter than 1-2 mins for demo purposes, but user asked for 1-2 mins)
@@ -1488,16 +1527,16 @@ function AddBeneficiaryModal({ isOpen, onClose, onAdd }: any) {
 }
   
 const ASSETS_TO_BUY = [
-  { ticker: 'CW8', name: 'Amundi MSCI World', price: 400.50, type: 'ETF', risk: 4 },
-  { ticker: 'PAASI', name: 'Amundi MSCI Emerging Markets', price: 23.40, type: 'ETF', risk: 5 },
-  { ticker: 'PUST', name: 'Lyxor S&P 500', price: 35.20, type: 'ETF', risk: 4 },
-  { ticker: 'AI', name: 'Air Liquide', price: 175.00, type: 'Action', risk: 3 },
-  { ticker: 'OR', name: 'L\'Oréal', price: 420.00, type: 'Action', risk: 3 },
-  { ticker: 'OBLIG-FR', name: 'OAT 10 ans France', price: 100.00, type: 'Obligation', risk: 2 },
-  { ticker: 'GOLD', name: 'Or Physique (Once)', price: 1950.00, type: 'Métal', risk: 3 },
-  { ticker: 'SILVER', name: 'Argent Physique', price: 22.50, type: 'Métal', risk: 4 },
-  { ticker: 'BTC', name: 'Bitcoin', price: 65000.00, type: 'Crypto', risk: 5 },
-  { ticker: 'ETH', name: 'Ethereum', price: 3500.00, type: 'Crypto', risk: 5 },
+  { ticker: 'CW8.PA', name: 'Amundi MSCI World', price: 400.50, type: 'ETF', risk: 4 },
+  { ticker: 'PAASI.PA', name: 'Amundi MSCI Emerging Markets', price: 23.40, type: 'ETF', risk: 5 },
+  { ticker: 'PUST.PA', name: 'Lyxor S&P 500', price: 35.20, type: 'ETF', risk: 4 },
+  { ticker: 'AI.PA', name: 'Air Liquide', price: 175.00, type: 'Action', risk: 3 },
+  { ticker: 'OR.PA', name: 'L\'Oréal', price: 420.00, type: 'Action', risk: 3 },
+  { ticker: 'OAT.PA', name: 'OAT 10 ans France', price: 100.00, type: 'Obligation', risk: 2 },
+  { ticker: 'GC=F', name: 'Or Physique (Once)', price: 1950.00, type: 'Métal', risk: 3 },
+  { ticker: 'SI=F', name: 'Argent Physique', price: 22.50, type: 'Métal', risk: 4 },
+  { ticker: 'BTC-USD', name: 'Bitcoin', price: 65000.00, type: 'Crypto', risk: 5 },
+  { ticker: 'ETH-USD', name: 'Ethereum', price: 3500.00, type: 'Crypto', risk: 5 },
 ];
 
 const MOCK_CHART_DATA = [
@@ -1543,12 +1582,16 @@ function MajorInvest({ userState, setUserState }: any) {
     e.preventDefault();
     const amount = parseFloat(buyAmount);
     if (!amount || amount <= 0 || !selectedAsset || !selectedAccount) return;
+    
+    const rtData = userState.realTimePrices[selectedAsset.ticker];
+    const currentPrice = rtData?.price || selectedAsset.price;
+
     if (amount > userState.realBalance) {
       alert("Solde insuffisant sur le compte courant.");
       return;
     }
 
-    const shares = amount / selectedAsset.price;
+    const shares = amount / currentPrice;
 
     setUserState((prev: any) => {
       // Update real balance
@@ -1621,85 +1664,165 @@ function MajorInvest({ userState, setUserState }: any) {
     const holdings = userState.holdings.filter((h: any) => h.accountId === selectedAccount);
     const transactions = userState.investTransactions.filter((t: any) => t.accountId === selectedAccount);
 
+    // Calculate real-time global performance for this account
+    const totalCurrentValue = holdings.reduce((acc: number, h: any) => {
+      const rtData = userState.realTimePrices[h.ticker];
+      return acc + (rtData ? h.shares * rtData.price : h.value);
+    }, 0);
+    
+    const totalInvested = holdings.reduce((acc: number, h: any) => acc + h.value, 0);
+    const globalPerf = totalInvested > 0 ? ((totalCurrentValue - totalInvested) / totalInvested) * 100 : 0;
+
+    // Helper for mini charts
+    const generateSparklineData = (price: number, perf: number) => {
+      const points = 10;
+      const data = [];
+      let current = price / (1 + perf / 100);
+      const step = (price - current) / points;
+      for (let i = 0; i <= points; i++) {
+        data.push({ value: current + step * i + (Math.random() - 0.5) * (price * 0.01) });
+      }
+      return data;
+    };
+
     return (
       <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="p-6 max-w-3xl mx-auto space-y-8 pb-32">
-        <header className="pt-2 flex items-center gap-4">
-          <button onClick={() => setSelectedAccount(null)} className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div>
-            <h1 className="font-display text-2xl font-bold text-white">{account.name}</h1>
-            <p className="text-slate-400 text-sm font-medium">Solde courant: {userState.realBalance.toFixed(2)} €</p>
+        <header className="pt-2 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button onClick={() => setSelectedAccount(null)} className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="font-display text-2xl font-bold text-white">{account.name}</h1>
+              <p className="text-slate-400 text-sm font-medium">Portefeuille d'investissement</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">Disponible</p>
+            <p className="text-white font-mono font-bold">{userState.realBalance.toFixed(2)} €</p>
           </div>
         </header>
 
-        {/* Chart & Balance */}
-        <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 shadow-lg">
-          <div className="flex justify-between items-end mb-6">
-            <div>
-              <p className="text-sm text-slate-400 mb-1">Valorisation totale</p>
-              <h2 className="text-4xl font-mono font-bold text-white">{account.balance.toFixed(2)} €</h2>
+        {/* Global Performance Card - Trade Republic Style */}
+        <div className="bg-black border border-slate-800 rounded-3xl p-8 shadow-2xl overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600/10 blur-[100px] -mr-32 -mt-32"></div>
+          
+          <div className="relative z-10">
+            <p className="text-slate-400 text-sm mb-1">Valeur totale</p>
+            <div className="flex items-baseline gap-3 mb-2">
+              <h2 className="text-5xl font-mono font-bold text-white">{(totalCurrentValue || account.balance).toFixed(2)} €</h2>
             </div>
-            <div className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium ${account.performance >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
-              {account.performance >= 0 ? <TrendingUp className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-              {account.performance >= 0 ? '+' : ''}{account.performance}%
+            <div className={`flex items-center gap-2 font-medium ${globalPerf >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              <span className="text-lg">{globalPerf >= 0 ? '+' : ''}{globalPerf.toFixed(2)} €</span>
+              <span className="text-sm opacity-80">({globalPerf >= 0 ? '+' : ''}{globalPerf.toFixed(2)}%)</span>
+              <span className="text-xs text-slate-500 ml-2">Aujourd'hui</span>
             </div>
           </div>
 
-          <div className="h-48 w-full">
+          <div className="h-40 w-full mt-8">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={MOCK_CHART_DATA}>
                 <defs>
-                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                  <linearGradient id="colorGlobal" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={globalPerf >= 0 ? "#10b981" : "#ef4444"} stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor={globalPerf >= 0 ? "#10b981" : "#ef4444"} stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                <XAxis dataKey="date" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `€${value}`} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '0.5rem', color: '#f8fafc' }}
-                  itemStyle={{ color: '#8b5cf6' }}
+                  contentStyle={{ backgroundColor: '#000', borderColor: '#334155', borderRadius: '12px' }}
+                  itemStyle={{ color: '#fff' }}
+                  labelStyle={{ display: 'none' }}
                 />
-                <Area type="monotone" dataKey="value" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
+                <Area 
+                  type="monotone" 
+                  dataKey="value" 
+                  stroke={globalPerf >= 0 ? "#10b981" : "#ef4444"} 
+                  strokeWidth={4} 
+                  fillOpacity={1} 
+                  fill="url(#colorGlobal)" 
+                  animationDuration={2000}
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
           
-          <div className="mt-6 flex gap-3">
-            <button onClick={() => setShowBuyModal(true)} className="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-medium py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+          <div className="mt-8 flex gap-4">
+            <button onClick={() => setShowBuyModal(true)} className="flex-1 bg-white text-black hover:bg-slate-200 font-bold py-4 rounded-2xl transition-all transform active:scale-95 flex items-center justify-center gap-2 shadow-lg">
               <Plus className="w-5 h-5" /> Investir
+            </button>
+            <button className="w-14 h-14 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-center text-white hover:bg-slate-800 transition-colors">
+              <Search className="w-6 h-6" />
             </button>
           </div>
         </div>
 
-        {/* Holdings */}
+        {/* Holdings List - Trade Republic Style */}
         <div>
-          <h3 className="font-display text-lg font-bold text-white mb-4">Mes Positions</h3>
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="font-display text-xl font-bold text-white">Positions</h3>
+            <button className="text-purple-400 text-sm font-bold hover:text-purple-300">Tout voir</button>
+          </div>
+          
           {holdings.length === 0 ? (
-            <div className="text-center py-8 bg-slate-900/50 border border-slate-800 rounded-3xl">
-              <p className="text-slate-400 text-sm">Aucune position pour le moment.</p>
+            <div className="text-center py-12 bg-slate-900/30 border border-dashed border-slate-800 rounded-3xl">
+              <div className="w-16 h-16 bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <TrendingUp className="w-8 h-8 text-slate-600" />
+              </div>
+              <p className="text-slate-400 font-medium">Commencez à bâtir votre patrimoine</p>
+              <button onClick={() => setShowBuyModal(true)} className="mt-4 text-purple-400 font-bold">Acheter votre premier actif</button>
             </div>
           ) : (
-            <div className="space-y-3">
-              {holdings.map((h: any) => (
-                <div key={h.id} className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 flex justify-between items-center">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-bold text-white">{h.ticker}</span>
-                      <span className="text-xs px-2 py-0.5 bg-slate-800 text-slate-300 rounded">{h.name}</span>
+            <div className="space-y-1">
+              {holdings.map((h: any) => {
+                const rtData = userState.realTimePrices[h.ticker];
+                const currentValue = rtData ? h.shares * rtData.price : h.value;
+                const perf = rtData ? ((rtData.price - (h.value / h.shares)) / (h.value / h.shares)) * 100 : h.performance;
+                const sparkData = generateSparklineData(rtData?.price || (h.value / h.shares), perf);
+
+                return (
+                  <motion.div 
+                    key={h.id} 
+                    whileHover={{ backgroundColor: 'rgba(30, 41, 59, 0.5)' }}
+                    className="group px-4 py-5 rounded-2xl flex justify-between items-center cursor-pointer transition-all border border-transparent hover:border-slate-800"
+                  >
+                    <div className="flex items-center gap-4 flex-1">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center font-bold text-white text-xs group-hover:scale-110 transition-transform">
+                        {h.ticker.substring(0, 3)}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-white text-lg">{h.ticker}</span>
+                        </div>
+                        <p className="text-sm text-slate-500 font-medium truncate max-w-[120px]">{h.name}</p>
+                      </div>
                     </div>
-                    <p className="text-sm text-slate-400">{h.shares.toFixed(4)} parts</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-mono font-bold text-white">{h.value.toFixed(2)} €</p>
-                    <p className={`text-xs font-medium ${h.performance >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {h.performance >= 0 ? '+' : ''}{h.performance}%
-                    </p>
-                  </div>
-                </div>
-              ))}
+
+                    {/* Mini Sparkline */}
+                    <div className="w-24 h-12 mx-4 hidden sm:block">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={sparkData}>
+                          <Line 
+                            type="monotone" 
+                            dataKey="value" 
+                            stroke={perf >= 0 ? "#10b981" : "#ef4444"} 
+                            strokeWidth={2} 
+                            dot={false} 
+                            animationDuration={1500}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+
+                    <div className="text-right">
+                      <p className="font-mono font-bold text-white text-lg">{currentValue.toFixed(2)} €</p>
+                      <div className={`flex items-center justify-end gap-1 text-sm font-bold ${perf >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {perf >= 0 ? <TrendingUp className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                        {perf >= 0 ? '+' : ''}{perf.toFixed(2)}%
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -1753,25 +1876,31 @@ function MajorInvest({ userState, setUserState }: any) {
                       <input type="text" placeholder="Rechercher un ETF, une action..." className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:border-purple-500" />
                     </div>
                     <div className="max-h-64 overflow-y-auto space-y-2 pr-2">
-                      {ASSETS_TO_BUY.map(asset => (
-                        <div key={asset.ticker} onClick={() => setSelectedAsset(asset)} className="p-3 bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 rounded-xl cursor-pointer transition-colors flex justify-between items-center">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-white">{asset.ticker}</span>
-                              <span className="text-[10px] px-1.5 py-0.5 bg-slate-700 text-slate-300 rounded">{asset.type}</span>
+                      {ASSETS_TO_BUY.map(asset => {
+                        const rtData = userState.realTimePrices[asset.ticker];
+                        const currentPrice = rtData?.price || asset.price;
+                        const currentTrend = rtData?.trend || '+0.00%';
+
+                        return (
+                          <div key={asset.ticker} onClick={() => setSelectedAsset({ ...asset, price: currentPrice })} className="p-3 bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 rounded-xl cursor-pointer transition-colors flex justify-between items-center">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-white">{asset.ticker}</span>
+                                <span className="text-[10px] px-1.5 py-0.5 bg-slate-700 text-slate-300 rounded">{asset.type}</span>
+                              </div>
+                              <p className="text-xs text-slate-400 truncate max-w-[150px]">{asset.name}</p>
                             </div>
-                            <p className="text-xs text-slate-400 truncate max-w-[150px]">{asset.name}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-mono text-sm text-white">{asset.price.toFixed(2)} €</p>
-                            <div className="flex gap-0.5 mt-1 justify-end">
-                              {[1,2,3,4,5].map(r => (
-                                <div key={r} className={`w-1.5 h-1.5 rounded-full ${r <= asset.risk ? (asset.risk > 3 ? 'bg-orange-500' : 'bg-emerald-500') : 'bg-slate-700'}`}></div>
-                              ))}
+                            <div className="text-right">
+                              <p className="font-mono text-sm text-white">{currentPrice.toFixed(2)} €</p>
+                              <div className="flex gap-0.5 mt-1 justify-end">
+                                {[1,2,3,4,5].map(r => (
+                                  <div key={r} className={`w-1.5 h-1.5 rounded-full ${r <= asset.risk ? (asset.risk > 3 ? 'bg-orange-500' : 'bg-emerald-500') : 'bg-slate-700'}`}></div>
+                                ))}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                     <button onClick={() => setShowBuyModal(false)} className="w-full py-3 text-slate-400 hover:text-white font-medium transition-colors">
                       Annuler
@@ -1827,12 +1956,49 @@ function MajorInvest({ userState, setUserState }: any) {
     );
   }
 
+  // Calculate global stats for all active investment accounts
+  const allActiveHoldings = userState.holdings;
+  const totalInvestedAll = allActiveHoldings.reduce((acc: number, h: any) => acc + h.value, 0);
+  const totalCurrentValueAll = allActiveHoldings.reduce((acc: number, h: any) => {
+    const rtData = userState.realTimePrices[h.ticker];
+    return acc + (rtData ? h.shares * rtData.price : h.value);
+  }, 0);
+  const globalPerfAll = totalInvestedAll > 0 ? ((totalCurrentValueAll - totalInvestedAll) / totalInvestedAll) * 100 : 0;
+
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-6 max-w-3xl mx-auto space-y-8 pb-32">
-      <header className="pt-2">
-        <h1 className="font-display text-2xl font-bold text-white">Investissements</h1>
-        <p className="text-slate-400 text-sm font-medium">Faites fructifier votre capital à moyen et long terme.</p>
+      <header className="pt-2 flex justify-between items-end">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-white">Investissements</h1>
+          <p className="text-slate-400 text-sm font-medium">Faites fructifier votre capital à moyen et long terme.</p>
+        </div>
+        <div className="text-right">
+          <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Performance Totale</p>
+          <p className={`text-lg font-mono font-bold ${globalPerfAll >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+            {globalPerfAll >= 0 ? '+' : ''}{globalPerfAll.toFixed(2)}%
+          </p>
+        </div>
       </header>
+
+      {/* Global Portfolio Summary - Trade Republic Style */}
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl overflow-hidden relative">
+        <div className="flex justify-between items-start relative z-10">
+          <div>
+            <p className="text-slate-400 text-xs uppercase tracking-wider mb-1">Valeur de vos actifs</p>
+            <h2 className="text-3xl font-mono font-bold text-white">{totalCurrentValueAll.toFixed(2)} €</h2>
+            <p className={`text-sm font-medium mt-1 ${globalPerfAll >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              {globalPerfAll >= 0 ? '+' : ''}{(totalCurrentValueAll - totalInvestedAll).toFixed(2)} € ({globalPerfAll >= 0 ? '+' : ''}{globalPerfAll.toFixed(2)}%)
+            </p>
+          </div>
+          <div className="w-24 h-16">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={MOCK_CHART_DATA}>
+                <Area type="monotone" dataKey="value" stroke={globalPerfAll >= 0 ? "#10b981" : "#ef4444"} fill="transparent" strokeWidth={2} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
 
       {/* Transfer Banner */}
       <div className="bg-gradient-to-r from-purple-900/40 to-blue-900/40 border border-purple-500/30 rounded-2xl p-5 flex items-start gap-4 shadow-lg">

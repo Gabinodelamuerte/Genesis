@@ -2,16 +2,35 @@ import express from "express";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
+import YahooFinance from 'yahoo-finance2';
 
 dotenv.config();
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
+  const yahooFinance = new YahooFinance();
 
   app.use(express.json());
 
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+
+  // API Route for Stock Prices
+  app.get("/api/stock/:symbol", async (req, res) => {
+    try {
+      const { symbol } = req.params;
+      const result = await yahooFinance.quote(symbol) as any;
+      res.json({
+        price: result.regularMarketPrice,
+        change: result.regularMarketChangePercent,
+        name: result.shortName || result.longName,
+        currency: result.currency
+      });
+    } catch (error) {
+      console.error(`Error fetching stock ${req.params.symbol}:`, error);
+      res.status(500).json({ error: "Failed to fetch stock data" });
+    }
+  });
 
   // API Route for Financial Advice
   app.post("/api/advice", async (req, res) => {

@@ -240,13 +240,13 @@ export const MODULES = [
 
 export const ASSETS_CATALOG = [
   { id: 'a1', name: 'S&P 500 ETF', symbol: 'SPY', type: 'ETF', price: 450.20, risk: 'Moyen', trend: '+1.2%' },
-  { id: 'a2', name: 'MSCI World ETF', symbol: 'CW8', type: 'ETF', price: 420.50, risk: 'Faible', trend: '+0.8%' },
+  { id: 'a2', name: 'MSCI World ETF', symbol: 'CW8.PA', type: 'ETF', price: 420.50, risk: 'Faible', trend: '+0.8%' },
   { id: 'a3', name: 'Apple Inc.', symbol: 'AAPL', type: 'Action', price: 175.50, risk: 'Moyen', trend: '+2.4%' },
   { id: 'a4', name: 'LVMH', symbol: 'MC.PA', type: 'Action', price: 820.10, risk: 'Moyen', trend: '-0.5%' },
-  { id: 'a5', name: 'Obligation État Français 10 ans', symbol: 'OAT', type: 'Obligation', price: 100.00, risk: 'Très Faible', trend: '+0.1%' },
-  { id: 'a6', name: 'Bitcoin', symbol: 'BTC', type: 'Crypto', price: 65000.00, risk: 'Très Élevé', trend: '+5.6%' },
-  { id: 'a7', name: 'Ethereum', symbol: 'ETH', type: 'Crypto', price: 3500.00, risk: 'Très Élevé', trend: '-2.1%' },
-  { id: 'a8', name: 'ETF Énergies Renouvelables', symbol: 'NRJ', type: 'ETF', price: 45.30, risk: 'Élevé', trend: '+3.2%' },
+  { id: 'a5', name: 'Obligation État Français 10 ans', symbol: 'OAT.PA', type: 'Obligation', price: 100.00, risk: 'Très Faible', trend: '+0.1%' },
+  { id: 'a6', name: 'Bitcoin', symbol: 'BTC-USD', type: 'Crypto', price: 65000.00, risk: 'Très Élevé', trend: '+5.6%' },
+  { id: 'a7', name: 'Ethereum', symbol: 'ETH-USD', type: 'Crypto', price: 3500.00, risk: 'Très Élevé', trend: '-2.1%' },
+  { id: 'a8', name: 'ETF Énergies Renouvelables', symbol: 'NRJ.PA', type: 'ETF', price: 45.30, risk: 'Élevé', trend: '+3.2%' },
 ];
 
 export const REWARDS = [
