@@ -70,10 +70,10 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
       { id: 'cto', name: 'Compte-Titres (CTO)', active: false, balance: 0, performance: 0 }
     ],
     holdings: [
-      { id: 'h1', accountId: 'pea', name: 'Amundi MSCI World', ticker: 'CW8', shares: 2, value: 800, performance: 5.2 }
+      { id: 'h1', accountId: 'pea', name: 'Amundi MSCI World', ticker: 'CW8.PA', shares: 2, value: 800, performance: 5.2 }
     ],
     investTransactions: [
-      { id: 'it1', accountId: 'pea', date: '10 Mars', label: 'Achat CW8', amount: -800, type: 'buy' }
+      { id: 'it1', accountId: 'pea', date: '10 Mars', label: 'Achat CW8.PA', amount: -800, type: 'buy' }
     ],
     userInsurances: [
       { id: 'ins1', type: 'auto', provider: 'Axa', monthlyPrice: 65 },
@@ -1532,7 +1532,7 @@ const ASSETS_TO_BUY = [
   { ticker: 'PUST.PA', name: 'Lyxor S&P 500', price: 35.20, type: 'ETF', risk: 4 },
   { ticker: 'AI.PA', name: 'Air Liquide', price: 175.00, type: 'Action', risk: 3 },
   { ticker: 'OR.PA', name: 'L\'Oréal', price: 420.00, type: 'Action', risk: 3 },
-  { ticker: 'OAT.PA', name: 'OAT 10 ans France', price: 100.00, type: 'Obligation', risk: 2 },
+  { ticker: 'LYXB.PA', name: 'Lyxor Euro Gov Bond', price: 145.00, type: 'Obligation', risk: 2 },
   { ticker: 'GC=F', name: 'Or Physique (Once)', price: 1950.00, type: 'Métal', risk: 3 },
   { ticker: 'SI=F', name: 'Argent Physique', price: 22.50, type: 'Métal', risk: 4 },
   { ticker: 'BTC-USD', name: 'Bitcoin', price: 65000.00, type: 'Crypto', risk: 5 },
@@ -1554,9 +1554,38 @@ function MajorInvest({ userState, setUserState }: any) {
   const [selectedAsset, setSelectedAsset] = useState<any>(null);
   const [buyAmount, setBuyAmount] = useState('');
   const [showExchangeSimulator, setShowExchangeSimulator] = useState(false);
+  const [showSellModal, setShowSellModal] = useState(false);
+  const [sellAmount, setSellAmount] = useState('');
   const [exchangeAmount, setExchangeAmount] = useState('1000');
   const [fromCurrency, setFromCurrency] = useState('EUR');
   const [toCurrency, setToCurrency] = useState('USD');
+  const [selectedHolding, setSelectedHolding] = useState<any>(null);
+  const [historyRange, setHistoryRange] = useState('1m');
+  const [displayMode, setDisplayMode] = useState<'absolute' | 'percentage'>('absolute');
+  const [historicalData, setHistoricalData] = useState<any[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+
+  useEffect(() => {
+    if (selectedHolding) {
+      fetchHistory(selectedHolding.ticker, historyRange);
+    }
+  }, [selectedHolding, historyRange]);
+
+  const fetchHistory = async (symbol: string, range: string) => {
+    setIsLoadingHistory(true);
+    setHistoricalData([]); // Clear previous data to show loading
+    try {
+      const response = await fetch(`/api/stock/${symbol}/history?range=${range}`);
+      if (response.ok) {
+        const data = await response.json();
+        setHistoricalData(data);
+      }
+    } catch (error) {
+      console.error("Error fetching history:", error);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
 
   const exchangeRates: Record<string, number> = {
     'EUR_USD': 1.09,
@@ -1650,6 +1679,69 @@ function MajorInvest({ userState, setUserState }: any) {
     setShowBuyModal(false);
     setBuyAmount('');
     setSelectedAsset(null);
+    setSelectedHolding(null);
+  };
+
+  const handleSell = (e: React.FormEvent) => {
+    e.preventDefault();
+    const amount = parseFloat(sellAmount);
+    if (!amount || amount <= 0 || !selectedHolding) return;
+    
+    const rtData = userState.realTimePrices[selectedHolding.ticker];
+    const currentPrice = rtData?.price || (selectedHolding.value / selectedHolding.shares);
+
+    if (amount > selectedHolding.value) {
+      alert("Montant supérieur à la valeur de la position.");
+      return;
+    }
+
+    const sharesToSell = amount / currentPrice;
+
+    setUserState((prev: any) => {
+      // Update real balance
+      const newRealBalance = prev.realBalance + amount;
+
+      // Update investment balance
+      const updatedInvestments = prev.investments.map((inv: any) => {
+        if (inv.id === selectedHolding.accountId) {
+          return { ...inv, balance: inv.balance - amount };
+        }
+        return inv;
+      });
+
+      // Add transaction
+      const newTransaction = {
+        id: `it_${Date.now()}`,
+        accountId: selectedHolding.accountId,
+        date: 'Aujourd\'hui',
+        label: `Vente ${selectedHolding.ticker}`,
+        amount: amount,
+        type: 'sell'
+      };
+
+      // Update holding
+      let newHoldings = prev.holdings.map((h: any) => {
+        if (h.id === selectedHolding.id) {
+          const newShares = h.shares - sharesToSell;
+          const newValue = h.value - amount;
+          if (newShares <= 0.0001) return null; // Remove if empty
+          return { ...h, shares: newShares, value: newValue };
+        }
+        return h;
+      }).filter(Boolean);
+
+      return {
+        ...prev,
+        realBalance: newRealBalance,
+        investments: updatedInvestments,
+        investTransactions: [newTransaction, ...prev.investTransactions],
+        holdings: newHoldings
+      };
+    });
+
+    setShowSellModal(false);
+    setSellAmount('');
+    setSelectedHolding(null);
   };
 
   const activateAccount = (id: string) => {
@@ -1783,6 +1875,7 @@ function MajorInvest({ userState, setUserState }: any) {
                   <motion.div 
                     key={h.id} 
                     whileHover={{ backgroundColor: 'rgba(30, 41, 59, 0.5)' }}
+                    onClick={() => setSelectedHolding(h)}
                     className="group px-4 py-5 rounded-2xl flex justify-between items-center cursor-pointer transition-all border border-transparent hover:border-slate-800"
                   >
                     <div className="flex items-center gap-4 flex-1">
@@ -1860,43 +1953,50 @@ function MajorInvest({ userState, setUserState }: any) {
         <AnimatePresence>
           {showBuyModal && (
             <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
             >
               <motion.div 
-                initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-                className="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl"
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                className="bg-slate-900 border border-slate-800 rounded-[2.5rem] w-full max-w-md p-8 shadow-2xl"
               >
-                <h3 className="text-xl font-bold text-white mb-4">Investir dans {account.name}</h3>
-                
-                {!selectedAsset ? (
-                  <div className="space-y-4">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-                      <input type="text" placeholder="Rechercher un ETF, une action..." className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:border-purple-500" />
-                    </div>
-                    <div className="max-h-64 overflow-y-auto space-y-2 pr-2">
-                      {ASSETS_TO_BUY.map(asset => {
-                        const rtData = userState.realTimePrices[asset.ticker];
-                        const currentPrice = rtData?.price || asset.price;
-                        const currentTrend = rtData?.trend || '+0.00%';
+                <div className="flex justify-between items-center mb-8">
+                  <h3 className="font-display text-2xl font-bold text-white">Investir</h3>
+                  <button onClick={() => setShowBuyModal(false)} className="text-slate-500 hover:text-white">
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
 
+                {!selectedAsset ? (
+                  <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                    <p className="text-sm text-slate-400 mb-4">Choisissez un actif à acheter :</p>
+                    <div className="grid grid-cols-1 gap-3">
+                      {ASSETS_TO_BUY.map((asset) => {
+                        const rt = userState.realTimePrices[asset.ticker];
                         return (
-                          <div key={asset.ticker} onClick={() => setSelectedAsset({ ...asset, price: currentPrice })} className="p-3 bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 rounded-xl cursor-pointer transition-colors flex justify-between items-center">
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className="font-bold text-white">{asset.ticker}</span>
-                                <span className="text-[10px] px-1.5 py-0.5 bg-slate-700 text-slate-300 rounded">{asset.type}</span>
+                          <div 
+                            key={asset.ticker}
+                            onClick={() => setSelectedAsset(asset)}
+                            className="p-4 bg-slate-800/30 border border-slate-800 rounded-2xl hover:border-purple-500/50 cursor-pointer transition-all flex justify-between items-center group"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center font-bold text-xs text-slate-400 group-hover:text-purple-400">
+                                {asset.ticker.substring(0, 3)}
                               </div>
-                              <p className="text-xs text-slate-400 truncate max-w-[150px]">{asset.name}</p>
+                              <div>
+                                <p className="font-bold text-white">{asset.ticker}</p>
+                                <p className="text-[10px] text-slate-500 uppercase">{asset.name}</p>
+                              </div>
                             </div>
                             <div className="text-right">
-                              <p className="font-mono text-sm text-white">{currentPrice.toFixed(2)} €</p>
-                              <div className="flex gap-0.5 mt-1 justify-end">
-                                {[1,2,3,4,5].map(r => (
-                                  <div key={r} className={`w-1.5 h-1.5 rounded-full ${r <= asset.risk ? (asset.risk > 3 ? 'bg-orange-500' : 'bg-emerald-500') : 'bg-slate-700'}`}></div>
-                                ))}
-                              </div>
+                              <p className="font-mono font-bold text-white">{(rt?.price || asset.price).toFixed(2)} €</p>
+                              <p className={`text-[10px] font-bold ${rt?.change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                {rt?.change >= 0 ? '+' : ''}{rt?.change?.toFixed(2)}%
+                              </p>
                             </div>
                           </div>
                         );
@@ -1933,7 +2033,7 @@ function MajorInvest({ userState, setUserState }: any) {
                       </div>
                       {buyAmount && parseFloat(buyAmount) > 0 && (
                         <p className="text-xs text-slate-500 mt-2 text-right">
-                          Soit environ {(parseFloat(buyAmount) / selectedAsset.price).toFixed(4)} parts
+                          Soit environ {(parseFloat(buyAmount) / (userState.realTimePrices[selectedAsset.ticker]?.price || selectedAsset.price)).toFixed(4)} parts
                         </p>
                       )}
                     </div>
@@ -1948,6 +2048,268 @@ function MajorInvest({ userState, setUserState }: any) {
                     </div>
                   </form>
                 )}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Detailed Holding View Modal */}
+        <AnimatePresence>
+          {selectedHolding && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/90 backdrop-blur-md"
+            >
+              <motion.div 
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="bg-slate-950 border-t sm:border border-slate-800 rounded-t-[2.5rem] sm:rounded-[2.5rem] w-full max-w-2xl h-[90vh] sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
+              >
+                <div className="p-6 sm:p-8 flex-1 overflow-y-auto custom-scrollbar">
+                  <div className="flex justify-between items-start mb-8">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center font-bold text-white text-lg">
+                        {selectedHolding.ticker.substring(0, 3)}
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-white">{selectedHolding.ticker}</h3>
+                        <p className="text-slate-400 font-medium">{selectedHolding.name}</p>
+                      </div>
+                    </div>
+                    <button onClick={() => setSelectedHolding(null)} className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white">
+                      <X className="w-6 h-6" />
+                    </button>
+                  </div>
+
+                  {/* Price & Perf */}
+                  <div className="mb-8">
+                    <div className="flex items-baseline gap-3 mb-2">
+                      <h4 className="text-5xl font-mono font-bold text-white">
+                        {displayMode === 'absolute' 
+                          ? `${(userState.realTimePrices[selectedHolding.ticker]?.price || (selectedHolding.value / selectedHolding.shares)).toFixed(2)} €`
+                          : `${((userState.realTimePrices[selectedHolding.ticker]?.price / (selectedHolding.value / selectedHolding.shares) - 1) * 100).toFixed(2)} %`
+                        }
+                      </h4>
+                      <button 
+                        onClick={() => setDisplayMode(prev => prev === 'absolute' ? 'percentage' : 'absolute')}
+                        className="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded hover:bg-slate-700 transition-colors"
+                      >
+                        {displayMode === 'absolute' ? '%' : '€'}
+                      </button>
+                    </div>
+                    <div className={`flex items-center gap-2 font-bold ${((userState.realTimePrices[selectedHolding.ticker]?.price || (selectedHolding.value / selectedHolding.shares)) >= (selectedHolding.value / selectedHolding.shares)) ? 'text-emerald-400' : 'text-red-400'}`}>
+                      <span>
+                        {displayMode === 'absolute' 
+                          ? `${((userState.realTimePrices[selectedHolding.ticker]?.price || (selectedHolding.value / selectedHolding.shares)) - (selectedHolding.value / selectedHolding.shares)).toFixed(2)} €`
+                          : `${((userState.realTimePrices[selectedHolding.ticker]?.price / (selectedHolding.value / selectedHolding.shares) - 1) * 100).toFixed(2)} %`
+                        }
+                      </span>
+                      <span className="text-xs opacity-60 uppercase tracking-widest">Depuis l'achat</span>
+                    </div>
+                  </div>
+
+                  {/* Chart */}
+                  <div className="h-64 w-full mb-8 relative">
+                    {isLoadingHistory && (
+                      <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/50 backdrop-blur-[2px]">
+                        <RefreshCw className="w-8 h-8 text-purple-500 animate-spin" />
+                      </div>
+                    )}
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={historicalData.length > 0 ? historicalData : MOCK_CHART_DATA}>
+                        <defs>
+                          <linearGradient id="colorHistory" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <XAxis 
+                          dataKey="date" 
+                          hide={false}
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fill: '#475569', fontSize: 10 }}
+                          tickFormatter={(tick) => {
+                            const date = new Date(tick);
+                            if (historyRange === '1h' || historyRange === '1j') {
+                              return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            }
+                            return date.toLocaleDateString([], { day: '2-digit', month: '2-digit' });
+                          }}
+                          minTickGap={30}
+                        />
+                        <YAxis 
+                          hide={true} 
+                          domain={['auto', 'auto']}
+                        />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#000', borderColor: '#334155', borderRadius: '12px' }}
+                          itemStyle={{ color: '#fff' }}
+                          labelFormatter={(label) => {
+                            if (typeof label === 'number') {
+                              return new Date(label).toLocaleString();
+                            }
+                            return label;
+                          }}
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="value" 
+                          stroke="#8b5cf6" 
+                          strokeWidth={4} 
+                          fillOpacity={1} 
+                          fill="url(#colorHistory)" 
+                          animationDuration={1000}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Time Filters */}
+                  <div className="flex justify-between bg-slate-900 p-1 rounded-2xl mb-8">
+                    {[
+                      { label: '1h', value: '1h' },
+                      { label: '1j', value: '1j' },
+                      { label: '1s', value: '1s' },
+                      { label: '1m', value: '1m' },
+                      { label: '1a', value: '1a' },
+                      { label: 'Max', value: 'all' },
+                    ].map((filter) => (
+                      <button
+                        key={filter.value}
+                        onClick={() => setHistoryRange(filter.value)}
+                        className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${historyRange === filter.value ? 'bg-white text-black shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                      >
+                        {filter.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Position Details */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-slate-900/50 border border-slate-800 p-4 rounded-2xl">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Parts détenues</p>
+                      <p className="text-white font-mono font-bold">{selectedHolding.shares.toFixed(4)}</p>
+                    </div>
+                    <div className="bg-slate-900/50 border border-slate-800 p-4 rounded-2xl">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Prix de revient</p>
+                      <p className="text-white font-mono font-bold">{(selectedHolding.value / selectedHolding.shares).toFixed(2)} €</p>
+                    </div>
+                    <div className="bg-slate-900/50 border border-slate-800 p-4 rounded-2xl">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Valeur actuelle</p>
+                      <p className="text-white font-mono font-bold">
+                        {(selectedHolding.shares * (userState.realTimePrices[selectedHolding.ticker]?.price || (selectedHolding.value / selectedHolding.shares))).toFixed(2)} €
+                      </p>
+                    </div>
+                    <div className="bg-slate-900/50 border border-slate-800 p-4 rounded-2xl">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Plus-value</p>
+                      <p className={`font-mono font-bold ${((userState.realTimePrices[selectedHolding.ticker]?.price || (selectedHolding.value / selectedHolding.shares)) >= (selectedHolding.value / selectedHolding.shares)) ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {((userState.realTimePrices[selectedHolding.ticker]?.price || (selectedHolding.value / selectedHolding.shares)) * selectedHolding.shares - selectedHolding.value).toFixed(2)} €
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6 sm:p-8 bg-slate-900/50 border-t border-slate-800 flex gap-4">
+                  <button 
+                    onClick={() => {
+                      const asset = ASSETS_TO_BUY.find(a => a.ticker === selectedHolding.ticker);
+                      if (asset) {
+                        setSelectedAsset(asset);
+                        setSelectedAccount(selectedHolding.accountId);
+                        setShowBuyModal(true);
+                      }
+                    }}
+                    className="flex-1 bg-white text-black font-bold py-4 rounded-2xl hover:bg-slate-200 transition-colors"
+                  >
+                    Acheter plus
+                  </button>
+                  <button 
+                    onClick={() => setShowSellModal(true)}
+                    className="flex-1 bg-slate-800 text-white font-bold py-4 rounded-2xl hover:bg-slate-700 transition-colors"
+                  >
+                    Vendre
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+          {showSellModal && selectedHolding && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+            >
+              <motion.div 
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                className="bg-slate-950 border border-slate-800 rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl"
+              >
+                <div className="p-8">
+                  <div className="flex justify-between items-center mb-8">
+                    <h3 className="text-2xl font-bold text-white">Vendre {selectedHolding.ticker}</h3>
+                    <button onClick={() => setShowSellModal(false)} className="text-slate-400 hover:text-white">
+                      <X className="w-6 h-6" />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleSell} className="space-y-6">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Montant à vendre (€)</label>
+                      <div className="relative">
+                        <input 
+                          type="number" 
+                          value={sellAmount} 
+                          onChange={(e) => setSellAmount(e.target.value)} 
+                          placeholder="0.00" 
+                          className="w-full bg-slate-900 border border-slate-800 rounded-2xl px-6 py-4 text-2xl font-mono font-bold text-white focus:outline-none focus:border-purple-500"
+                        />
+                        <span className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 font-bold">€</span>
+                      </div>
+                      <div className="flex justify-between mt-2">
+                        <p className="text-xs text-slate-500">
+                          Valeur dispo: <span className="text-white font-bold">{selectedHolding.value.toFixed(2)} €</span>
+                        </p>
+                        <button 
+                          type="button"
+                          onClick={() => setSellAmount(selectedHolding.value.toString())}
+                          className="text-xs text-purple-400 font-bold hover:text-purple-300"
+                        >
+                          Tout vendre
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-900/50 border border-slate-800 p-4 rounded-2xl space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-slate-500">Parts à vendre</span>
+                        <span className="text-white font-mono">
+                          {(parseFloat(sellAmount) / (userState.realTimePrices[selectedHolding.ticker]?.price || (selectedHolding.value / selectedHolding.shares)) || 0).toFixed(4)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-slate-500">Prix actuel</span>
+                        <span className="text-white font-mono">
+                          {(userState.realTimePrices[selectedHolding.ticker]?.price || (selectedHolding.value / selectedHolding.shares)).toFixed(2)} €
+                        </span>
+                      </div>
+                    </div>
+
+                    <button 
+                      type="submit" 
+                      disabled={!sellAmount || parseFloat(sellAmount) <= 0 || parseFloat(sellAmount) > selectedHolding.value}
+                      className="w-full py-5 bg-red-600 hover:bg-red-500 text-white rounded-2xl font-bold transition-all disabled:opacity-50 shadow-lg shadow-red-900/20"
+                    >
+                      Confirmer la vente
+                    </button>
+                  </form>
+                </div>
               </motion.div>
             </motion.div>
           )}

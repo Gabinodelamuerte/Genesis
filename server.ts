@@ -20,15 +20,57 @@ async function startServer() {
     try {
       const { symbol } = req.params;
       const result = await yahooFinance.quote(symbol) as any;
+      
+      if (!result) {
+        return res.status(404).json({ error: "Stock not found" });
+      }
+
       res.json({
-        price: result.regularMarketPrice,
-        change: result.regularMarketChangePercent,
-        name: result.shortName || result.longName,
-        currency: result.currency
+        price: result.regularMarketPrice || result.price || 0,
+        change: result.regularMarketChangePercent || 0,
+        name: result.shortName || result.longName || symbol,
+        currency: result.currency || 'EUR'
       });
     } catch (error) {
       console.error(`Error fetching stock ${req.params.symbol}:`, error);
       res.status(500).json({ error: "Failed to fetch stock data" });
+    }
+  });
+
+  // API Route for Historical Stock Data
+  app.get("/api/stock/:symbol/history", async (req, res) => {
+    try {
+      const { symbol } = req.params;
+      const { range } = req.query; // 1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max
+      
+      const rangeMap: Record<string, number> = {
+        '1h': 4 * 3600 * 1000, // Show last 4 hours for '1h' filter
+        '1j': 24 * 3600 * 1000,
+        '1s': 7 * 24 * 3600 * 1000,
+        '1m': 30 * 24 * 3600 * 1000,
+        '1a': 365 * 24 * 3600 * 1000,
+        'all': 10 * 365 * 24 * 3600 * 1000
+      };
+
+      const duration = rangeMap[range as string] || rangeMap['1m'];
+      const period1 = new Date(Date.now() - duration);
+      
+      const interval = duration <= rangeMap['1j'] ? '2m' : (duration <= rangeMap['1s'] ? '15m' : '1d');
+
+      const result = await yahooFinance.chart(symbol, {
+        period1: period1,
+        interval: interval as any
+      });
+
+      const history = result.quotes.map(q => ({
+        date: q.date instanceof Date ? q.date.getTime() : new Date(q.date).getTime(),
+        value: q.close || q.open || q.adjClose
+      })).filter(q => q.value !== null && !isNaN(q.date));
+
+      res.json(history);
+    } catch (error) {
+      console.error(`Error fetching history for ${req.params.symbol}:`, error);
+      res.status(500).json({ error: "Failed to fetch history" });
     }
   });
 
