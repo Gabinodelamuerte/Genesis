@@ -25,12 +25,37 @@ html.light-mode .keep-colors {
   filter: invert(1) hue-rotate(180deg);
 }
 
-/* Hide scrollbar globally */
-::-webkit-scrollbar {
+/* Hide scrollbar globally by default */
+*::-webkit-scrollbar {
   display: none;
 }
 
 * {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+}
+
+/* Custom Scrollbar for Chat - Explicitly enable */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  display: block;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.4);
+}
+
+.custom-scrollbar {
+  -ms-overflow-style: auto !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(148, 163, 184, 0.2) transparent !important;
 }
