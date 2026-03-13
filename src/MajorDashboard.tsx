@@ -1686,6 +1686,7 @@ function MajorInvest({ userState, setUserState }: any) {
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [expandedAsset, setExpandedAsset] = useState<string | null>(null);
   const [showAboutAsset, setShowAboutAsset] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (selectedHolding) {
@@ -1972,7 +1973,10 @@ function MajorInvest({ userState, setUserState }: any) {
             <button onClick={() => setShowBuyModal(true)} className="flex-1 bg-white text-black hover:bg-slate-200 font-bold py-4 rounded-2xl transition-all transform active:scale-95 flex items-center justify-center gap-2 shadow-lg">
               <Plus className="w-5 h-5" /> Investir
             </button>
-            <button className="w-14 h-14 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-center text-white hover:bg-slate-800 transition-colors">
+            <button 
+              onClick={() => setShowBuyModal(true)}
+              className="w-14 h-14 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-center text-white hover:bg-slate-800 transition-colors"
+            >
               <Search className="w-6 h-6" />
             </button>
           </div>
@@ -2097,140 +2101,177 @@ function MajorInvest({ userState, setUserState }: any) {
               >
                 <div className="flex justify-between items-center mb-8">
                   <h3 className="font-display text-2xl font-bold text-white">Investir</h3>
-                  <button onClick={() => setShowBuyModal(false)} className="text-slate-500 hover:text-white">
+                  <button 
+                    onClick={() => {
+                      setShowBuyModal(false);
+                      setSearchQuery('');
+                    }} 
+                    className="text-slate-500 hover:text-white"
+                  >
                     <X className="w-6 h-6" />
                   </button>
                 </div>
 
                 {!selectedAsset ? (
                   <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
-                    <p className="text-sm text-slate-400 mb-4">Choisissez un actif à acheter :</p>
+                    <div className="relative mb-6">
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                      <input 
+                        type="text"
+                        placeholder="Rechercher une action, un ETF..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-2xl py-4 pl-12 pr-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-purple-500/50 transition-all"
+                        autoFocus
+                      />
+                    </div>
+
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">
+                      {searchQuery ? 'Résultats de recherche' : 'Suggestions pour vous'}
+                    </p>
+
                     <div className="grid grid-cols-1 gap-3">
-                      {ASSETS_TO_BUY.map((asset) => {
-                        const rt = userState.realTimePrices[asset.ticker];
-                        const isExpanded = expandedAsset === asset.ticker;
-                        return (
-                          <div 
-                            key={asset.ticker}
-                            className={`bg-slate-800/30 border rounded-2xl transition-all overflow-hidden ${isExpanded ? 'border-purple-500/50 bg-slate-800/50' : 'border-slate-800 hover:border-slate-700'}`}
-                          >
+                      {ASSETS_TO_BUY.filter(asset => 
+                        asset.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                        asset.ticker.toLowerCase().includes(searchQuery.toLowerCase())
+                      ).length > 0 ? (
+                        ASSETS_TO_BUY.filter(asset => 
+                          asset.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          asset.ticker.toLowerCase().includes(searchQuery.toLowerCase())
+                        ).map((asset) => {
+                          const rt = userState.realTimePrices[asset.ticker];
+                          const isExpanded = expandedAsset === asset.ticker;
+                          return (
                             <div 
-                              onClick={() => setExpandedAsset(isExpanded ? null : asset.ticker)}
-                              className="p-4 cursor-pointer flex justify-between items-center group"
+                              key={asset.ticker}
+                              className={`bg-slate-800/30 border rounded-2xl transition-all overflow-hidden ${isExpanded ? 'border-purple-500/50 bg-slate-800/50' : 'border-slate-800 hover:border-slate-700'}`}
                             >
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center font-bold text-xs text-slate-400 group-hover:text-purple-400">
-                                  {asset.ticker.substring(0, 3)}
+                              <div 
+                                onClick={() => setExpandedAsset(isExpanded ? null : asset.ticker)}
+                                className="p-4 cursor-pointer flex justify-between items-center group"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center font-bold text-xs text-slate-400 group-hover:text-purple-400">
+                                    {asset.ticker.substring(0, 3)}
+                                  </div>
+                                  <div>
+                                    <p className="font-bold text-white">{asset.ticker}</p>
+                                    <p className="text-[10px] text-slate-500 uppercase">{asset.name}</p>
+                                  </div>
                                 </div>
-                                <div>
-                                  <p className="font-bold text-white">{asset.ticker}</p>
-                                  <p className="text-[10px] text-slate-500 uppercase">{asset.name}</p>
+                                <div className="flex items-center gap-4">
+                                  <div className="text-right">
+                                    <p className="font-mono font-bold text-white">{(rt?.price || asset.price).toFixed(2)} €</p>
+                                    <p className={`text-[10px] font-bold ${rt?.change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                      {rt?.change >= 0 ? '+' : ''}{rt?.change?.toFixed(2)}%
+                                    </p>
+                                  </div>
+                                  {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
                                 </div>
                               </div>
-                              <div className="flex items-center gap-4">
-                                <div className="text-right">
-                                  <p className="font-mono font-bold text-white">{(rt?.price || asset.price).toFixed(2)} €</p>
-                                  <p className={`text-[10px] font-bold ${rt?.change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                                    {rt?.change >= 0 ? '+' : ''}{rt?.change?.toFixed(2)}%
-                                  </p>
-                                </div>
-                                {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
-                              </div>
-                            </div>
 
-                            <AnimatePresence>
-                              {isExpanded && (
-                                <motion.div 
-                                  initial={{ height: 0, opacity: 0 }}
-                                  animate={{ height: 'auto', opacity: 1 }}
-                                  exit={{ height: 0, opacity: 0 }}
-                                  className="px-4 pb-4"
-                                >
-                                  <div className="h-48 w-full mb-4 bg-slate-950/50 rounded-xl p-2 relative">
-                                    {isLoadingHistory && (
-                                      <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/20 backdrop-blur-[1px]">
-                                        <RefreshCw className="w-5 h-5 text-purple-500 animate-spin" />
-                                      </div>
-                                    )}
-                                    <ResponsiveContainer width="100%" height="100%">
-                                      <AreaChart data={historicalData.length > 0 ? historicalData : MOCK_CHART_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                        <defs>
-                                          <linearGradient id="colorHistoryMini" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
-                                            <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
-                                          </linearGradient>
-                                        </defs>
-                                        <XAxis 
-                                          dataKey="date" 
-                                          hide={false}
-                                          axisLine={false}
-                                          tickLine={false}
-                                          tick={{ fill: '#475569', fontSize: 8 }}
-                                          tickFormatter={(tick) => {
-                                            const date = new Date(tick);
-                                            if (isNaN(date.getTime())) return tick;
-                                            return date.toLocaleDateString([], { day: '2-digit', month: '2-digit' });
-                                          }}
-                                          minTickGap={20}
-                                        />
-                                        <YAxis 
-                                          hide={true} 
-                                          domain={['auto', 'auto']}
-                                        />
-                                        <Tooltip 
-                                          formatter={(value: number) => [`${value.toFixed(2)} €`, 'Prix']}
-                                          contentStyle={{ backgroundColor: '#000', borderColor: '#334155', borderRadius: '8px', fontSize: '10px' }}
-                                          itemStyle={{ color: '#fff', padding: 0 }}
-                                          labelFormatter={(label) => {
-                                            const date = new Date(label);
-                                            return isNaN(date.getTime()) ? label : date.toLocaleString();
-                                          }}
-                                        />
-                                        <Area 
-                                          type="monotone" 
-                                          dataKey="value" 
-                                          stroke="#8b5cf6" 
-                                          strokeWidth={2} 
-                                          fillOpacity={1} 
-                                          fill="url(#colorHistoryMini)" 
-                                          connectNulls={true}
-                                        />
-                                      </AreaChart>
-                                    </ResponsiveContainer>
-                                  </div>
-
-                                  <div className="grid grid-cols-2 gap-2 mb-4">
-                                    <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800/50">
-                                      <p className="text-[9px] text-slate-500 uppercase font-bold mb-1">Type</p>
-                                      <p className="text-white text-xs font-bold">{asset.type}</p>
-                                    </div>
-                                    <button 
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setShowAboutAsset(asset);
-                                      }}
-                                      className="bg-slate-900/50 p-3 rounded-xl border border-slate-800/50 text-left hover:bg-slate-800 transition-colors group/about"
-                                    >
-                                      <div className="flex justify-between items-center">
-                                        <p className="text-[9px] text-slate-500 uppercase font-bold mb-1">À propos</p>
-                                        <ChevronRight className="w-3 h-3 text-slate-600 group-hover/about:text-purple-400" />
-                                      </div>
-                                      <p className="text-purple-400 text-xs font-bold">Voir les détails</p>
-                                    </button>
-                                  </div>
-
-                                  <button 
-                                    onClick={() => setSelectedAsset(asset)}
-                                    className="w-full py-3 bg-white text-black font-bold rounded-xl hover:bg-slate-200 transition-all transform active:scale-[0.98]"
+                              <AnimatePresence>
+                                {isExpanded && (
+                                  <motion.div 
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="px-4 pb-4"
                                   >
-                                    Investir maintenant
-                                  </button>
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
+                                    <div className="h-48 w-full mb-4 bg-slate-950/50 rounded-xl p-2 relative">
+                                      {isLoadingHistory && (
+                                        <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/20 backdrop-blur-[1px]">
+                                          <RefreshCw className="w-5 h-5 text-purple-500 animate-spin" />
+                                        </div>
+                                      )}
+                                      <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={historicalData.length > 0 ? historicalData : MOCK_CHART_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                          <defs>
+                                            <linearGradient id="colorHistoryMini" x1="0" y1="0" x2="0" y2="1">
+                                              <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
+                                              <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                                            </linearGradient>
+                                          </defs>
+                                          <XAxis 
+                                            dataKey="date" 
+                                            hide={false}
+                                            axisLine={false}
+                                            tickLine={false}
+                                            tick={{ fill: '#475569', fontSize: 8 }}
+                                            tickFormatter={(tick) => {
+                                              const date = new Date(tick);
+                                              if (isNaN(date.getTime())) return tick;
+                                              return date.toLocaleDateString([], { day: '2-digit', month: '2-digit' });
+                                            }}
+                                            minTickGap={20}
+                                          />
+                                          <YAxis 
+                                            hide={true} 
+                                            domain={['auto', 'auto']}
+                                          />
+                                          <Tooltip 
+                                            formatter={(value: number) => [`${value.toFixed(2)} €`, 'Prix']}
+                                            contentStyle={{ backgroundColor: '#000', borderColor: '#334155', borderRadius: '8px', fontSize: '10px' }}
+                                            itemStyle={{ color: '#fff', padding: 0 }}
+                                            labelFormatter={(label) => {
+                                              const date = new Date(label);
+                                              return isNaN(date.getTime()) ? label : date.toLocaleString();
+                                            }}
+                                          />
+                                          <Area 
+                                            type="monotone" 
+                                            dataKey="value" 
+                                            stroke="#8b5cf6" 
+                                            strokeWidth={2} 
+                                            fillOpacity={1} 
+                                            fill="url(#colorHistoryMini)" 
+                                            connectNulls={true}
+                                          />
+                                        </AreaChart>
+                                      </ResponsiveContainer>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-2 mb-4">
+                                      <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800/50">
+                                        <p className="text-[9px] text-slate-500 uppercase font-bold mb-1">Type</p>
+                                        <p className="text-white text-xs font-bold">{asset.type}</p>
+                                      </div>
+                                      <button 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setShowAboutAsset(asset);
+                                        }}
+                                        className="bg-slate-900/50 p-3 rounded-xl border border-slate-800/50 text-left hover:bg-slate-800 transition-colors group/about"
+                                      >
+                                        <div className="flex justify-between items-center">
+                                          <p className="text-[9px] text-slate-500 uppercase font-bold mb-1">À propos</p>
+                                          <ChevronRight className="w-3 h-3 text-slate-600 group-hover/about:text-purple-400" />
+                                        </div>
+                                        <p className="text-purple-400 text-xs font-bold">Voir les détails</p>
+                                      </button>
+                                    </div>
+
+                                    <button 
+                                      onClick={() => setSelectedAsset(asset)}
+                                      className="w-full py-3 bg-white text-black font-bold rounded-xl hover:bg-slate-200 transition-all transform active:scale-[0.98]"
+                                    >
+                                      Investir maintenant
+                                    </button>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="py-12 text-center">
+                          <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-800">
+                            <Search className="w-8 h-8 text-slate-600" />
                           </div>
-                        );
-                      })}
+                          <p className="text-white font-bold">Aucun résultat</p>
+                          <p className="text-sm text-slate-500">Essayez une autre recherche</p>
+                        </div>
+                      )}
                     </div>
                     <button onClick={() => setShowBuyModal(false)} className="w-full py-3 text-slate-400 hover:text-white font-medium transition-colors">
                       Annuler
