@@ -167,12 +167,12 @@ export function GenesisAI({ userContext }: { userContext: any }) {
                       <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ${msg.role === 'user' ? 'bg-slate-800 border border-slate-700' : 'bg-purple-600/20 border border-purple-500/30'}`}>
                         {msg.role === 'user' ? <User className="w-5 h-5 text-slate-400" /> : <GenesisLogo className="w-6 h-6" />}
                       </div>
-                      <div className={`p-4 rounded-[1.5rem] text-sm leading-relaxed shadow-sm ${
+                      <div className={`p-5 rounded-[2rem] text-sm leading-relaxed shadow-sm ${
                         msg.role === 'user' 
                           ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-tr-none' 
                           : 'bg-slate-800/50 text-slate-200 rounded-tl-none border border-slate-700/50 backdrop-blur-sm'
                       }`}>
-                        <div className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-slate-950 prose-pre:border prose-pre:border-slate-800">
+                        <div className="prose prose-invert prose-sm max-w-none prose-p:leading-[1.8] prose-p:mb-5 last:prose-p:mb-0 prose-li:mb-2 prose-headings:mb-4 prose-pre:bg-slate-950 prose-pre:border prose-pre:border-slate-800">
                           <Markdown>{msg.text}</Markdown>
                         </div>
                       </div>
