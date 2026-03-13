@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Home, CreditCard, Shield, TrendingUp, User, Wallet, ChevronRight, CheckCircle2, Lock, Sparkles, Building2, Briefcase, Plus, ArrowRight, PieChart as PieChartIcon, Trash2, History, ArrowUpRight, ArrowDownRight, ArrowLeft, Download, Search, Car, HeartPulse, Landmark, Dog, ArrowRightLeft, CheckCircle, Trophy, BookOpen, X, XCircle, Pencil, Users, Coins, RefreshCw, Globe, AlertCircle, Sun, Moon, Info } from 'lucide-react';
+import { Home, CreditCard, Shield, TrendingUp, User, Wallet, ChevronRight, ChevronDown, ChevronUp, CheckCircle2, Lock, Sparkles, Building2, Briefcase, Plus, ArrowRight, PieChart as PieChartIcon, Trash2, History, ArrowUpRight, ArrowDownRight, ArrowLeft, Download, Search, Car, HeartPulse, Landmark, Dog, ArrowRightLeft, CheckCircle, Trophy, BookOpen, X, XCircle, Pencil, Users, Coins, RefreshCw, Globe, AlertCircle, Sun, Moon, Info } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis, CartesianGrid, LineChart, Line } from 'recharts';
 import { GenesisLogo } from './components/GenesisLogo';
 import { GenesisAI } from './components/GenesisAI';
@@ -1527,16 +1527,136 @@ function AddBeneficiaryModal({ isOpen, onClose, onAdd }: any) {
 }
   
 const ASSETS_TO_BUY = [
-  { ticker: 'CW8.PA', name: 'Amundi MSCI World', price: 400.50, type: 'ETF', risk: 4 },
-  { ticker: 'PAASI.PA', name: 'Amundi MSCI Emerging Markets', price: 23.40, type: 'ETF', risk: 5 },
-  { ticker: 'PUST.PA', name: 'Lyxor S&P 500', price: 35.20, type: 'ETF', risk: 4 },
-  { ticker: 'AI.PA', name: 'Air Liquide', price: 175.00, type: 'Action', risk: 3 },
-  { ticker: 'OR.PA', name: 'L\'Oréal', price: 420.00, type: 'Action', risk: 3 },
-  { ticker: 'LYXB.PA', name: 'Lyxor Euro Gov Bond', price: 145.00, type: 'Obligation', risk: 2 },
-  { ticker: 'GC=F', name: 'Or Physique (Once)', price: 1950.00, type: 'Métal', risk: 3 },
-  { ticker: 'SI=F', name: 'Argent Physique', price: 22.50, type: 'Métal', risk: 4 },
-  { ticker: 'BTC-USD', name: 'Bitcoin', price: 65000.00, type: 'Crypto', risk: 5 },
-  { ticker: 'ETH-USD', name: 'Ethereum', price: 3500.00, type: 'Crypto', risk: 5 },
+  { 
+    ticker: 'CW8.PA', 
+    name: 'Amundi MSCI World', 
+    price: 400.50, 
+    type: 'ETF', 
+    risk: 4,
+    isin: 'LU1681043599',
+    wkn: 'A2H57Y',
+    index: 'MSCI World Net Total Return',
+    issuer: 'Amundi',
+    currency: 'EUR',
+    replication: 'Physique'
+  },
+  { 
+    ticker: 'PAASI.PA', 
+    name: 'Amundi MSCI Emerging Markets', 
+    price: 23.40, 
+    type: 'ETF', 
+    risk: 5,
+    isin: 'LU1681045370',
+    wkn: 'A2H57X',
+    index: 'MSCI Emerging Markets',
+    issuer: 'Amundi',
+    currency: 'EUR',
+    replication: 'Swap'
+  },
+  { 
+    ticker: 'PUST.PA', 
+    name: 'Lyxor S&P 500', 
+    price: 35.20, 
+    type: 'ETF', 
+    risk: 4,
+    isin: 'LU1681048804',
+    wkn: 'A2H573',
+    index: 'S&P 500 TR',
+    issuer: 'Amundi',
+    currency: 'EUR',
+    replication: 'Swap'
+  },
+  { 
+    ticker: 'AI.PA', 
+    name: 'Air Liquide', 
+    price: 175.00, 
+    type: 'Action', 
+    risk: 3,
+    isin: 'FR0000120073',
+    wkn: '850133',
+    index: 'CAC 40',
+    issuer: 'Air Liquide SA',
+    currency: 'EUR',
+    replication: 'Direct'
+  },
+  { 
+    ticker: 'OR.PA', 
+    name: 'L\'Oréal', 
+    price: 420.00, 
+    type: 'Action', 
+    risk: 3,
+    isin: 'FR0000120321',
+    wkn: '853888',
+    index: 'CAC 40',
+    issuer: 'L\'Oréal SA',
+    currency: 'EUR',
+    replication: 'Direct'
+  },
+  { 
+    ticker: 'LYXB.PA', 
+    name: 'Lyxor Euro Gov Bond', 
+    price: 145.00, 
+    type: 'Obligation', 
+    risk: 2,
+    isin: 'LU1650490474',
+    wkn: 'A2H57Z',
+    index: 'Bloomberg Euro Treasury',
+    issuer: 'Amundi',
+    currency: 'EUR',
+    replication: 'Physique'
+  },
+  { 
+    ticker: 'GC=F', 
+    name: 'Or Physique (Once)', 
+    price: 1950.00, 
+    type: 'Métal', 
+    risk: 3,
+    isin: 'US0000000000',
+    wkn: 'GOLD01',
+    index: 'Gold Spot',
+    issuer: 'Market',
+    currency: 'USD',
+    replication: 'Physique'
+  },
+  { 
+    ticker: 'SI=F', 
+    name: 'Argent Physique', 
+    price: 22.50, 
+    type: 'Métal', 
+    risk: 4,
+    isin: 'US0000000001',
+    wkn: 'SILV01',
+    index: 'Silver Spot',
+    issuer: 'Market',
+    currency: 'USD',
+    replication: 'Physique'
+  },
+  { 
+    ticker: 'BTC-USD', 
+    name: 'Bitcoin', 
+    price: 65000.00, 
+    type: 'Crypto', 
+    risk: 5,
+    isin: 'CRYPTO-BTC',
+    wkn: 'BTC001',
+    index: 'Bitcoin Index',
+    issuer: 'Decentralized',
+    currency: 'USD',
+    replication: 'Digital'
+  },
+  { 
+    ticker: 'ETH-USD', 
+    name: 'Ethereum', 
+    price: 3500.00, 
+    type: 'Crypto', 
+    risk: 5,
+    isin: 'CRYPTO-ETH',
+    wkn: 'ETH001',
+    index: 'Ethereum Index',
+    issuer: 'Decentralized',
+    currency: 'USD',
+    replication: 'Digital'
+  },
 ];
 
 const MOCK_CHART_DATA = [
@@ -1564,12 +1684,16 @@ function MajorInvest({ userState, setUserState }: any) {
   const [displayMode, setDisplayMode] = useState<'absolute' | 'percentage'>('absolute');
   const [historicalData, setHistoricalData] = useState<any[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [expandedAsset, setExpandedAsset] = useState<string | null>(null);
+  const [showAboutAsset, setShowAboutAsset] = useState<any>(null);
 
   useEffect(() => {
     if (selectedHolding) {
       fetchHistory(selectedHolding.ticker, historyRange);
+    } else if (expandedAsset) {
+      fetchHistory(expandedAsset, historyRange);
     }
-  }, [selectedHolding, historyRange]);
+  }, [selectedHolding, expandedAsset, historyRange]);
 
   const fetchHistory = async (symbol: string, range: string) => {
     setIsLoadingHistory(true);
@@ -1838,6 +1962,7 @@ function MajorInvest({ userState, setUserState }: any) {
                   fillOpacity={1} 
                   fill="url(#colorGlobal)" 
                   animationDuration={2000}
+                  connectNulls={true}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -1906,6 +2031,7 @@ function MajorInvest({ userState, setUserState }: any) {
                             strokeWidth={2} 
                             dot={false} 
                             animationDuration={1500}
+                            connectNulls={true}
                           />
                         </LineChart>
                       </ResponsiveContainer>
@@ -1977,32 +2103,131 @@ function MajorInvest({ userState, setUserState }: any) {
                 </div>
 
                 {!selectedAsset ? (
-                  <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
                     <p className="text-sm text-slate-400 mb-4">Choisissez un actif à acheter :</p>
                     <div className="grid grid-cols-1 gap-3">
                       {ASSETS_TO_BUY.map((asset) => {
                         const rt = userState.realTimePrices[asset.ticker];
+                        const isExpanded = expandedAsset === asset.ticker;
                         return (
                           <div 
                             key={asset.ticker}
-                            onClick={() => setSelectedAsset(asset)}
-                            className="p-4 bg-slate-800/30 border border-slate-800 rounded-2xl hover:border-purple-500/50 cursor-pointer transition-all flex justify-between items-center group"
+                            className={`bg-slate-800/30 border rounded-2xl transition-all overflow-hidden ${isExpanded ? 'border-purple-500/50 bg-slate-800/50' : 'border-slate-800 hover:border-slate-700'}`}
                           >
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center font-bold text-xs text-slate-400 group-hover:text-purple-400">
-                                {asset.ticker.substring(0, 3)}
+                            <div 
+                              onClick={() => setExpandedAsset(isExpanded ? null : asset.ticker)}
+                              className="p-4 cursor-pointer flex justify-between items-center group"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center font-bold text-xs text-slate-400 group-hover:text-purple-400">
+                                  {asset.ticker.substring(0, 3)}
+                                </div>
+                                <div>
+                                  <p className="font-bold text-white">{asset.ticker}</p>
+                                  <p className="text-[10px] text-slate-500 uppercase">{asset.name}</p>
+                                </div>
                               </div>
-                              <div>
-                                <p className="font-bold text-white">{asset.ticker}</p>
-                                <p className="text-[10px] text-slate-500 uppercase">{asset.name}</p>
+                              <div className="flex items-center gap-4">
+                                <div className="text-right">
+                                  <p className="font-mono font-bold text-white">{(rt?.price || asset.price).toFixed(2)} €</p>
+                                  <p className={`text-[10px] font-bold ${rt?.change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                    {rt?.change >= 0 ? '+' : ''}{rt?.change?.toFixed(2)}%
+                                  </p>
+                                </div>
+                                {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
                               </div>
                             </div>
-                            <div className="text-right">
-                              <p className="font-mono font-bold text-white">{(rt?.price || asset.price).toFixed(2)} €</p>
-                              <p className={`text-[10px] font-bold ${rt?.change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                                {rt?.change >= 0 ? '+' : ''}{rt?.change?.toFixed(2)}%
-                              </p>
-                            </div>
+
+                            <AnimatePresence>
+                              {isExpanded && (
+                                <motion.div 
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: 'auto', opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  className="px-4 pb-4"
+                                >
+                                  <div className="h-48 w-full mb-4 bg-slate-950/50 rounded-xl p-2 relative">
+                                    {isLoadingHistory && (
+                                      <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/20 backdrop-blur-[1px]">
+                                        <RefreshCw className="w-5 h-5 text-purple-500 animate-spin" />
+                                      </div>
+                                    )}
+                                    <ResponsiveContainer width="100%" height="100%">
+                                      <AreaChart data={historicalData.length > 0 ? historicalData : MOCK_CHART_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                        <defs>
+                                          <linearGradient id="colorHistoryMini" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
+                                            <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                                          </linearGradient>
+                                        </defs>
+                                        <XAxis 
+                                          dataKey="date" 
+                                          hide={false}
+                                          axisLine={false}
+                                          tickLine={false}
+                                          tick={{ fill: '#475569', fontSize: 8 }}
+                                          tickFormatter={(tick) => {
+                                            const date = new Date(tick);
+                                            if (isNaN(date.getTime())) return tick;
+                                            return date.toLocaleDateString([], { day: '2-digit', month: '2-digit' });
+                                          }}
+                                          minTickGap={20}
+                                        />
+                                        <YAxis 
+                                          hide={true} 
+                                          domain={['auto', 'auto']}
+                                        />
+                                        <Tooltip 
+                                          formatter={(value: number) => [`${value.toFixed(2)} €`, 'Prix']}
+                                          contentStyle={{ backgroundColor: '#000', borderColor: '#334155', borderRadius: '8px', fontSize: '10px' }}
+                                          itemStyle={{ color: '#fff', padding: 0 }}
+                                          labelFormatter={(label) => {
+                                            const date = new Date(label);
+                                            return isNaN(date.getTime()) ? label : date.toLocaleString();
+                                          }}
+                                        />
+                                        <Area 
+                                          type="monotone" 
+                                          dataKey="value" 
+                                          stroke="#8b5cf6" 
+                                          strokeWidth={2} 
+                                          fillOpacity={1} 
+                                          fill="url(#colorHistoryMini)" 
+                                          connectNulls={true}
+                                        />
+                                      </AreaChart>
+                                    </ResponsiveContainer>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 gap-2 mb-4">
+                                    <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800/50">
+                                      <p className="text-[9px] text-slate-500 uppercase font-bold mb-1">Type</p>
+                                      <p className="text-white text-xs font-bold">{asset.type}</p>
+                                    </div>
+                                    <button 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setShowAboutAsset(asset);
+                                      }}
+                                      className="bg-slate-900/50 p-3 rounded-xl border border-slate-800/50 text-left hover:bg-slate-800 transition-colors group/about"
+                                    >
+                                      <div className="flex justify-between items-center">
+                                        <p className="text-[9px] text-slate-500 uppercase font-bold mb-1">À propos</p>
+                                        <ChevronRight className="w-3 h-3 text-slate-600 group-hover/about:text-purple-400" />
+                                      </div>
+                                      <p className="text-purple-400 text-xs font-bold">Voir les détails</p>
+                                    </button>
+                                  </div>
+
+                                  <button 
+                                    onClick={() => setSelectedAsset(asset)}
+                                    className="w-full py-3 bg-white text-black font-bold rounded-xl hover:bg-slate-200 transition-all transform active:scale-[0.98]"
+                                  >
+                                    Investir maintenant
+                                  </button>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
                           </div>
                         );
                       })}
@@ -2191,6 +2416,7 @@ function MajorInvest({ userState, setUserState }: any) {
                           fillOpacity={1} 
                           fill="url(#colorHistory)" 
                           animationDuration={1000}
+                          connectNulls={true}
                         />
                       </AreaChart>
                     </ResponsiveContainer>
@@ -2339,6 +2565,63 @@ function MajorInvest({ userState, setUserState }: any) {
                       Confirmer la vente
                     </button>
                   </form>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+
+          {/* About Asset Modal */}
+          {showAboutAsset && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/90 backdrop-blur-md"
+            >
+              <motion.div 
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                className="bg-slate-950 border-t sm:border border-slate-800 rounded-t-[2.5rem] sm:rounded-[2.5rem] w-full max-w-md overflow-hidden flex flex-col shadow-2xl"
+              >
+                <div className="p-8">
+                  <div className="flex justify-between items-start mb-6">
+                    <div>
+                      <h3 className="text-3xl font-bold text-white mb-2">À propos</h3>
+                      <p className="text-slate-400 text-sm font-medium leading-relaxed">{showAboutAsset.name}</p>
+                    </div>
+                    <button onClick={() => setShowAboutAsset(null)} className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white">
+                      <X className="w-6 h-6" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-4 mb-8">
+                    {[
+                      { label: 'Indice', value: showAboutAsset.index },
+                      { label: 'ISIN', value: showAboutAsset.isin },
+                      { label: 'WKN', value: showAboutAsset.wkn },
+                      { label: 'Ticker', value: showAboutAsset.ticker },
+                      { label: 'Émetteur', value: showAboutAsset.issuer },
+                      { label: 'Devise', value: showAboutAsset.currency },
+                      { label: 'Réplication', value: showAboutAsset.replication },
+                      { label: 'Classe d\'actif', value: showAboutAsset.type === 'ETF' ? 'Actions' : showAboutAsset.type },
+                    ].map((item, idx) => (
+                      <div key={idx} className="flex justify-between items-center py-2 border-b border-slate-900">
+                        <span className="text-slate-500 text-sm font-bold uppercase tracking-wider">{item.label}</span>
+                        <span className="text-white text-sm font-bold">{item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="space-y-4">
+                    <h4 className="text-white font-bold text-lg">Documents</h4>
+                    <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl flex flex-col items-center justify-center gap-4 w-32 aspect-square group cursor-pointer hover:border-purple-500/50 transition-all">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-purple-400 transition-colors">
+                        <BookOpen className="w-6 h-6" />
+                      </div>
+                      <span className="text-white text-xs font-bold">Info clé</span>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             </motion.div>
