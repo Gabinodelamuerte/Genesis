@@ -22,6 +22,13 @@ export default function App() {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [storedPassword, setStoredPassword] = useState<string>('135790'); // Default for demo
+  const [showCookies, setShowCookies] = useState(true);
+  const [cookieSettings, setCookieSettings] = useState({
+    ia: true,
+    analytics: true,
+    social: false
+  });
+  const [isCustomizingCookies, setIsCustomizingCookies] = useState(false);
 
   const calculateAge = (dateString: string) => {
     if (!dateString) return 0;
@@ -155,6 +162,27 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {showCookies && (
+          <CookieConsent 
+            onAcceptAll={() => {
+              setCookieSettings({ ia: true, analytics: true, social: false });
+              setShowCookies(false);
+            }}
+            onRejectAll={() => {
+              setCookieSettings({ ia: false, analytics: false, social: false });
+              setShowCookies(false);
+            }}
+            onSave={(settings: any) => {
+              setCookieSettings(settings);
+              setShowCookies(false);
+            }}
+            isCustomizing={isCustomizingCookies}
+            setIsCustomizing={setIsCustomizingCookies}
+          />
+        )}
+      </AnimatePresence>
+
       <AnimatePresence mode="wait">
         {view === 'landing' && (
           <LandingView 
@@ -281,6 +309,199 @@ export default function App() {
           </div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+function CookieConsent({ onAcceptAll, onRejectAll, onSave, isCustomizing, setIsCustomizing }: any) {
+  const [settings, setSettings] = useState({
+    ia: true,
+    analytics: true,
+    social: false
+  });
+
+  return (
+    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 md:p-6">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="absolute inset-0 bg-slate-950/95 backdrop-blur-xl"
+      />
+      
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-purple-600/30 blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-600/30 blur-[120px]" />
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 40, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 40, scale: 0.95 }}
+        className="relative w-full max-w-3xl bg-slate-900/40 border border-white/10 rounded-[3rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden max-h-[90vh] flex flex-col backdrop-blur-2xl"
+      >
+        {/* Header Section */}
+        <div className="p-8 md:p-12 pb-6 border-b border-white/5">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-2xl shadow-lg shadow-purple-500/20">
+              🍪
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-purple-400 uppercase tracking-[0.2em] mb-1">Confidentialité</p>
+              <h3 className="text-2xl md:text-3xl font-display font-bold text-white tracking-tight">Gère tes données, contrôle ton aventure !</h3>
+            </div>
+          </div>
+          <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-2xl">
+            Chez Genesis, on pense que la liberté financière commence par le contrôle de ses propres données. Avant d'explorer l'app, choisis ce que tu nous confies.
+          </p>
+        </div>
+
+        {/* Content Section */}
+        <div className="flex-1 overflow-y-auto p-8 md:p-12 pt-6 custom-scrollbar">
+          <AnimatePresence mode="wait">
+            {!isCustomizing ? (
+              <motion.div
+                key="summary"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="space-y-6"
+              >
+                <div className="group bg-white/5 hover:bg-white/10 border border-white/10 rounded-3xl p-6 transition-all duration-300">
+                  <div className="flex items-start gap-5">
+                    <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center shrink-0 border border-white/10 group-hover:border-purple-500/50 transition-colors">
+                      <Shield className="w-6 h-6 text-purple-400" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <h4 className="font-bold text-lg text-white">🔒 Les Indispensables</h4>
+                        <span className="text-[9px] font-bold bg-white/10 px-2 py-0.5 rounded-full text-slate-400 uppercase tracking-widest">Toujours actifs</span>
+                      </div>
+                      <p className="text-sm text-slate-400 leading-relaxed mb-3">
+                        Ceux-là, on ne peut pas s'en passer. Ils servent à te connecter de façon sécurisée et à vérifier que tu es bien un humain.
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Base légale :</span>
+                        <span className="text-[10px] text-slate-400 italic">Intérêt légitime / Sécurité</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    { icon: "🤖", label: "IA Perso", desc: "Défis sur-mesure" },
+                    { icon: "📊", label: "Analyse", desc: "Amélioration app" },
+                    { icon: "📢", label: "Réseaux", desc: "Partage exploits", disabled: true }
+                  ].map((item, i) => (
+                    <div key={i} className={`bg-white/5 border border-white/10 rounded-3xl p-5 flex flex-col items-center text-center ${item.disabled ? 'opacity-40' : 'hover:bg-white/10 transition-colors'}`}>
+                      <span className="text-3xl mb-3">{item.icon}</span>
+                      <p className="text-[11px] font-bold text-white uppercase tracking-widest mb-1">{item.label}</p>
+                      <p className="text-[10px] text-slate-500">{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="customize"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-4"
+              >
+                {[
+                  { 
+                    id: 'ia', 
+                    icon: "🤖", 
+                    title: "L'IA Personnalisée", 
+                    desc: "C'est le cerveau de Genesis. En l'activant, tu permets à l'IA d'analyser tes simulations pour te proposer des défis sur-mesure (ex: économiser pour ton premier appart).",
+                    note: "Tes données de simulation sont pseudonymisées. Base légale : Consentement explicite."
+                  },
+                  { 
+                    id: 'analytics', 
+                    icon: "📊", 
+                    title: "Analyse de l'expérience", 
+                    desc: "Pour savoir si nos jeux et nos cours te plaisent. Cela nous aide à améliorer l'app sans jamais savoir qui tu es personnellement.",
+                    note: "Base légale : Consentement."
+                  },
+                  { 
+                    id: 'social', 
+                    icon: "📢", 
+                    title: "Réseaux & Partenaires", 
+                    desc: "Partager tes exploits sur tes réseaux. Note : Si tu as moins de 15 ans, cette option reste désactivée pour protéger ta vie privée.",
+                    note: "Base légale : Consentement (et autorisation parentale si <15 ans).",
+                    disabled: true
+                  }
+                ].map((item) => (
+                  <div key={item.id} className={`bg-white/5 border border-white/10 rounded-3xl p-6 flex items-center justify-between gap-6 ${item.disabled ? 'opacity-60' : ''}`}>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-2xl">{item.icon}</span>
+                        <h4 className="font-bold text-white">{item.title}</h4>
+                      </div>
+                      <p className="text-xs text-slate-400 leading-relaxed mb-3">{item.desc}</p>
+                      <p className="text-[10px] text-slate-500 italic">{item.note}</p>
+                    </div>
+                    <button 
+                      onClick={() => !item.disabled && setSettings({...settings, [item.id]: !((settings as any)[item.id])})}
+                      disabled={item.disabled}
+                      className={`w-14 h-7 rounded-full transition-all relative shrink-0 ${item.disabled ? 'bg-slate-800' : (settings as any)[item.id] ? 'bg-purple-600 shadow-[0_0_15px_rgba(147,51,234,0.5)]' : 'bg-slate-700'}`}
+                    >
+                      <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-all shadow-sm ${item.disabled ? 'left-1 bg-slate-600' : (settings as any)[item.id] ? 'left-8' : 'left-1'}`} />
+                    </button>
+                  </div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Footer Section */}
+        <div className="p-8 md:p-12 pt-0">
+          {!isCustomizing ? (
+            <div className="flex flex-col gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button
+                  onClick={onAcceptAll}
+                  className="group relative py-5 bg-white text-slate-950 rounded-[2rem] font-bold text-base overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98] shadow-2xl"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-100 to-blue-100 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span className="relative">Tout accepter</span>
+                </button>
+                <button
+                  onClick={onRejectAll}
+                  className="py-5 bg-slate-800 text-white border border-white/10 rounded-[2rem] font-bold text-base hover:bg-slate-700 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Tout refuser
+                </button>
+              </div>
+              <button
+                onClick={() => setIsCustomizing(true)}
+                className="py-2 text-slate-500 hover:text-purple-400 text-xs font-bold uppercase tracking-[0.2em] transition-colors"
+              >
+                Personnaliser mes choix
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              <button
+                onClick={() => onSave(settings)}
+                className="py-5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-[2rem] font-bold text-base hover:scale-[1.02] active:scale-[0.98] shadow-2xl shadow-purple-500/20 transition-all"
+              >
+                Enregistrer mes préférences
+              </button>
+              <button
+                onClick={() => setIsCustomizing(false)}
+                className="py-2 text-slate-500 hover:text-white text-xs font-bold uppercase tracking-[0.2em] transition-colors"
+              >
+                Retour à l'aperçu
+              </button>
+            </div>
+          )}
+        </div>
+      </motion.div>
     </div>
   );
 }
