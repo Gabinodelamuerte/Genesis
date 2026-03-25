@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Home, CreditCard, Shield, TrendingUp, User, Wallet, ChevronRight, ChevronDown, ChevronUp, CheckCircle2, Lock, Sparkles, Building2, Briefcase, Plus, ArrowRight, PieChart as PieChartIcon, Trash2, History, ArrowUpRight, ArrowDownRight, ArrowLeft, Download, Search, Car, HeartPulse, Landmark, Dog, ArrowRightLeft, CheckCircle, Trophy, BookOpen, X, XCircle, Pencil, Users, Coins, RefreshCw, Globe, AlertCircle, Sun, Moon, Info } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis, CartesianGrid, LineChart, Line } from 'recharts';
 import { GenesisLogo } from './components/GenesisLogo';
+import { Footer } from './App';
 import { GenesisAI } from './components/GenesisAI';
 import { MAJOR_REWARDS, MAJOR_CHALLENGES } from './data/majorData';
 
@@ -310,6 +311,7 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
             onGoToGamification={() => setActiveTab('gamification')}
           />
         )}
+        <Footer />
       </div>
 
       <nav className="fixed bottom-0 left-0 right-0 bg-slate-900/80 backdrop-blur-md border-t border-slate-800 px-2 py-4 flex justify-between items-center z-50 max-w-3xl mx-auto">

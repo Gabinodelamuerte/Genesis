@@ -231,6 +231,13 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      {/* Global Footer for non-dashboard views */}
+      {(view === 'landing' || view === 'register' || view === 'login' || view === 'create-password') && (
+        <div className="relative z-10 pb-8">
+          <Footer />
+        </div>
+      )}
+
       {/* 2FA Modal */}
       <AnimatePresence>
         {isTwoFactorOpen && (
@@ -503,6 +510,16 @@ function CookieConsent({ onAcceptAll, onRejectAll, onSave, isCustomizing, setIsC
         </div>
       </motion.div>
     </div>
+  );
+}
+
+export function Footer() {
+  return (
+    <footer className="py-8 text-center border-t border-white/5 mt-auto">
+      <p className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.2em]">
+        © COPYRIGHT - TOUS DROITS RÉSERVÉS - GROUPE BPCE
+      </p>
+    </footer>
   );
 }
 

@@ -4,6 +4,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { BookOpen, LineChart as ChartIcon, User, Home, Gift, Users, Link as LinkIcon, Lock, Sparkles, ChevronRight, Wallet, TrendingUp, Shield, Rocket, Target, CheckCircle2, XCircle, ArrowLeft, Share2, CreditCard, Sun, Moon } from 'lucide-react';
 import { MODULES, ASSETS_CATALOG, REWARDS, THEMES } from './data/minorData';
 import { GenesisLogo } from './components/GenesisLogo';
+import { Footer } from './App';
 import { GenesisAI } from './components/GenesisAI';
 
 interface Transaction {
@@ -229,6 +230,7 @@ export default function MinorDashboard({ name, age, onLogout }: { name: string, 
             onLinkAccount={() => setUserState(prev => ({ ...prev, isLinked: true }))}
           />
         )}
+        <Footer />
       </div>
 
       <nav className="fixed bottom-0 left-0 right-0 bg-slate-900/80 backdrop-blur-md border-t border-slate-800 px-6 py-4 flex justify-between items-center z-50 max-w-3xl mx-auto">
