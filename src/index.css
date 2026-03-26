@@ -147,10 +147,13 @@ html.light-mode .text-white-light {
 /* FORCE BLACK BG AND WHITE TEXT FOR ICONS IN LIGHT MODE */
 html.light-mode .force-black-bg {
   background-color: #000000 !important;
+  border-color: #000000 !important;
 }
 
-html.light-mode .force-white-text {
+html.light-mode .force-white-text,
+html.light-mode .force-white-text * {
   color: #ffffff !important;
+  stroke: #ffffff !important;
 }
 
 /* Hover Inversion Utility */

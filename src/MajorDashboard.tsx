@@ -382,7 +382,7 @@ function MajorHome({ name, userState, level, progressPercent, nextLevelXp, onGoT
       <div className="bg-gradient-to-br from-blue-900/40 to-slate-900/40 border border-blue-500/20 rounded-3xl p-6 relative overflow-hidden shadow-lg">
         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl"></div>
         <div className="relative z-10">
-          <p className="text-sm text-slate-400 mb-1">Patrimoine Global</p>
+          <p className="text-[17px] leading-[21px] font-bold text-black dark:text-slate-400 mb-[9px]">Patrimoine Global</p>
           <h2 className="text-4xl font-mono font-bold text-white mb-6">{(totalAssets || 0).toFixed(2)} €</h2>
           
           <div className="grid grid-cols-3 gap-2">
@@ -422,8 +422,8 @@ function MajorHome({ name, userState, level, progressPercent, nextLevelXp, onGoT
               Rattachez vos banques, assurances et investissements pour une vue 360°.
             </p>
           </div>
-          <div className="w-10 h-10 rounded-full bg-slate-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors">
-            <ArrowRight className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 rounded-full bg-blue-200 dark:bg-slate-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors">
+            <ArrowRight className="w-5 h-5 text-blue-700 dark:text-slate-400 group-hover:text-white" />
           </div>
         </div>
       </div>
@@ -880,8 +880,8 @@ function MajorAccount({ name, userState, setUserState }: any) {
           {userState.transactions.map((tx: any, idx: number) => (
             <div key={tx.id} className={`flex items-center justify-between p-4 ${idx !== userState.transactions.length - 1 ? 'border-b border-slate-800/50' : ''}`}>
               <div className="flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center icon-container-small ${tx.type === 'income' ? 'bg-emerald-500/10' : tx.type === 'transfer' ? 'bg-blue-500/10' : 'bg-slate-800'}`}>
-                  {tx.type === 'income' ? <ArrowDownRight className="w-5 h-5 text-emerald-400" /> : tx.type === 'transfer' ? <ArrowRightLeft className="w-5 h-5 text-blue-400" /> : <ArrowUpRight className="w-5 h-5 text-slate-400" />}
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center icon-container-small ${tx.type === 'income' ? 'bg-emerald-500/10' : tx.type === 'transfer' ? 'bg-blue-500/10 force-black-bg' : 'force-black-bg'}`}>
+                  {tx.type === 'income' ? <ArrowUpRight className="w-5 h-5 text-emerald-400" /> : tx.type === 'transfer' ? <ArrowRightLeft className="w-5 h-5 text-blue-400 force-white-text" /> : <ArrowDownRight className="w-5 h-5 force-white-text" />}
                 </div>
                 <div>
                   <p className="font-medium text-sm text-slate-200">{tx.label}</p>
@@ -943,8 +943,8 @@ function MajorAccount({ name, userState, setUserState }: any) {
               {selectedSavingsAccount.transactions.map((tx: any, idx: number) => (
                 <div key={tx.id} className={`flex items-center justify-between p-4 ${idx !== selectedSavingsAccount.transactions!.length - 1 ? 'border-b border-slate-800/50' : ''}`}>
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center icon-container-small">
-                      <ArrowRightLeft className="w-5 h-5 text-blue-400" />
+                    <div className="w-10 h-10 rounded-full force-black-bg flex items-center justify-center icon-container-small">
+                      <ArrowRightLeft className="w-5 h-5 text-blue-400 force-white-text" />
                     </div>
                     <div>
                       <p className="font-medium text-sm text-slate-200">{tx.label}</p>
@@ -1168,8 +1168,8 @@ function MajorAccount({ name, userState, setUserState }: any) {
                   <h4 className="font-bold text-white">{account.name}</h4>
                   <p className="text-xs text-emerald-400 font-medium">Taux: {account.rate}%</p>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center transition-all border border-transparent savings-arrow-container">
-                  <ChevronRight className="w-4 h-4" />
+                <div className="w-8 h-8 rounded-full bg-blue-200 dark:bg-slate-800 group-hover:bg-blue-600 flex items-center justify-center transition-all">
+                  <ChevronRight className="w-4 h-4 text-blue-700 dark:text-slate-400 group-hover:text-white" />
                 </div>
               </div>
               
@@ -1203,7 +1203,7 @@ function MajorAccount({ name, userState, setUserState }: any) {
             <div key={tx.id} className={`flex items-center justify-between p-4 ${idx !== Math.min(userState.transactions.length, 5) - 1 ? 'border-b border-slate-800/50' : ''}`}>
               <div className="flex items-center gap-4">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'income' ? 'bg-emerald-500/10' : tx.type === 'transfer' ? 'bg-blue-500/10 force-black-bg' : 'force-black-bg'}`}>
-                  {tx.type === 'income' ? <ArrowUpRight className="w-5 h-5 text-emerald-400" /> : tx.type === 'transfer' ? <ArrowRightLeft className="w-5 h-5 text-blue-400 force-white-text" /> : <ArrowDownRight className="w-5 h-5 text-slate-400 force-white-text" />}
+                  {tx.type === 'income' ? <ArrowUpRight className="w-5 h-5 text-emerald-400" /> : tx.type === 'transfer' ? <ArrowRightLeft className="w-5 h-5 text-blue-400 force-white-text" /> : <ArrowDownRight className="w-5 h-5 force-white-text" />}
                 </div>
                 <div>
                   <p className="font-medium text-sm text-slate-200">{tx.label}</p>
@@ -2053,8 +2053,8 @@ function MajorInvest({ userState, setUserState }: any) {
               {transactions.map((tx: any, idx: number) => (
                 <div key={tx.id} className={`flex items-center justify-between p-4 ${idx !== transactions.length - 1 ? 'border-b border-slate-800/50' : ''}`}>
                   <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'buy' ? 'bg-purple-500/10 text-purple-400' : 'bg-slate-800 text-slate-400'}`}>
-                      {tx.type === 'buy' ? <ArrowDownRight className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'buy' ? 'bg-purple-500/10 text-purple-400' : 'force-black-bg'}`}>
+                      {tx.type === 'buy' ? <ArrowDownRight className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5 force-white-text" />}
                     </div>
                     <div>
                       <p className="font-medium text-sm text-slate-200">{tx.label}</p>
@@ -2822,7 +2822,9 @@ function MajorInvest({ userState, setUserState }: any) {
                 </div>
               </div>
               {inv.active ? (
-                <ChevronRight className="w-5 h-5 text-slate-500" />
+                <div className="w-8 h-8 rounded-full bg-blue-200 dark:bg-slate-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors">
+                  <ChevronRight className="w-4 h-4 text-blue-700 dark:text-slate-400 group-hover:text-white" />
+                </div>
               ) : (
                 <button onClick={(e) => { e.stopPropagation(); activateAccount(inv.id); }} className="text-xs font-medium force-black-bg hover:opacity-80 force-white-text px-3 py-1.5 rounded-lg transition-colors">
                   Ouvrir
@@ -2940,8 +2942,8 @@ function MajorInsurance({ userState, setUserState }: any) {
               <Sparkles className="w-6 h-6 text-emerald-400" />
             </div>
             <div>
-              <p className="text-sm text-emerald-100/70 mb-1">Économies potentielles avec BPCE</p>
-              <h2 className="text-3xl font-mono font-bold text-emerald-400">+{totalSavings.toFixed(0)} € <span className="text-lg text-emerald-400/70">/ an</span></h2>
+              <p className="text-sm text-black dark:text-emerald-100/70 mb-1">Économies potentielles avec BPCE</p>
+              <h2 className="text-3xl font-mono font-bold text-black dark:text-emerald-400">+{totalSavings.toFixed(0)} € <span className="text-lg text-black dark:text-emerald-400/70">/ an</span></h2>
             </div>
           </div>
         </div>
@@ -3030,8 +3032,8 @@ function MajorInsurance({ userState, setUserState }: any) {
                         {userIns.provider !== 'Genesis Assurances' && (
                           <>
                             <div className="flex justify-center -my-2 relative z-10">
-                              <div className="w-8 h-8 rounded-full bg-slate-800 border-4 border-slate-900 flex items-center justify-center icon-container-small">
-                                <ArrowRightLeft className="w-4 h-4 text-slate-400 rotate-90" />
+                              <div className="w-8 h-8 rounded-full bg-blue-200 dark:bg-slate-800 border-4 border-slate-900 dark:border-slate-900 flex items-center justify-center icon-container-small transition-colors">
+                                <ArrowRightLeft className="w-4 h-4 text-blue-700 dark:text-slate-400 rotate-90" />
                               </div>
                             </div>
 
@@ -3040,7 +3042,7 @@ function MajorInsurance({ userState, setUserState }: any) {
                               <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl"></div>
                               <div className="relative z-10">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <p className="text-xs text-emerald-400/70 uppercase tracking-wider font-bold">Proposition BPCE</p>
+                                  <p className="text-xs text-black dark:text-emerald-400/70 uppercase tracking-wider font-bold">Proposition BPCE</p>
                                   <span className="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full font-bold">Mêmes garanties</span>
                                 </div>
                                 <p className="font-bold text-white flex items-center gap-2">
@@ -3048,7 +3050,7 @@ function MajorInsurance({ userState, setUserState }: any) {
                                 </p>
                               </div>
                               <div className="text-right relative z-10">
-                                <p className="font-mono text-xl font-bold text-emerald-400">{bpcePrice.toFixed(2)} €<span className="text-xs text-emerald-400/70 font-sans">/mois</span></p>
+                                <p className="font-mono text-xl font-bold text-emerald-400">{bpcePrice.toFixed(2)} €<span className="text-xs text-[#0A976A] font-sans">/mois</span></p>
                                 <p className="text-xs font-bold text-emerald-400 mt-1 bg-emerald-500/20 inline-block px-2 py-0.5 rounded">-{yearlySavings.toFixed(0)}€ / an</p>
                               </div>
                             </div>
@@ -3175,8 +3177,8 @@ function MajorGamification({ userState, setUserState, onBack }: any) {
                     </div>
                     <span className="text-xs text-slate-600 font-medium">Quiz avancé</span>
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-slate-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors">
-                    <ArrowRight className="w-4 h-4 force-white" />
+                  <div className="w-8 h-8 rounded-full bg-blue-200 dark:bg-slate-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors">
+                    <ArrowRight className="w-4 h-4 text-blue-700 dark:text-slate-400 group-hover:text-white" />
                   </div>
                 </div>
               </div>
@@ -3422,7 +3424,9 @@ function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamificat
               <p className="text-xs text-slate-400">Consultez vos privilèges et relevez des défis.</p>
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-white transition-colors" />
+          <div className="w-10 h-10 rounded-full bg-blue-200 dark:bg-slate-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors">
+            <ChevronRight className="w-5 h-5 text-blue-700 dark:text-slate-400 group-hover:text-white transition-colors" />
+          </div>
         </div>
       </section>
 
