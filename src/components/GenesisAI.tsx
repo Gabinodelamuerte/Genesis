@@ -167,10 +167,10 @@ export function GenesisAI({ userContext }: { userContext: any }) {
                       <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ${msg.role === 'user' ? 'bg-slate-800 border border-slate-700' : 'bg-purple-600/20 border border-purple-500/30'}`}>
                         {msg.role === 'user' ? <User className="w-5 h-5 text-slate-400" /> : <GenesisLogo className="w-6 h-6" />}
                       </div>
-                      <div className={`p-5 rounded-[2rem] text-sm leading-relaxed shadow-sm ${
+                      <div className={`p-5 rounded-[2rem] text-sm leading-relaxed shadow-sm force-white chatbot-message ${
                         msg.role === 'user' 
                           ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-tr-none' 
-                          : 'bg-slate-800/50 text-slate-200 rounded-tl-none border border-slate-700/50 backdrop-blur-sm'
+                          : 'bg-slate-800/50 text-white rounded-tl-none border border-slate-700/50 backdrop-blur-sm'
                       }`}>
                         <div className="prose prose-invert prose-sm max-w-none prose-p:leading-[1.8] prose-p:mb-5 last:prose-p:mb-0 prose-li:mb-2 prose-headings:mb-4 prose-pre:bg-slate-950 prose-pre:border prose-pre:border-slate-800">
                           <Markdown>{msg.text}</Markdown>
@@ -216,7 +216,7 @@ export function GenesisAI({ userContext }: { userContext: any }) {
                   whileTap={{ scale: 0.95 }}
                   type="submit"
                   disabled={!input.trim() || isLoading}
-                  className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 flex items-center justify-center text-white transition-all shadow-xl shadow-purple-500/20 shrink-0"
+                  className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 flex items-center justify-center force-white transition-all shadow-xl shadow-purple-500/20 shrink-0"
                 >
                   {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                 </motion.button>

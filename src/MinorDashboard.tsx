@@ -233,7 +233,7 @@ export default function MinorDashboard({ name, age, onLogout }: { name: string, 
         <Footer />
       </div>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-slate-900/80 backdrop-blur-md border-t border-slate-800 px-6 py-4 flex justify-between items-center z-50 max-w-3xl mx-auto">
+      <nav className="fixed bottom-0 left-0 right-0 bg-slate-900/80 backdrop-blur-md border-t border-slate-800 px-6 py-4 flex justify-between items-center z-50 max-w-3xl mx-auto nav-glass">
         <NavItem icon={<Home />} label="Accueil" active={activeTab === 'home'} onClick={() => setActiveTab('home')} />
         <NavItem icon={<CreditCard />} label="Compte" active={activeTab === 'account'} onClick={() => setActiveTab('account')} />
         <NavItem icon={<BookOpen />} label="Apprendre" active={activeTab === 'learn'} onClick={() => setActiveTab('learn')} />
@@ -248,7 +248,7 @@ export default function MinorDashboard({ name, age, onLogout }: { name: string, 
 
 function NavItem({ icon, label, active, onClick }: any) {
   return (
-    <button onClick={onClick} className={`flex flex-col items-center gap-1 transition-colors ${active ? 'text-purple-400' : 'text-slate-500 hover:text-slate-300'}`}>
+    <button onClick={onClick} className={`flex flex-col items-center gap-1 transition-colors ${active ? 'text-purple-400 nav-active-underline' : 'text-slate-500 hover:text-slate-300 nav-item-inactive'}`}>
       {React.cloneElement(icon, { className: 'w-6 h-6' })}
       <span className="text-[10px] font-medium">{label}</span>
     </button>
@@ -330,7 +330,7 @@ function MinorHome({ name, userState, level, progressPercent, nextLevelXp, onOpe
                 <span className="flex items-center gap-1"><Rocket className="w-3 h-3 text-emerald-400"/> +{nextModule.moneyReward} ¤</span>
               </p>
             </div>
-            <div className="w-10 h-10 rounded-full bg-slate-800 group-hover:bg-purple-600 flex items-center justify-center transition-colors">
+            <div className="w-10 h-10 rounded-full bg-slate-800 group-hover:bg-purple-600 flex items-center justify-center transition-colors icon-container-small">
               <ChevronRight className="w-5 h-5 text-white" />
             </div>
           </div>
@@ -437,7 +437,7 @@ function MinorLearn({ userState, onOpenModule }: any) {
               <div 
                 key={mod.id} 
                 onClick={() => !isDone && onOpenModule(mod.id)}
-                className={`border rounded-2xl p-4 flex items-center gap-4 transition-colors ${isDone ? 'bg-slate-900/30 border-slate-800 opacity-60 cursor-default' : 'bg-slate-900/80 border-slate-700 hover:bg-slate-800 cursor-pointer'}`}
+                className={`border rounded-2xl p-4 flex items-center gap-4 transition-all group ${isDone ? 'bg-slate-900/30 border-slate-800 opacity-60 cursor-default' : 'bg-slate-900/80 border-slate-700 hover:bg-slate-800 hover:border-black dark:hover:border-white cursor-pointer'}`}
               >
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${isDone ? 'bg-slate-800' : theme?.bg}`}>
                   <BookOpen className={`w-6 h-6 ${isDone ? 'text-slate-500' : theme?.color}`} />
@@ -452,8 +452,8 @@ function MinorLearn({ userState, onOpenModule }: any) {
                     <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
                   </div>
                 ) : (
-                  <button className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-slate-700 transition-colors">
-                    <ChevronRight className="w-5 h-5 text-slate-300" />
+                  <button className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center group-hover:bg-white group-hover:text-black group-hover:border group-hover:border-black transition-all">
+                    <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-black" />
                   </button>
                 )}
               </div>
@@ -481,15 +481,15 @@ function MinorLearn({ userState, onOpenModule }: any) {
             <div 
               key={theme.id} 
               onClick={() => setActiveTheme(theme.id)}
-              className="bg-slate-900/50 border border-slate-800 rounded-3xl p-5 hover:bg-slate-800/50 transition-colors cursor-pointer relative overflow-hidden group"
+              className="bg-slate-900/50 border border-slate-800 rounded-3xl p-5 hover:bg-slate-800/50 hover:border-black dark:hover:border-white transition-all cursor-pointer relative overflow-hidden group"
             >
               <div className={`absolute -right-6 -top-6 w-24 h-24 ${theme.bg} rounded-full blur-2xl group-hover:blur-3xl transition-all`}></div>
               
               <div className="flex items-start justify-between mb-4 relative z-10">
-                <div className={`w-12 h-12 rounded-2xl ${theme.bg} flex items-center justify-center text-2xl shadow-inner`}>
+                <div className={`w-12 h-12 rounded-2xl ${theme.bg} flex items-center justify-center text-2xl shadow-inner group-hover:bg-white group-hover:text-black transition-all`}>
                   {theme.icon}
                 </div>
-                <div className="bg-slate-950/50 px-2 py-1 rounded-lg border border-slate-800 text-xs font-medium text-slate-300">
+                <div className="bg-slate-950/50 px-2 py-1 rounded-lg border border-slate-800 text-xs font-medium text-slate-300 group-hover:bg-white group-hover:text-black group-hover:border-black transition-all">
                   {completedInTheme}/{themeModules.length}
                 </div>
               </div>
@@ -625,16 +625,16 @@ function MinorInvest({ userState, totalPortfolioValue, onInvest }: any) {
           const currentTrend = rtData?.trend || asset.trend;
 
           return (
-            <div key={asset.id} onClick={() => setSelectedAsset({ ...asset, price: currentPrice, trend: currentTrend })} className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 flex justify-between items-center hover:bg-slate-800/50 transition-colors cursor-pointer">
+            <div key={asset.id} onClick={() => setSelectedAsset({ ...asset, price: currentPrice, trend: currentTrend })} className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 flex justify-between items-center hover:bg-slate-800/50 hover:border-black dark:hover:border-white transition-all cursor-pointer group">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xs border border-slate-700">
+                <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xs border border-slate-700 group-hover:bg-white group-hover:text-black group-hover:border-black transition-all icon-container-small">
                   {asset.symbol.substring(0, 3)}
                 </div>
                 <div>
                   <h4 className="font-bold text-sm">{asset.name}</h4>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] px-2 py-0.5 bg-slate-800 rounded text-slate-300">{asset.type}</span>
-                    <span className="text-[10px] px-2 py-0.5 bg-slate-800 rounded text-slate-300">Risque: {asset.risk}</span>
+                    <span className="text-[10px] px-2 py-0.5 bg-slate-800 rounded text-slate-300 group-hover:bg-white group-hover:text-black group-hover:border-black transition-all">{asset.type}</span>
+                    <span className="text-[10px] px-2 py-0.5 bg-slate-800 rounded text-slate-300 group-hover:bg-white group-hover:text-black group-hover:border-black transition-all">Risque: {asset.risk}</span>
                   </div>
                 </div>
               </div>
@@ -689,7 +689,7 @@ function MinorInvest({ userState, totalPortfolioValue, onInvest }: any) {
             <button 
               onClick={handleBuy}
               disabled={!investAmount || parseFloat(investAmount) <= 0 || parseFloat(investAmount) > userState.virtualBalance}
-              className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-500 text-white rounded-xl font-bold transition-colors"
+              className="w-full py-4 bg-emerald-600 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black disabled:bg-slate-800 disabled:text-slate-500 text-white rounded-xl font-bold transition-all border border-transparent hover:border-black dark:hover:border-white"
             >
               Acheter {selectedAsset.symbol}
             </button>
@@ -707,7 +707,7 @@ function MinorInvest({ userState, totalPortfolioValue, onInvest }: any) {
           {virtualTransactions.slice().reverse().map((tx: any) => (
             <div key={tx.id} className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'earn' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-purple-500/20 text-purple-400'}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center icon-container-small ${tx.type === 'earn' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-purple-500/20 text-purple-400'}`}>
                   {tx.type === 'earn' ? <Gift className="w-5 h-5" /> : <ChartIcon className="w-5 h-5" />}
                 </div>
                 <div>
@@ -774,7 +774,7 @@ function MinorProfile({ name, userState, level, onLogout, onLinkAccount }: any) 
             {isLightMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </div>
           <div>
-            <h3 className="font-bold">Apparence</h3>
+            <h3 className="font-bold text-slate-50">Apparence</h3>
             <p className="text-sm text-slate-400">{isLightMode ? 'Mode Clair' : 'Mode Sombre'}</p>
           </div>
         </div>
@@ -793,7 +793,7 @@ function MinorProfile({ name, userState, level, onLogout, onLinkAccount }: any) 
           <>
             <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center icon-container-small">
                   <LinkIcon className="w-5 h-5 text-blue-400" />
                 </div>
                 <div>
@@ -806,7 +806,7 @@ function MinorProfile({ name, userState, level, onLogout, onLinkAccount }: any) 
 
             <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center icon-container-small">
                   <Lock className="w-5 h-5 text-purple-400" />
                 </div>
                 <div>
@@ -845,7 +845,7 @@ function MinorProfile({ name, userState, level, onLogout, onLinkAccount }: any) 
             </div>
             <h4 className="font-bold text-sm mb-2">Aucun compte parent lié</h4>
             <p className="text-xs text-slate-400 mb-4">Lier un compte permet de débloquer des défis familiaux et de gérer tes plafonds.</p>
-            <button onClick={onLinkAccount} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-colors">
+            <button onClick={onLinkAccount} className="px-4 py-2 cta-inverted text-sm font-medium rounded-xl transition-all">
               Lier un compte parent
             </button>
           </div>
@@ -857,7 +857,7 @@ function MinorProfile({ name, userState, level, onLogout, onLinkAccount }: any) 
         <div className="bg-gradient-to-r from-blue-900/40 to-purple-900/40 border border-blue-500/20 rounded-2xl p-5 relative overflow-hidden">
           <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl"></div>
           <div className="flex items-start gap-4 relative z-10">
-            <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0 icon-container-small">
               <Users className="w-5 h-5 text-blue-400" />
             </div>
             <div>
@@ -867,7 +867,7 @@ function MinorProfile({ name, userState, level, onLogout, onLinkAccount }: any) 
                 <code className="bg-slate-950 px-3 py-1.5 rounded-lg text-sm font-mono text-purple-300 border border-slate-800">GENESIS-{name.toUpperCase()}</code>
               </div>
               <div className="flex gap-2">
-                <button className="flex-1 flex items-center justify-center gap-2 text-xs font-medium bg-white text-slate-900 px-3 py-2 rounded-lg hover:bg-slate-200 transition-colors">
+                <button className="flex-1 flex items-center justify-center gap-2 text-xs font-medium cta-inverted px-3 py-2 rounded-lg transition-all">
                   <Share2 className="w-4 h-4" /> Partager
                 </button>
               </div>
@@ -917,7 +917,7 @@ function ModuleView({ module, onBack, onComplete }: any) {
               {module.content}
             </div>
           </div>
-          <button onClick={() => setStep('quiz')} className="w-full py-4 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold transition-colors">
+          <button onClick={() => setStep('quiz')} className="w-full py-4 cta-inverted rounded-xl font-bold transition-all">
             Passer au Quiz
           </button>
         </div>
@@ -943,7 +943,7 @@ function ModuleView({ module, onBack, onComplete }: any) {
           <button 
             onClick={checkAnswer}
             disabled={selectedAnswer === null}
-            className="w-full py-4 bg-purple-600 hover:bg-purple-500 disabled:bg-slate-800 disabled:text-slate-500 text-white rounded-xl font-bold transition-colors"
+            className="w-full py-4 cta-inverted disabled:opacity-50 text-white rounded-xl font-bold transition-all"
           >
             Valider la réponse
           </button>
@@ -969,7 +969,7 @@ function ModuleView({ module, onBack, onComplete }: any) {
             </div>
           </div>
 
-          <button onClick={onComplete} className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold transition-colors">
+          <button onClick={onComplete} className="w-full py-4 cta-inverted rounded-xl font-bold transition-all">
             Retour à l'accueil
           </button>
         </div>
@@ -993,7 +993,8 @@ function MinorAccount({ userState, age, onLinkAccount, onTransfer }: any) {
     const amount = parseFloat(requestAmount);
     if (!isNaN(amount) && amount > 0) {
       // In a real app, this would send a notification to the parent
-      alert(`Demande de ${amount}€ envoyée à ton parent !\nMotif : ${requestLabel}\nMessage : ${requestMessage}`);
+      const labelText = requestLabel || "Non spécifié";
+      alert(`Demande de ${amount}€ envoyée à ton parent !\nMotif : ${labelText}\nMessage : ${requestMessage}`);
       setShowRequestModal(false);
       setRequestAmount('');
       setRequestLabel('');
@@ -1046,7 +1047,7 @@ function MinorAccount({ userState, age, onLinkAccount, onTransfer }: any) {
         </p>
         <button 
           onClick={onLinkAccount}
-          className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-colors shadow-lg shadow-blue-500/25"
+          className="px-8 py-4 cta-inverted font-bold rounded-xl transition-all shadow-lg shadow-blue-500/25"
         >
           Lier un compte parent
         </button>
@@ -1075,12 +1076,15 @@ function MinorAccount({ userState, age, onLinkAccount, onTransfer }: any) {
           <p className="text-4xl font-mono font-bold text-white mb-6">{(userState.realBalance || 0).toFixed(2)} €</p>
           
           <div className="flex gap-3">
-            <button onClick={() => setShowTransferModal(true)} className="flex-1 bg-white/10 hover:bg-white/20 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">
+            <button 
+              onClick={() => setShowTransferModal(true)} 
+              className="flex-1 cta-inverted text-sm font-medium py-2.5 rounded-xl transition-all"
+            >
               Verser sur livret
             </button>
             <button 
               onClick={() => setShowRequestModal(true)}
-              className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium py-2.5 rounded-xl transition-colors"
+              className="flex-1 cta-inverted text-sm font-medium py-2.5 rounded-xl transition-all"
             >
               Demander de l'argent
             </button>
@@ -1107,14 +1111,14 @@ function MinorAccount({ userState, age, onLinkAccount, onTransfer }: any) {
             </div>
           </div>
         ) : (
-          <div className="relative w-full max-w-sm mx-auto aspect-[1.586] rounded-2xl bg-gradient-to-br from-slate-800 to-slate-950 border border-slate-700 p-6 flex flex-col justify-between overflow-hidden shadow-2xl">
+          <div className="relative w-full max-w-sm mx-auto aspect-[1.586] rounded-2xl bg-gradient-to-br from-slate-800 to-slate-950 border border-slate-700 p-6 flex flex-col justify-between overflow-hidden shadow-2xl force-white">
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay"></div>
             <div className="absolute -right-10 -top-10 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl"></div>
             
             <div className="flex justify-between items-start relative z-10">
               <div className="flex items-center gap-2">
                 <GenesisLogo className="w-6 h-6" />
-                <span className="font-display font-bold text-lg tracking-widest text-slate-300">GENESIS</span>
+                <span className="font-display font-bold text-lg tracking-widest text-slate-300 force-white">GENESIS</span>
               </div>
               <div className="flex gap-1">
                 <div className="w-8 h-5 bg-slate-300/20 rounded-sm"></div>
@@ -1122,17 +1126,17 @@ function MinorAccount({ userState, age, onLinkAccount, onTransfer }: any) {
             </div>
             
             <div className="relative z-10">
-              <div className="font-mono text-lg tracking-widest text-slate-300 mb-2">
+              <div className="font-mono text-lg tracking-widest text-slate-300 mb-2 force-white">
                 **** **** **** 1234
               </div>
               <div className="flex justify-between items-end">
                 <div>
-                  <div className="text-[8px] text-slate-500 uppercase tracking-wider mb-0.5">Titulaire</div>
-                  <div className="text-sm font-medium text-slate-300 uppercase">Utilisateur</div>
+                  <div className="text-[8px] text-slate-500 uppercase tracking-wider mb-0.5 force-white opacity-60">Titulaire</div>
+                  <div className="text-sm font-medium text-slate-300 uppercase force-white">Utilisateur</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-[8px] text-slate-500 uppercase tracking-wider mb-0.5">Type</div>
-                  <div className="text-xs font-medium text-purple-400">{cardType === 'virtuelle' ? 'Virtuelle' : 'Physique'}</div>
+                  <div className="text-[8px] text-slate-500 uppercase tracking-wider mb-0.5 force-white opacity-60">Type</div>
+                  <div className="text-xs font-medium text-purple-400 force-white">Virtuelle</div>
                 </div>
               </div>
             </div>
@@ -1146,7 +1150,7 @@ function MinorAccount({ userState, age, onLinkAccount, onTransfer }: any) {
         <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl"></div>
         <div className="flex justify-between items-start mb-4 relative z-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center icon-container-small">
               <Shield className="w-5 h-5 text-emerald-400" />
             </div>
             <div>
@@ -1195,7 +1199,7 @@ function MinorAccount({ userState, age, onLinkAccount, onTransfer }: any) {
           {realTransactions.slice().reverse().map((tx: any) => (
             <div key={tx.id} className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-500/20 text-blue-400">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-500/20 text-blue-400 icon-container-small">
                   <Wallet className="w-5 h-5" />
                 </div>
                 <div>
@@ -1243,7 +1247,7 @@ function MinorAccount({ userState, age, onLinkAccount, onTransfer }: any) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Motif / Libellé</label>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Motif / Libellé (Optionnel)</label>
                 <select 
                   value={requestLabel}
                   onChange={(e) => setRequestLabel(e.target.value)}
@@ -1271,7 +1275,7 @@ function MinorAccount({ userState, age, onLinkAccount, onTransfer }: any) {
 
             <button 
               onClick={handleRequestSubmit}
-              disabled={!requestAmount || parseFloat(requestAmount) <= 0 || !requestLabel}
+              disabled={!requestAmount || parseFloat(requestAmount) <= 0}
               className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-500 text-white rounded-xl font-bold transition-colors"
             >
               Envoyer la demande

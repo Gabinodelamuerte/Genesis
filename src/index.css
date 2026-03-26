@@ -6,46 +6,276 @@
   --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
 }
 
-body {
-  @apply bg-slate-950 text-slate-50 antialiased selection:bg-purple-500/30;
+:root {
+  --bg-primary: #020617;
+  --bg-secondary: #0f172a;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border-primary: #1e293b;
+  --accent-primary: #3b82f6;
+  --accent-secondary: #a855f7;
 }
 
-/* Light Mode Filter Hack */
 html.light-mode {
-  filter: invert(1) hue-rotate(180deg);
-  background-color: #020617; /* Inverted background color to ensure it flips to white/light */
+  --bg-primary: #f1f5f9; /* Slightly gray background for contrast as requested */
+  --bg-secondary: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --border-primary: #e2e8f0;
+  --accent-primary: #2563eb;
+  --accent-secondary: #7c3aed;
 }
 
-/* Re-invert elements that shouldn't be inverted (images, charts, specific icons) */
-html.light-mode img,
-html.light-mode video,
-html.light-mode canvas,
-html.light-mode .recharts-wrapper,
-html.light-mode .keep-colors {
-  filter: invert(1) hue-rotate(180deg);
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  @apply antialiased selection:bg-purple-500/30;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Make blue elements black in light mode */
-/* Since we use invert(1), setting them to white in CSS makes them black in the browser */
-html.light-mode .text-blue-400,
-html.light-mode .text-blue-500,
-html.light-mode .text-blue-600 {
+/* Global color overrides for light mode */
+html.light-mode .bg-slate-950:not(.force-white):not(.fixed) {
+  background-color: #f8fafc !important; /* Very light gray for main background */
+}
+
+html.light-mode .bg-slate-900:not(.force-white):not(.fixed),
+html.light-mode .bg-slate-900\/80:not(.force-white):not(.fixed),
+html.light-mode .bg-slate-900\/50:not(.force-white):not(.fixed),
+html.light-mode .bg-white\/5:not(.force-white):not(.fixed),
+html.light-mode .bg-white\/10:not(.force-white):not(.fixed) { 
+  background-color: #ffffff !important; /* Pure white for cards */
+  border-color: #e2e8f0 !important; /* Soft slate border */
+}
+
+/* Inner boxes for contrast (like the one in the Approval Modal) */
+html.light-mode .bg-slate-950\/50:not(.force-white):not(.fixed),
+html.light-mode .bg-slate-950\/40:not(.force-white):not(.fixed),
+html.light-mode .bg-slate-950\/60:not(.force-white):not(.fixed) {
+  background-color: #f1f5f9 !important; /* Light gray for inner boxes to create contrast on white */
+  border-color: #cbd5e1 !important;
+}
+
+/* Fix for overlays that shouldn't be solid white */
+html.light-mode .fixed.bg-slate-950\/80,
+html.light-mode .fixed.bg-black\/80,
+html.light-mode .fixed.bg-black\/90 {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: none !important;
+}
+
+html.light-mode .bg-gradient-to-br:not(.force-white),
+html.light-mode .bg-gradient-to-r:not(.force-white) {
+  background-image: none !important;
+  background-color: #ffffff !important;
+  border-color: #000000 !important;
+}
+
+/* NO GRAY for wording - force dark colors in light mode */
+html.light-mode .text-slate-50:not(.force-white),
+html.light-mode .text-white:not(.force-white),
+html.light-mode .text-slate-100:not(.force-white),
+html.light-mode .text-slate-200:not(.force-white),
+html.light-mode .text-slate-300:not(.force-white),
+html.light-mode .text-slate-400:not(.force-white),
+html.light-mode .text-slate-500:not(.force-white),
+html.light-mode .text-slate-600:not(.force-white),
+html.light-mode .text-slate-700:not(.force-white) { 
+  color: #000000 !important; /* Pure black for maximum contrast */
+}
+
+/* EXCEPTIONS: Force white text on dark backgrounds (like the bank card and chatbot) */
+.force-white,
+.force-white *,
+.bg-black .text-white,
+.bg-slate-900 .text-white,
+.bg-blue-600 .text-white,
+.bg-indigo-600 .text-white,
+.bg-gradient-to-br.from-blue-600 .text-white {
   color: #ffffff !important;
 }
 
-html.light-mode .bg-blue-400,
-html.light-mode .bg-blue-500,
-html.light-mode .bg-blue-600,
-html.light-mode .bg-blue-500\/20,
-html.light-mode .bg-blue-600\/20,
-html.light-mode .bg-blue-900\/40 {
+html.light-mode .border-slate-800,
+html.light-mode .border-slate-700,
+html.light-mode .border-slate-600,
+html.light-mode .border-slate-500,
+html.light-mode .border-slate-400,
+html.light-mode .border-slate-300 { 
+  border-color: #e2e8f0 !important;
+}
+
+/* Accent text colors in light mode */
+html.light-mode .text-blue-400 { color: #2563eb !important; }
+html.light-mode .text-emerald-400 { color: #059669 !important; }
+html.light-mode .text-purple-400 { color: #7c3aed !important; }
+html.light-mode .text-slate-400 { color: #64748b !important; }
+html.light-mode .text-slate-300 { color: #475569 !important; }
+
+html.light-mode .border-slate-900 { border-color: #e2e8f0 !important; }
+
+/* Inverted CTA style: Black background, White text by default in light mode */
+/* Hover: White background, Black text, Black border */
+html.light-mode .cta-inverted {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #000000 !important;
+  @apply transition-all duration-300;
+}
+
+html.light-mode .cta-inverted * {
+  color: #ffffff !important;
+}
+
+html.light-mode .cta-inverted:hover {
+  background-color: transparent !important;
+  color: #000000 !important;
+}
+
+html.light-mode .cta-inverted:hover * {
+  color: #000000 !important;
+}
+
+/* Hover Inversion Utility */
+.cta-hover-invert {
+  @apply transition-all duration-300 border;
+}
+
+html.light-mode .cta-hover-invert:hover {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+}
+
+html.light-mode .cta-hover-invert:hover * {
+  color: #ffffff !important;
+}
+
+/* Fix for the savings account arrow specifically */
+html.light-mode .savings-arrow-container {
+  border: 1px solid #000000 !important;
+  background-color: transparent !important;
+}
+
+html.light-mode .savings-arrow-container .lucide {
+  color: #000000 !important;
+}
+
+html.light-mode .savings-card:hover .savings-arrow-container {
+  background-color: #000000 !important;
+}
+
+html.light-mode .savings-card:hover .savings-arrow-container .lucide {
+  color: #ffffff !important;
+}
+
+.force-white { color: #ffffff !important; }
+.force-dark { color: #0f172a !important; }
+
+/* Prose overrides for light mode */
+html.light-mode .prose-invert {
+  --tw-prose-body: var(--text-primary);
+  --tw-prose-headings: var(--text-primary);
+  --tw-prose-links: var(--accent-primary);
+  --tw-prose-bold: var(--text-primary);
+  --tw-prose-counters: var(--text-secondary);
+  --tw-prose-bullets: var(--text-secondary);
+  --tw-prose-hr: var(--border-primary);
+  --tw-prose-quotes: var(--text-primary);
+  --tw-prose-quote-borders: var(--border-primary);
+  --tw-prose-captions: var(--text-secondary);
+  --tw-prose-code: var(--text-primary);
+  --tw-prose-pre-code: var(--text-primary);
+  --tw-prose-pre-bg: var(--bg-secondary);
+  --tw-prose-th-borders: var(--border-primary);
+  --tw-prose-td-borders: var(--border-primary);
+}
+
+/* Input fixes for light mode */
+html.light-mode input, 
+html.light-mode select,
+html.light-mode textarea {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+html.light-mode input::placeholder,
+html.light-mode textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Navigation bar light mode: less gray, more opaque white */
+html.light-mode .nav-glass {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-top-color: #000000 !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+/* Navigation active state: Bold and black as requested */
+/* Chatbot messages should stay dark in light mode for white text visibility */
+html.light-mode .chatbot-message {
+  background-color: #1e293b !important; /* slate-800 */
+  color: #ffffff !important;
+}
+
+html.light-mode .chatbot-message * {
+  color: #ffffff !important;
+}
+
+html.light-mode .nav-active-underline {
+  font-weight: 800 !important;
+  color: #000000 !important;
+}
+
+html.light-mode .nav-active-underline .lucide {
+  stroke-width: 3px !important;
+  color: #000000 !important;
+}
+
+/* Inactive nav icons in light mode should also be black but less bold */
+html.light-mode .nav-item-inactive {
+  color: #000000 !important;
+  opacity: 0.5;
+}
+
+html.light-mode .nav-item-inactive .lucide {
+  stroke-width: 1.5px !important;
+  color: #000000 !important;
+}
+
+/* Small icons visibility: add white background in light mode */
+html.light-mode .icon-container-small {
   background-color: #ffffff !important;
+  border: 1px solid #000000 !important;
+}
+
+html.light-mode .icon-container-small .lucide {
+  color: #000000 !important;
+}
+
+/* Notification inversion for light mode */
+html.light-mode .notification-box {
+  background-color: #000000 !important;
+  color: #ffffff !important;
   border-color: #ffffff !important;
 }
 
-html.light-mode .border-blue-500\/20,
-html.light-mode .border-blue-500\/30 {
-  border-color: #ffffff !important;
+html.light-mode .notification-box * {
+  color: #ffffff !important;
+}
+
+html.light-mode .notification-box .text-blue-400 {
+  color: #60a5fa !important; /* Slightly lighter blue for dark background */
+}
+
+.nav-active-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: currentColor;
+  border-radius: 2px;
 }
 
 /* Hide scrollbar globally by default */

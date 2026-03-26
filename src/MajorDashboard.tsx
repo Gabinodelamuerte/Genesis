@@ -254,16 +254,16 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
                 )}
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex gap-6 justify-center mt-4">
                 <button 
                   onClick={() => setPendingChildRequest(null)}
-                  className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium rounded-xl transition-colors"
+                  className="text-slate-400 hover:text-white text-sm font-medium transition-colors underline underline-offset-8"
                 >
                   Refuser
                 </button>
                 <button 
                   onClick={handleApproveRequest}
-                  className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-xl shadow-lg shadow-blue-900/20 transition-all"
+                  className="text-blue-400 hover:text-blue-300 text-sm font-bold transition-all underline underline-offset-8"
                 >
                   Approuver
                 </button>
@@ -330,7 +330,7 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
         <Footer />
       </div>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-slate-900/80 backdrop-blur-md border-t border-slate-800 px-2 py-4 flex justify-between items-center z-50 max-w-3xl mx-auto">
+      <nav className="fixed bottom-0 left-0 right-0 bg-slate-900/80 backdrop-blur-md border-t border-slate-800 px-2 py-4 flex justify-between items-center z-50 max-w-3xl mx-auto nav-glass">
         <NavItem icon={<Home />} label="Accueil" active={activeTab === 'home'} onClick={() => setActiveTab('home')} />
         <NavItem icon={<CreditCard />} label="Compte" active={activeTab === 'account'} onClick={() => setActiveTab('account')} />
         <NavItem icon={<PieChartIcon />} label="Gestion" active={activeTab === 'gestion'} onClick={() => setActiveTab('gestion')} />
@@ -346,7 +346,7 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
 
 function NavItem({ icon, label, active, onClick }: any) {
   return (
-    <button onClick={onClick} className={`flex flex-col items-center gap-1 transition-colors ${active ? 'text-blue-400' : 'text-slate-500 hover:text-slate-300'}`}>
+    <button onClick={onClick} className={`flex flex-col items-center gap-1 transition-colors ${active ? 'text-blue-400 nav-active-underline' : 'text-slate-500 hover:text-slate-300 nav-item-inactive'}`}>
       {React.cloneElement(icon, { className: 'w-6 h-6' })}
       <span className="text-[10px] font-medium">{label}</span>
     </button>
@@ -410,7 +410,7 @@ function MajorHome({ name, userState, level, progressPercent, nextLevelXp, onGoT
           onClick={onGoToProfile}
           className="bg-slate-900/80 border border-slate-700 hover:border-blue-500/50 rounded-3xl p-5 flex items-center gap-4 transition-all cursor-pointer group shadow-lg"
         >
-          <div className="w-14 h-14 rounded-2xl bg-blue-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+          <div className="w-14 h-14 rounded-2xl bg-blue-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform icon-container-small">
             <Building2 className="w-7 h-7 text-blue-400" />
           </div>
           <div className="flex-1">
@@ -756,7 +756,6 @@ function MajorAccount({ name, userState, setUserState }: any) {
   const [selectedSavingsAccountId, setSelectedSavingsAccountId] = useState<string | null>(null);
   const [showAllTransactions, setShowAllTransactions] = useState(false);
   const [showCardDetails, setShowCardDetails] = useState(false);
-  const [showLimitsModal, setShowLimitsModal] = useState(false);
 
   const setCardType = (type: 'virtuelle' | 'physique') => {
     setUserState((prev: any) => ({ ...prev, cardType: type }));
@@ -881,7 +880,7 @@ function MajorAccount({ name, userState, setUserState }: any) {
           {userState.transactions.map((tx: any, idx: number) => (
             <div key={tx.id} className={`flex items-center justify-between p-4 ${idx !== userState.transactions.length - 1 ? 'border-b border-slate-800/50' : ''}`}>
               <div className="flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'income' ? 'bg-emerald-500/10' : tx.type === 'transfer' ? 'bg-blue-500/10' : 'bg-slate-800'}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center icon-container-small ${tx.type === 'income' ? 'bg-emerald-500/10' : tx.type === 'transfer' ? 'bg-blue-500/10' : 'bg-slate-800'}`}>
                   {tx.type === 'income' ? <ArrowDownRight className="w-5 h-5 text-emerald-400" /> : tx.type === 'transfer' ? <ArrowRightLeft className="w-5 h-5 text-blue-400" /> : <ArrowUpRight className="w-5 h-5 text-slate-400" />}
                 </div>
                 <div>
@@ -916,7 +915,7 @@ function MajorAccount({ name, userState, setUserState }: any) {
           <p className="text-sm text-slate-400 mb-1">Solde disponible</p>
           <h2 className="text-5xl font-mono font-bold text-white mb-6">{selectedSavingsAccount.balance.toFixed(2)} €</h2>
           <div className="flex gap-4">
-            <button onClick={() => setShowTransferModal(true)} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-all">
+            <button onClick={() => setShowTransferModal(true)} className="flex-1 cta-inverted font-bold py-3 rounded-xl transition-all">
               Déposer / Retirer
             </button>
           </div>
@@ -944,7 +943,7 @@ function MajorAccount({ name, userState, setUserState }: any) {
               {selectedSavingsAccount.transactions.map((tx: any, idx: number) => (
                 <div key={tx.id} className={`flex items-center justify-between p-4 ${idx !== selectedSavingsAccount.transactions!.length - 1 ? 'border-b border-slate-800/50' : ''}`}>
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center icon-container-small">
                       <ArrowRightLeft className="w-5 h-5 text-blue-400" />
                     </div>
                     <div>
@@ -993,10 +992,16 @@ function MajorAccount({ name, userState, setUserState }: any) {
           <p className="text-4xl font-mono font-bold text-white mb-6">{(userState.realBalance || 0).toFixed(2)} €</p>
           
           <div className="flex gap-3">
-            <button onClick={() => setShowTransferModal(true)} className="flex-1 bg-white/10 hover:bg-white/20 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">
+            <button 
+              onClick={() => setShowTransferModal(true)} 
+              className="flex-1 cta-inverted text-sm font-medium py-2.5 rounded-xl transition-all"
+            >
               Virement
             </button>
-            <button onClick={() => setShowRIBModal(true)} className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">
+            <button 
+              onClick={() => setShowRIBModal(true)} 
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-xl transition-all border border-transparent"
+            >
               RIB / IBAN
             </button>
           </div>
@@ -1061,14 +1066,14 @@ function MajorAccount({ name, userState, setUserState }: any) {
             </div>
           ) : (
             <div className="space-y-6">
-              <div className={`relative w-full max-w-sm mx-auto aspect-[1.586] rounded-2xl bg-gradient-to-br ${userState.isCardBlocked ? 'from-slate-900 to-slate-950 grayscale' : 'from-slate-800 to-slate-950'} border border-slate-700 p-6 flex flex-col justify-between overflow-hidden shadow-2xl transition-all duration-500`}>
+              <div className={`relative w-full max-w-sm mx-auto aspect-[1.586] rounded-2xl bg-gradient-to-br ${userState.isCardBlocked ? 'from-slate-900 to-slate-950 grayscale' : 'from-slate-800 to-slate-950'} border border-slate-700 p-6 flex flex-col justify-between overflow-hidden shadow-2xl transition-all duration-500 force-white`}>
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay"></div>
                 <div className={`absolute -right-10 -top-10 w-32 h-32 ${userState.isCardBlocked ? 'bg-slate-500/10' : 'bg-blue-500/20'} rounded-full blur-2xl`}></div>
                 
                 <div className="flex justify-between items-start relative z-10">
                   <div className="flex items-center gap-2">
                     <GenesisLogo className="w-6 h-6" />
-                    <span className="font-display font-bold text-lg tracking-widest text-slate-300">GENESIS</span>
+                    <span className="font-display font-bold text-lg tracking-widest text-slate-300 force-white">GENESIS</span>
                   </div>
                   <div className="flex gap-1">
                     <div className="w-8 h-5 bg-slate-300/20 rounded-sm"></div>
@@ -1076,7 +1081,7 @@ function MajorAccount({ name, userState, setUserState }: any) {
                 </div>
                 
                 <div className="relative z-10">
-                  <div className="font-mono text-lg tracking-widest text-slate-300 mb-2 flex items-center justify-between">
+                  <div className="font-mono text-lg tracking-widest text-slate-300 mb-2 flex items-center justify-between force-white">
                     <span>{showCardDetails ? '4532 8812 4456 4092' : '**** **** **** 4092'}</span>
                     <button 
                       onClick={() => setShowCardDetails(!showCardDetails)}
@@ -1087,14 +1092,14 @@ function MajorAccount({ name, userState, setUserState }: any) {
                   </div>
                   <div className="flex justify-between items-end">
                     <div>
-                      <div className="text-[8px] text-slate-500 uppercase tracking-wider mb-0.5">Titulaire</div>
-                      <div className="text-sm font-medium text-slate-300 uppercase">{name}</div>
+                      <div className="text-[8px] text-slate-500 uppercase tracking-wider mb-0.5 force-white opacity-60">Titulaire</div>
+                      <div className="text-sm font-medium text-slate-300 uppercase force-white">{name}</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-[8px] text-slate-500 uppercase tracking-wider mb-0.5">
+                      <div className="text-[8px] text-slate-500 uppercase tracking-wider mb-0.5 force-white opacity-60">
                         {showCardDetails ? 'CVV' : 'Type'}
                       </div>
-                      <div className="text-xs font-medium text-blue-400">
+                      <div className="text-xs font-medium text-blue-400 force-white">
                         {showCardDetails ? '442' : (userState.cardType === 'virtuelle' ? 'Virtuelle' : 'Physique')}
                       </div>
                     </div>
@@ -1114,20 +1119,18 @@ function MajorAccount({ name, userState, setUserState }: any) {
               <div className="flex flex-col gap-3">
                 <button 
                   onClick={toggleCardBlock}
-                  className={`w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-                    userState.isCardBlocked 
-                    ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600/30' 
-                    : 'bg-red-600/20 text-red-400 border border-red-500/30 hover:bg-red-600/30 underline underline-offset-4'
+                  className={`w-full py-2 text-sm font-bold transition-all underline underline-offset-8 ${
+                    userState.isCardBlocked ? 'text-emerald-400 hover:text-emerald-300' : 'text-red-400 hover:text-red-300'
                   }`}
                 >
                   {userState.isCardBlocked ? (
                     <>
-                      <CheckCircle2 className="w-4 h-4" />
+                      <CheckCircle2 className="w-4 h-4 inline-block mr-2" />
                       Débloquer ma carte
                     </>
                   ) : (
                     <>
-                      <XCircle className="w-4 h-4" />
+                      <XCircle className="w-4 h-4 inline-block mr-2" />
                       Bloquer ma carte (Perte/Vol)
                     </>
                   )}
@@ -1158,15 +1161,15 @@ function MajorAccount({ name, userState, setUserState }: any) {
             <div 
               key={account.id} 
               onClick={() => setSelectedSavingsAccountId(account.id)}
-              className="bg-slate-900/50 border border-slate-800 rounded-3xl p-5 shadow-lg relative overflow-hidden group hover:border-blue-500/30 transition-colors cursor-pointer"
+              className="bg-slate-900/50 border border-slate-800 rounded-3xl p-5 shadow-lg relative overflow-hidden group savings-card transition-all cursor-pointer"
             >
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h4 className="font-bold text-white">{account.name}</h4>
                   <p className="text-xs text-emerald-400 font-medium">Taux: {account.rate}%</p>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center group-hover:bg-blue-600 transition-colors">
-                  <ChevronRight className="w-4 h-4 text-white" />
+                <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center transition-all border border-transparent savings-arrow-container">
+                  <ChevronRight className="w-4 h-4" />
                 </div>
               </div>
               
@@ -1324,7 +1327,11 @@ function TransferModal({ isOpen, onClose, onTransfer, userState, initialFromId =
                 </div>
               </div>
 
-              <button type="submit" disabled={!amount || !toId || parseFloat(amount) <= 0} className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all disabled:opacity-50">
+              <button 
+                type="submit" 
+                disabled={!amount || !toId || parseFloat(amount) <= 0} 
+                className="w-full py-4 cta-inverted rounded-xl font-bold transition-all disabled:opacity-50"
+              >
                 Confirmer le virement
               </button>
             </form>
@@ -1382,125 +1389,8 @@ function RIBModal({ isOpen, onClose, name }: any) {
                 <p className="font-mono text-sm">GENEFR2PXXX</p>
               </div>
 
-              <button className="w-full py-3 bg-slate-900 text-white rounded-xl font-bold flex items-center justify-center gap-2">
+              <button className="w-full py-3 cta-inverted rounded-xl font-bold flex items-center justify-center gap-2 transition-all">
                 <Download className="w-4 h-4" /> Télécharger le RIB
-              </button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
-
-function LimitsModal({ isOpen, onClose, childAccount, onUpdateLimits }: any) {
-  const [paymentLimit, setPaymentLimit] = useState(childAccount?.limits?.payment || 200);
-  const [withdrawalLimit, setWithdrawalLimit] = useState(childAccount?.limits?.withdrawal || 50);
-  const [onlinePurchase, setOnlinePurchase] = useState(childAccount?.limits?.onlinePurchase ?? true);
-  const [atmWithdrawal, setAtmWithdrawal] = useState(childAccount?.limits?.atmWithdrawal ?? false);
-  const [isCardBlocked, setIsCardBlocked] = useState(childAccount?.isCardBlocked ?? false);
-
-  if (!childAccount) return null;
-
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-white">Limites de {childAccount.name}</h3>
-              <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-full text-slate-400 transition-colors"><X className="w-5 h-5" /></button>
-            </div>
-
-            <div className="space-y-6">
-              <div className="flex items-center justify-between p-4 bg-red-500/10 border border-red-500/20 rounded-2xl">
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isCardBlocked ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
-                    <CreditCard className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-white">{isCardBlocked ? 'Carte Bloquée' : 'Carte Active'}</p>
-                    <p className="text-[10px] text-slate-500">Bloquer en cas de perte/vol</p>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => setIsCardBlocked(!isCardBlocked)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${isCardBlocked ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white underline underline-offset-4'}`}
-                >
-                  {isCardBlocked ? 'Débloquer' : 'Bloquer'}
-                </button>
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <label className="text-sm font-medium text-slate-400">Plafond de paiement (30j)</label>
-                  <span className="text-blue-400 font-mono font-bold">{paymentLimit} €</span>
-                </div>
-                <input 
-                  type="range" 
-                  min="0" 
-                  max="1000" 
-                  step="50"
-                  value={paymentLimit} 
-                  onChange={(e) => setPaymentLimit(parseInt(e.target.value))}
-                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                />
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <label className="text-sm font-medium text-slate-400">Plafond de retrait (30j)</label>
-                  <span className="text-blue-400 font-mono font-bold">{withdrawalLimit} €</span>
-                </div>
-                <input 
-                  type="range" 
-                  min="0" 
-                  max="500" 
-                  step="10"
-                  value={withdrawalLimit} 
-                  onChange={(e) => setWithdrawalLimit(parseInt(e.target.value))}
-                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                />
-              </div>
-
-              <div className="space-y-4 pt-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-white">Achat en ligne</p>
-                    <p className="text-[10px] text-slate-500">Autoriser les paiements sur internet</p>
-                  </div>
-                  <button 
-                    onClick={() => setOnlinePurchase(!onlinePurchase)}
-                    className={`w-12 h-6 rounded-full transition-colors relative ${onlinePurchase ? 'bg-emerald-600' : 'bg-slate-800'}`}
-                  >
-                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${onlinePurchase ? 'left-7' : 'left-1'}`}></div>
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-white">Retrait DAB</p>
-                    <p className="text-[10px] text-slate-500">Autoriser les retraits aux distributeurs</p>
-                  </div>
-                  <button 
-                    onClick={() => setAtmWithdrawal(!atmWithdrawal)}
-                    className={`w-12 h-6 rounded-full transition-colors relative ${atmWithdrawal ? 'bg-emerald-600' : 'bg-slate-800'}`}
-                  >
-                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${atmWithdrawal ? 'left-7' : 'left-1'}`}></div>
-                  </button>
-                </div>
-              </div>
-
-              <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 flex gap-3">
-                <Shield className="w-5 h-5 text-blue-400 shrink-0" />
-                <p className="text-xs text-slate-400">Ces limites s'appliquent uniquement à la carte bancaire de l'enfant. Les virements entre vos comptes restent illimités.</p>
-              </div>
-
-              <button 
-                onClick={() => onUpdateLimits({ payment: paymentLimit, withdrawal: withdrawalLimit, onlinePurchase, atmWithdrawal, isCardBlocked })}
-                className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all"
-              >
-                Enregistrer les modifications
               </button>
             </div>
           </motion.div>
@@ -1607,13 +1497,13 @@ function AddBeneficiaryModal({ isOpen, onClose, onAdd }: any) {
                 />
               </div>
 
-              <button 
-                type="submit" 
-                disabled={!name || !iban}
-                className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all disabled:opacity-50 mt-4"
-              >
-                Ajouter le bénéficiaire
-              </button>
+            <button 
+              type="submit" 
+              disabled={!name || !iban}
+              className="w-full py-4 cta-inverted rounded-xl font-bold transition-all disabled:opacity-50 mt-4"
+            >
+              Ajouter le bénéficiaire
+            </button>
             </form>
           </motion.div>
         </motion.div>
@@ -3129,10 +3019,10 @@ function MajorInsurance({ userState, setUserState }: any) {
                             </div>
                             <button 
                               onClick={() => startEditing(userIns)}
-                              className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white transition-colors opacity-0 group-hover:opacity-100 flex items-center gap-1"
+                              className="p-2 rounded-lg bg-black dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors flex items-center gap-1"
                             >
                               <Pencil className="w-4 h-4" />
-                              <span className="text-[10px]">Modifier</span>
+                              <span className="text-[10px] font-bold">Modifier</span>
                             </button>
                           </div>
                         </div>
@@ -3140,7 +3030,7 @@ function MajorInsurance({ userState, setUserState }: any) {
                         {userIns.provider !== 'Genesis Assurances' && (
                           <>
                             <div className="flex justify-center -my-2 relative z-10">
-                              <div className="w-8 h-8 rounded-full bg-slate-800 border-4 border-slate-900 flex items-center justify-center">
+                              <div className="w-8 h-8 rounded-full bg-slate-800 border-4 border-slate-900 flex items-center justify-center icon-container-small">
                                 <ArrowRightLeft className="w-4 h-4 text-slate-400 rotate-90" />
                               </div>
                             </div>
@@ -3165,7 +3055,7 @@ function MajorInsurance({ userState, setUserState }: any) {
 
                             <button 
                               onClick={() => handleChangeProvider(userIns.id)}
-                              className={`w-full py-3 ${changingId === userIns.id ? 'bg-emerald-500' : 'bg-emerald-600'} hover:bg-emerald-500 text-white font-medium rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg`}
+                              className={`w-full py-3 cta-inverted font-medium rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg`}
                             >
                               <CheckCircle className="w-5 h-5" /> 
                               {changingId === userIns.id ? 'Changer pour Genesis Assurances' : 'Changer pour BPCE'}
@@ -3281,12 +3171,12 @@ function MajorGamification({ userState, setUserState, onBack }: any) {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="flex -space-x-2">
-                      {[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full border-2 border-slate-900 bg-slate-800 flex items-center justify-center text-[8px] text-slate-500 font-bold">Q{i}</div>)}
+                      {[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full border-2 border-slate-900 bg-slate-800 flex items-center justify-center text-[8px] force-white font-bold">Q{i}</div>)}
                     </div>
                     <span className="text-xs text-slate-600 font-medium">Quiz avancé</span>
                   </div>
                   <div className="w-8 h-8 rounded-full bg-slate-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors">
-                    <ArrowRight className="w-4 h-4 text-white" />
+                    <ArrowRight className="w-4 h-4 force-white" />
                   </div>
                 </div>
               </div>
@@ -3408,8 +3298,26 @@ function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamificat
   const [childIdInput, setChildIdInput] = useState('');
   const [isLinking, setIsLinking] = useState(false);
   const [linkSuccess, setLinkSuccess] = useState(false);
-  const [showLimitsModal, setShowLimitsModal] = useState(false);
+  const [isLimitsExpanded, setIsLimitsExpanded] = useState(false);
+  const [isConfirmingBlock, setIsConfirmingBlock] = useState(false);
   const [isLightMode, setIsLightMode] = useState(() => document.documentElement.classList.contains('light-mode'));
+
+  // Local state for limits when expanded
+  const [paymentLimit, setPaymentLimit] = useState(userState.childAccount?.limits?.payment ?? 500);
+  const [withdrawalLimit, setWithdrawalLimit] = useState(userState.childAccount?.limits?.withdrawal ?? 100);
+  const [onlinePurchase, setOnlinePurchase] = useState(userState.childAccount?.limits?.onlinePurchase ?? true);
+  const [atmWithdrawal, setAtmWithdrawal] = useState(userState.childAccount?.limits?.atmWithdrawal ?? false);
+  const [isCardBlocked, setIsCardBlocked] = useState(userState.childAccount?.isCardBlocked ?? false);
+
+  useEffect(() => {
+    if (userState.childAccount?.limits) {
+      setPaymentLimit(userState.childAccount.limits.payment);
+      setWithdrawalLimit(userState.childAccount.limits.withdrawal);
+      setOnlinePurchase(userState.childAccount.limits.onlinePurchase);
+      setAtmWithdrawal(userState.childAccount.limits.atmWithdrawal);
+      setIsCardBlocked(userState.childAccount.isCardBlocked);
+    }
+  }, [userState.childAccount]);
 
   const toggleTheme = () => {
     const html = document.documentElement;
@@ -3449,7 +3357,9 @@ function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamificat
           linked: true,
           id: childIdInput,
           name: "Léo",
-          balance: 150.00
+          balance: 150.00,
+          limits: { payment: 500, withdrawal: 100, onlinePurchase: true, atmWithdrawal: false },
+          isCardBlocked: false
         }
       }));
     }, 2000);
@@ -3468,30 +3378,30 @@ function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamificat
       </header>
 
       {/* Identifiant Personnel */}
-      <section className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+      <section className={`border rounded-2xl p-4 flex items-center justify-between transition-colors ${isLightMode ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/50 border-slate-800'}`}>
         <div>
           <p className="text-[10px] uppercase text-slate-500 font-bold mb-1 tracking-widest">Votre Identifiant Genesis</p>
-          <p className="font-mono text-lg text-blue-400 font-bold">{userState.accountId}</p>
+          <p className={`font-mono text-lg font-bold ${isLightMode ? 'text-blue-600' : 'text-blue-400'}`}>{userState.accountId}</p>
         </div>
-        <button className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 transition-colors">
+        <button className={`p-2 rounded-lg transition-colors ${isLightMode ? 'hover:bg-slate-100 text-slate-500' : 'hover:bg-slate-800 text-slate-400'}`}>
           <History className="w-5 h-5" />
         </button>
       </section>
 
       {/* Apparence */}
-      <section className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+      <section className={`border rounded-2xl p-4 flex items-center justify-between transition-colors ${isLightMode ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/50 border-slate-800'}`}>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400">
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isLightMode ? 'bg-slate-100 text-slate-600' : 'bg-slate-800 text-slate-400'}`}>
             {isLightMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </div>
           <div>
-            <h3 className="font-bold text-white">Apparence</h3>
+            <h3 className="font-bold text-slate-50">Apparence</h3>
             <p className="text-sm text-slate-400">{isLightMode ? 'Mode Clair' : 'Mode Sombre'}</p>
           </div>
         </div>
         <button 
           onClick={toggleTheme}
-          className={`w-14 h-8 rounded-full p-1 transition-colors duration-300 ease-in-out ${isLightMode ? 'bg-blue-500' : 'bg-slate-700'}`}
+          className={`w-14 h-8 rounded-full p-1 transition-colors duration-300 ease-in-out ${isLightMode ? 'bg-blue-600' : 'bg-slate-700'}`}
         >
           <div className={`w-6 h-6 rounded-full bg-white shadow-md transform transition-transform duration-300 ease-in-out ${isLightMode ? 'translate-x-6' : 'translate-x-0'}`} />
         </button>
@@ -3553,46 +3463,162 @@ function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamificat
             )}
           </div>
         ) : (
-          <div className="bg-emerald-900/20 border border-emerald-500/30 rounded-3xl p-6 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                <User className="w-6 h-6 text-emerald-400" />
+          <div className="bg-emerald-900/20 border border-emerald-500/30 rounded-3xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                  <User className="w-6 h-6 text-emerald-400" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white">Compte de {userState.childAccount.name}</h4>
+                  <p className="text-xs text-slate-400">Affilié avec succès • {userState.childAccount.id}</p>
+                </div>
               </div>
-              <div>
-                <h4 className="font-bold text-white">Compte de {userState.childAccount.name}</h4>
-                <p className="text-xs text-slate-400">Affilié avec succès • {userState.childAccount.id}</p>
+              <div className="text-right">
+                <p className="text-sm font-mono font-bold text-white">{userState.childAccount.balance.toFixed(2)} €</p>
+                <button 
+                  onClick={() => setIsLimitsExpanded(!isLimitsExpanded)}
+                  className="mt-2 text-blue-400 text-[10px] font-bold hover:text-blue-300 uppercase tracking-wider transition-all flex items-center gap-2 underline underline-offset-4"
+                >
+                  {isLimitsExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  Gérer les limites
+                </button>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-sm font-mono font-bold text-white">{userState.childAccount.balance.toFixed(2)} €</p>
-              <button 
-                onClick={() => setShowLimitsModal(true)}
-                className="mt-2 px-4 py-2 bg-blue-600/20 text-blue-400 border border-blue-500/30 rounded-xl text-[10px] font-bold hover:bg-blue-600/30 underline underline-offset-4 uppercase tracking-wider transition-all"
-              >
-                Gérer les limites
-              </button>
-            </div>
+
+            <AnimatePresence>
+              {isLimitsExpanded && (
+                <motion.div 
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden border-t border-emerald-500/10 pt-6 mt-2 space-y-6"
+                >
+                  <div className="flex items-center justify-between p-4 bg-red-500/10 border border-red-500/20 rounded-2xl">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isCardBlocked ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                        <CreditCard className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-white">{isCardBlocked ? 'Carte Bloquée' : 'Carte Active'}</p>
+                        <p className="text-[10px] text-slate-500">Bloquer en cas de perte/vol</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col items-end gap-2">
+                      {isConfirmingBlock ? (
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => setIsConfirmingBlock(false)}
+                            className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-slate-800 force-white hover:bg-slate-700 transition-all"
+                          >
+                            Annuler
+                          </button>
+                          <button 
+                            onClick={() => {
+                              setIsCardBlocked(!isCardBlocked);
+                              setIsConfirmingBlock(false);
+                            }}
+                            className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-red-600 text-white hover:bg-red-500 transition-all"
+                          >
+                            Confirmer
+                          </button>
+                        </div>
+                      ) : (
+                        <button 
+                          onClick={() => setIsConfirmingBlock(true)}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${isCardBlocked ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white underline underline-offset-4'}`}
+                        >
+                          {isCardBlocked ? 'Débloquer' : 'Bloquer'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-sm font-medium text-slate-400">Plafond de paiement (30j)</label>
+                        <span className="text-blue-400 font-mono font-bold">{paymentLimit} €</span>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max="1000" 
+                        step="50"
+                        value={paymentLimit} 
+                        onChange={(e) => setPaymentLimit(parseInt(e.target.value))}
+                        className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-sm font-medium text-slate-400">Plafond de retrait (30j)</label>
+                        <span className="text-blue-400 font-mono font-bold">{withdrawalLimit} €</span>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max="500" 
+                        step="10"
+                        value={withdrawalLimit} 
+                        onChange={(e) => setWithdrawalLimit(parseInt(e.target.value))}
+                        className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center justify-between p-3 bg-slate-950/40 rounded-xl border border-slate-800">
+                      <div>
+                        <p className="text-sm font-medium text-white">Achat en ligne</p>
+                        <p className="text-[10px] text-slate-500">Autoriser les paiements internet</p>
+                      </div>
+                      <button 
+                        onClick={() => setOnlinePurchase(!onlinePurchase)}
+                        className={`w-12 h-6 rounded-full transition-colors relative ${onlinePurchase ? 'bg-emerald-600' : 'bg-slate-800'}`}
+                      >
+                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${onlinePurchase ? 'left-7' : 'left-1'}`}></div>
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-slate-950/40 rounded-xl border border-slate-800">
+                      <div>
+                        <p className="text-sm font-medium text-white">Retrait DAB</p>
+                        <p className="text-[10px] text-slate-500">Autoriser les retraits</p>
+                      </div>
+                      <button 
+                        onClick={() => setAtmWithdrawal(!atmWithdrawal)}
+                        className={`w-12 h-6 rounded-full transition-colors relative ${atmWithdrawal ? 'bg-emerald-600' : 'bg-slate-800'}`}
+                      >
+                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${atmWithdrawal ? 'left-7' : 'left-1'}`}></div>
+                      </button>
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={() => {
+                      setUserState((prev: any) => ({
+                        ...prev,
+                        childAccount: {
+                          ...prev.childAccount,
+                          limits: { payment: paymentLimit, withdrawal: withdrawalLimit, onlinePurchase, atmWithdrawal },
+                          isCardBlocked
+                        }
+                      }));
+                      setIsLimitsExpanded(false);
+                    }}
+                    className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-blue-600/20"
+                  >
+                    Enregistrer les modifications
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
       </section>
-
-      <LimitsModal 
-        isOpen={showLimitsModal} 
-        onClose={() => setShowLimitsModal(false)} 
-        childAccount={userState.childAccount}
-        onUpdateLimits={(limitsData: any) => {
-          const { isCardBlocked, ...limits } = limitsData;
-          setUserState((prev: any) => ({
-            ...prev,
-            childAccount: {
-              ...prev.childAccount,
-              limits,
-              isCardBlocked
-            }
-          }));
-          setShowLimitsModal(false);
-        }}
-      />
 
       <div className="space-y-6">
         {/* Banks */}
