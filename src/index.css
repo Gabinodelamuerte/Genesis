@@ -334,3 +334,165 @@ html.light-mode .notification-box .text-blue-400 {
   scrollbar-width: thin !important;
   scrollbar-color: rgba(148, 163, 184, 0.2) transparent !important;
 }
+
+/* Global Button Invert for Light Mode */
+html.light-mode button[class*="bg-slate-900"],
+html.light-mode button[class*="bg-slate-800"],
+html.light-mode button[class*="bg-blue-600"],
+html.light-mode button[class*="bg-emerald-600"],
+html.light-mode button[class*="bg-purple-600"],
+html.light-mode button[class*="bg-blue-200"],
+html.light-mode button[class*="bg-emerald-200"],
+html.light-mode button[class*="bg-purple-200"],
+html.light-mode button[class*="bg-white"],
+html.light-mode button[class*="bg-black"] {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
+  transition: all 0.3s ease !important;
+}
+
+html.light-mode button[class*="bg-slate-900"] *,
+html.light-mode button[class*="bg-slate-800"] *,
+html.light-mode button[class*="bg-blue-600"] *,
+html.light-mode button[class*="bg-emerald-600"] *,
+html.light-mode button[class*="bg-purple-600"] *,
+html.light-mode button[class*="bg-blue-200"] *,
+html.light-mode button[class*="bg-emerald-200"] *,
+html.light-mode button[class*="bg-purple-200"] *,
+html.light-mode button[class*="bg-white"] *,
+html.light-mode button[class*="bg-black"] * {
+  color: #000000 !important;
+  transition: all 0.3s ease !important;
+}
+
+html.light-mode button[class*="bg-slate-900"]:hover,
+html.light-mode button[class*="bg-slate-800"]:hover,
+html.light-mode button[class*="bg-blue-600"]:hover,
+html.light-mode button[class*="bg-emerald-600"]:hover,
+html.light-mode button[class*="bg-purple-600"]:hover,
+html.light-mode button[class*="bg-blue-200"]:hover,
+html.light-mode button[class*="bg-emerald-200"]:hover,
+html.light-mode button[class*="bg-purple-200"]:hover,
+html.light-mode button[class*="bg-white"]:hover,
+html.light-mode button[class*="bg-black"]:hover {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+html.light-mode button[class*="bg-slate-900"]:hover *,
+html.light-mode button[class*="bg-slate-800"]:hover *,
+html.light-mode button[class*="bg-blue-600"]:hover *,
+html.light-mode button[class*="bg-emerald-600"]:hover *,
+html.light-mode button[class*="bg-purple-600"]:hover *,
+html.light-mode button[class*="bg-blue-200"]:hover *,
+html.light-mode button[class*="bg-emerald-200"]:hover *,
+html.light-mode button[class*="bg-purple-200"]:hover *,
+html.light-mode button[class*="bg-white"]:hover *,
+html.light-mode button[class*="bg-black"]:hover * {
+  color: #ffffff !important;
+}
+
+/* Also apply to pictos (icon containers) */
+html.light-mode .icon-container-small,
+html.light-mode .icon-container-large,
+html.light-mode div[class*="rounded-full"][class*="bg-blue-200"],
+html.light-mode div[class*="rounded-full"][class*="bg-emerald-200"],
+html.light-mode div[class*="rounded-full"][class*="bg-purple-200"],
+html.light-mode div[class*="rounded-full"][class*="bg-slate-800"],
+html.light-mode div[class*="rounded-full"][class*="bg-slate-900"] {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
+  transition: all 0.3s ease !important;
+}
+
+html.light-mode .icon-container-small *,
+html.light-mode .icon-container-large *,
+html.light-mode div[class*="rounded-full"][class*="bg-blue-200"] *,
+html.light-mode div[class*="rounded-full"][class*="bg-emerald-200"] *,
+html.light-mode div[class*="rounded-full"][class*="bg-purple-200"] *,
+html.light-mode div[class*="rounded-full"][class*="bg-slate-800"] *,
+html.light-mode div[class*="rounded-full"][class*="bg-slate-900"] * {
+  color: #000000 !important;
+}
+
+html.light-mode .group:hover .icon-container-small,
+html.light-mode .group:hover .icon-container-large,
+html.light-mode .group:hover div[class*="rounded-full"][class*="bg-blue-200"],
+html.light-mode .group:hover div[class*="rounded-full"][class*="bg-emerald-200"],
+html.light-mode .group:hover div[class*="rounded-full"][class*="bg-purple-200"],
+html.light-mode .group:hover div[class*="rounded-full"][class*="bg-slate-800"],
+html.light-mode .group:hover div[class*="rounded-full"][class*="bg-slate-900"],
+html.light-mode .icon-container-small:hover,
+html.light-mode .icon-container-large:hover,
+html.light-mode div[class*="rounded-full"][class*="bg-blue-200"]:hover,
+html.light-mode div[class*="rounded-full"][class*="bg-emerald-200"]:hover,
+html.light-mode div[class*="rounded-full"][class*="bg-purple-200"]:hover,
+html.light-mode div[class*="rounded-full"][class*="bg-slate-800"]:hover,
+html.light-mode div[class*="rounded-full"][class*="bg-slate-900"]:hover {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+html.light-mode .group:hover .icon-container-small *,
+html.light-mode .group:hover .icon-container-large *,
+html.light-mode .group:hover div[class*="rounded-full"][class*="bg-blue-200"] *,
+html.light-mode .group:hover div[class*="rounded-full"][class*="bg-emerald-200"] *,
+html.light-mode .group:hover div[class*="rounded-full"][class*="bg-purple-200"] *,
+html.light-mode .group:hover div[class*="rounded-full"][class*="bg-slate-800"] *,
+html.light-mode .group:hover div[class*="rounded-full"][class*="bg-slate-900"] *,
+html.light-mode .icon-container-small:hover *,
+html.light-mode .icon-container-large:hover *,
+html.light-mode div[class*="rounded-full"][class*="bg-blue-200"]:hover *,
+html.light-mode div[class*="rounded-full"][class*="bg-emerald-200"]:hover *,
+html.light-mode div[class*="rounded-full"][class*="bg-purple-200"]:hover *,
+html.light-mode div[class*="rounded-full"][class*="bg-slate-800"]:hover *,
+html.light-mode div[class*="rounded-full"][class*="bg-slate-900"]:hover * {
+  color: #ffffff !important;
+}
+
+/* Force white background for modals and cards in light mode */
+html.light-mode .bg-slate-950\/80,
+html.light-mode .bg-slate-950\/95,
+html.light-mode .bg-slate-950\/60,
+html.light-mode .bg-slate-950\/50,
+html.light-mode .bg-slate-950 {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
+}
+html.light-mode .bg-slate-950\/80 *,
+html.light-mode .bg-slate-950\/95 *,
+html.light-mode .bg-slate-950\/60 *,
+html.light-mode .bg-slate-950\/50 *,
+html.light-mode .bg-slate-950 * {
+  color: #000000 !important;
+  border-color: #000000 !important;
+}
+
+/* Light mode overrides for savings badge and popups */
+html.light-mode .bg-slate-800.text-slate-400.border-slate-700 {
+  background-color: #e2e8f0 !important; /* slate-200 */
+  color: #1e293b !important; /* slate-800 */
+  border-color: #cbd5e1 !important; /* slate-300 */
+}
+
+html.light-mode .bg-slate-900.border-t.border-slate-800 {
+  background-color: #e2e8f0 !important; /* slate-200 */
+  border-top-color: #cbd5e1 !important; /* slate-300 */
+  color: #000000 !important;
+}
+html.light-mode .bg-slate-900.border-t.border-slate-800 * {
+  color: #000000 !important;
+}
+
+/* Investment catalogue labels light mode override */
+html.light-mode .catalogue-label {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
+}
+html.light-mode .catalogue-label * {
+  color: #000000 !important;
+}

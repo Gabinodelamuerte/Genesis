@@ -591,8 +591,9 @@ function MajorGestion({ userState, setUserState, onGoToInvest }: any) {
                   </Pie>
                   <Tooltip 
                     formatter={(value: number) => [`${value.toFixed(2)} €`, 'Valeur']}
-                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '0.5rem', color: '#f8fafc' }}
-                    itemStyle={{ color: '#f8fafc' }}
+                    contentStyle={{ backgroundColor: '#ffffff', borderColor: '#000000', borderRadius: '0.5rem', color: '#000000' }}
+                    itemStyle={{ color: '#000000', fontWeight: 'bold' }}
+                    labelStyle={{ color: '#000000' }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -1937,8 +1938,8 @@ function MajorInvest({ userState, setUserState }: any) {
                 </defs>
                 <Tooltip 
                   formatter={(value: number) => [`${value.toFixed(2)} €`, 'Valeur']}
-                  contentStyle={{ backgroundColor: '#000', borderColor: '#334155', borderRadius: '12px' }}
-                  itemStyle={{ color: '#fff' }}
+                  contentStyle={{ backgroundColor: '#ffffff', borderColor: '#000000', borderRadius: '12px', color: '#000000' }}
+                  itemStyle={{ color: '#000000', fontWeight: 'bold' }}
                   labelStyle={{ display: 'none' }}
                 />
                 <Area 

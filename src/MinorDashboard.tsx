@@ -287,7 +287,7 @@ function MinorHome({ name, userState, level, progressPercent, nextLevelXp, onOpe
             <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
               <Wallet className="w-4 h-4 text-blue-400" />
             </div>
-            <span className="text-xs font-medium text-slate-300">Argent de poche</span>
+            <span className="text-[17px] leading-[21px] font-bold text-black dark:text-slate-400">Argent de poche</span>
           </div>
           <p className="text-2xl font-mono font-bold text-white relative z-10">{(userState.realBalance || 0).toFixed(2)} €</p>
         </div>
@@ -299,7 +299,7 @@ function MinorHome({ name, userState, level, progressPercent, nextLevelXp, onOpe
             <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
               <Rocket className="w-4 h-4 text-emerald-400" />
             </div>
-            <span className="text-xs font-medium text-slate-300">Fonds Virtuels</span>
+            <span className="text-[17px] leading-[21px] font-bold text-black dark:text-slate-400">Fonds Virtuels</span>
           </div>
           <p className="text-2xl font-mono font-bold text-white relative z-10">{(userState.virtualBalance || 0).toFixed(2)} ¤</p>
         </div>
@@ -330,8 +330,8 @@ function MinorHome({ name, userState, level, progressPercent, nextLevelXp, onOpe
                 <span className="flex items-center gap-1"><Rocket className="w-3 h-3 text-emerald-400"/> +{nextModule.moneyReward} ¤</span>
               </p>
             </div>
-            <div className="w-10 h-10 rounded-full bg-slate-800 group-hover:bg-purple-600 flex items-center justify-center transition-colors icon-container-small">
-              <ChevronRight className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-full bg-blue-200 dark:bg-slate-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors icon-container-small">
+              <ChevronRight className="w-5 h-5 text-blue-700 dark:text-slate-400 group-hover:text-white" />
             </div>
           </div>
         ) : (
@@ -452,8 +452,8 @@ function MinorLearn({ userState, onOpenModule }: any) {
                     <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
                   </div>
                 ) : (
-                  <button className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center group-hover:bg-white group-hover:text-black group-hover:border group-hover:border-black transition-all">
-                    <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-black" />
+                  <button className="w-8 h-8 rounded-full bg-blue-200 dark:bg-slate-800 group-hover:bg-blue-600 flex items-center justify-center transition-all">
+                    <ChevronRight className="w-5 h-5 text-blue-700 dark:text-slate-400 group-hover:text-white" />
                   </button>
                 )}
               </div>
@@ -605,10 +605,10 @@ function MinorInvest({ userState, totalPortfolioValue, onInvest }: any) {
               <XAxis dataKey="name" stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
               <YAxis stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => `${val}¤`} />
               <Tooltip 
-                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '12px', color: '#fff' }}
-                itemStyle={{ color: '#fff', fontWeight: 'bold' }}
+                contentStyle={{ backgroundColor: '#ffffff', borderColor: '#000000', borderRadius: '12px', color: '#000000' }}
+                itemStyle={{ color: '#000000', fontWeight: 'bold' }}
                 formatter={(value: number) => [`${(value || 0).toFixed(2)} ¤`, 'Valeur']}
-                labelStyle={{ color: '#94a3b8' }}
+                labelStyle={{ color: '#000000' }}
               />
               <Area type="monotone" dataKey="value" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
             </AreaChart>
@@ -633,8 +633,8 @@ function MinorInvest({ userState, totalPortfolioValue, onInvest }: any) {
                 <div>
                   <h4 className="font-bold text-sm">{asset.name}</h4>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] px-2 py-0.5 bg-slate-800 rounded text-slate-300 group-hover:bg-white group-hover:text-black group-hover:border-black transition-all">{asset.type}</span>
-                    <span className="text-[10px] px-2 py-0.5 bg-slate-800 rounded text-slate-300 group-hover:bg-white group-hover:text-black group-hover:border-black transition-all">Risque: {asset.risk}</span>
+                    <span className="text-[10px] px-2 py-0.5 bg-slate-800 rounded text-slate-300 group-hover:bg-white group-hover:text-black group-hover:border-black transition-all catalogue-label">{asset.type}</span>
+                    <span className="text-[10px] px-2 py-0.5 bg-slate-800 rounded text-slate-300 group-hover:bg-white group-hover:text-black group-hover:border-black transition-all catalogue-label">Risque: {asset.risk}</span>
                   </div>
                 </div>
               </div>
@@ -1069,7 +1069,7 @@ function MinorAccount({ userState, age, onLinkAccount, onTransfer }: any) {
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-2">
               <Wallet className="w-5 h-5 text-blue-400" />
-              <h2 className="font-medium text-slate-300">Compte Courant</h2>
+              <h2 className="text-[17px] leading-[21px] font-bold text-black dark:text-slate-400">Compte Courant</h2>
             </div>
             <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded border border-blue-500/20">Disponible</span>
           </div>
@@ -1118,7 +1118,7 @@ function MinorAccount({ userState, age, onLinkAccount, onTransfer }: any) {
             <div className="flex justify-between items-start relative z-10">
               <div className="flex items-center gap-2">
                 <GenesisLogo className="w-6 h-6" />
-                <span className="font-display font-bold text-lg tracking-widest text-slate-300 force-white">GENESIS</span>
+                <span className="font-display font-bold text-lg tracking-widest text-slate-300 force-white !text-white">GENESIS</span>
               </div>
               <div className="flex gap-1">
                 <div className="w-8 h-5 bg-slate-300/20 rounded-sm"></div>
@@ -1126,17 +1126,17 @@ function MinorAccount({ userState, age, onLinkAccount, onTransfer }: any) {
             </div>
             
             <div className="relative z-10">
-              <div className="font-mono text-lg tracking-widest text-slate-300 mb-2 force-white">
+              <div className="font-mono text-lg tracking-widest text-slate-300 mb-2 force-white !text-white">
                 **** **** **** 1234
               </div>
               <div className="flex justify-between items-end">
                 <div>
-                  <div className="text-[8px] text-slate-500 uppercase tracking-wider mb-0.5 force-white opacity-60">Titulaire</div>
-                  <div className="text-sm font-medium text-slate-300 uppercase force-white">Utilisateur</div>
+                  <div className="text-[8px] text-slate-500 uppercase tracking-wider mb-0.5 force-white !text-white opacity-60">Titulaire</div>
+                  <div className="text-sm font-medium text-slate-300 uppercase force-white !text-white">Utilisateur</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-[8px] text-slate-500 uppercase tracking-wider mb-0.5 force-white opacity-60">Type</div>
-                  <div className="text-xs font-medium text-purple-400 force-white">Virtuelle</div>
+                  <div className="text-[8px] text-slate-500 uppercase tracking-wider mb-0.5 force-white !text-white opacity-60">Type</div>
+                  <div className="text-xs font-medium text-purple-400 force-white !text-white">Virtuelle</div>
                 </div>
               </div>
             </div>
@@ -1154,7 +1154,7 @@ function MinorAccount({ userState, age, onLinkAccount, onTransfer }: any) {
               <Shield className="w-5 h-5 text-emerald-400" />
             </div>
             <div>
-              <h4 className="font-bold text-sm">Livret Jeune Genesis</h4>
+              <h4 className="text-[17px] leading-[21px] font-bold text-black dark:text-slate-400">Livret Jeune Genesis</h4>
               <p className="text-xs text-slate-400">Taux : 3% net / an</p>
             </div>
           </div>

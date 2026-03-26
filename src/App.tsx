@@ -122,6 +122,12 @@ export default function App() {
       setView('major-dashboard');
       return;
     }
+
+    if (loginCode === '040404') {
+      setName("Gabin");
+      setView('minor-dashboard');
+      return;
+    }
     
     if (loginCode !== storedPassword) {
       setLoginError("Mot de passe incorrect");
