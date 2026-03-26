@@ -41,6 +41,7 @@ html.light-mode .bg-slate-950:not(.force-white):not(.fixed) {
 html.light-mode .bg-slate-900:not(.force-white):not(.fixed),
 html.light-mode .bg-slate-900\/80:not(.force-white):not(.fixed),
 html.light-mode .bg-slate-900\/50:not(.force-white):not(.fixed),
+html.light-mode .bg-slate-900\/20:not(.force-white):not(.fixed),
 html.light-mode .bg-white\/5:not(.force-white):not(.fixed),
 html.light-mode .bg-white\/10:not(.force-white):not(.fixed) { 
   background-color: #ffffff !important; /* Pure white for cards */
@@ -143,8 +144,13 @@ html.light-mode .text-white-light {
   color: #ffffff !important;
 }
 
-html.light-mode .cta-inverted:hover * {
-  color: #000000 !important;
+/* FORCE BLACK BG AND WHITE TEXT FOR ICONS IN LIGHT MODE */
+html.light-mode .force-black-bg {
+  background-color: #000000 !important;
+}
+
+html.light-mode .force-white-text {
+  color: #ffffff !important;
 }
 
 /* Hover Inversion Utility */

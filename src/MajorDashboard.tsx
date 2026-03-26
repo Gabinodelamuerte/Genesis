@@ -1023,8 +1023,8 @@ function MajorAccount({ name, userState, setUserState }: any) {
           {userState.beneficiaries.map((beneficiary: any, idx: number) => (
             <div key={beneficiary.id} className={`flex items-center justify-between p-4 ${idx !== userState.beneficiaries.length - 1 ? 'border-b border-slate-800/50' : ''}`}>
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-slate-800 bg-black-light flex items-center justify-center text-slate-400">
-                  <Users className="w-5 h-5 text-white-light" />
+                <div className="w-10 h-10 rounded-full force-black-bg flex items-center justify-center text-slate-400">
+                  <Users className="w-5 h-5 force-white-text" />
                 </div>
                 <div>
                   <p className="font-medium text-sm text-slate-200">{beneficiary.name}</p>
@@ -1202,8 +1202,8 @@ function MajorAccount({ name, userState, setUserState }: any) {
           {userState.transactions.slice(0, 5).map((tx: any, idx: number) => (
             <div key={tx.id} className={`flex items-center justify-between p-4 ${idx !== Math.min(userState.transactions.length, 5) - 1 ? 'border-b border-slate-800/50' : ''}`}>
               <div className="flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'income' ? 'bg-emerald-500/10' : tx.type === 'transfer' ? 'bg-blue-500/10 bg-black-light' : 'bg-slate-800 bg-black-light'}`}>
-                  {tx.type === 'income' ? <ArrowUpRight className="w-5 h-5 text-emerald-400" /> : tx.type === 'transfer' ? <ArrowRightLeft className="w-5 h-5 text-blue-400 text-white-light" /> : <ArrowDownRight className="w-5 h-5 text-slate-400 text-white-light" />}
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'income' ? 'bg-emerald-500/10' : tx.type === 'transfer' ? 'bg-blue-500/10 force-black-bg' : 'force-black-bg'}`}>
+                  {tx.type === 'income' ? <ArrowUpRight className="w-5 h-5 text-emerald-400" /> : tx.type === 'transfer' ? <ArrowRightLeft className="w-5 h-5 text-blue-400 force-white-text" /> : <ArrowDownRight className="w-5 h-5 text-slate-400 force-white-text" />}
                 </div>
                 <div>
                   <p className="font-medium text-sm text-slate-200">{tx.label}</p>
@@ -2803,12 +2803,12 @@ function MajorInvest({ userState, setUserState }: any) {
           <div 
             key={inv.id} 
             onClick={() => inv.active ? setSelectedAccount(inv.id) : null}
-            className={`border rounded-3xl p-5 transition-all ${inv.active ? 'bg-slate-900/50 border-slate-800 hover:border-purple-500/50 cursor-pointer shadow-lg' : 'bg-slate-900/20 border-slate-800/50 opacity-75'}`}
+            className={`border rounded-3xl p-5 transition-all ${inv.active ? 'bg-slate-900/50 border-slate-800 hover:border-purple-500/50 cursor-pointer shadow-lg' : 'bg-slate-900/20 border-slate-800/50'}`}
           >
             <div className="flex justify-between items-start mb-4">
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${inv.active ? 'bg-purple-500/20' : 'bg-slate-800 bg-black-light'}`}>
-                  <Briefcase className={`w-5 h-5 ${inv.active ? 'text-purple-400' : 'text-slate-500 text-white-light'}`} />
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${inv.active ? 'bg-purple-500/20' : 'force-black-bg'}`}>
+                  <Briefcase className={`w-5 h-5 ${inv.active ? 'text-purple-400' : 'force-white-text'}`} />
                 </div>
                 <div>
                   <h3 className="font-bold text-white">{inv.name}</h3>
@@ -2824,7 +2824,7 @@ function MajorInvest({ userState, setUserState }: any) {
               {inv.active ? (
                 <ChevronRight className="w-5 h-5 text-slate-500" />
               ) : (
-                <button onClick={(e) => { e.stopPropagation(); activateAccount(inv.id); }} className="text-xs font-medium bg-slate-800 hover:bg-slate-700 bg-black-light text-white-light px-3 py-1.5 rounded-lg transition-colors">
+                <button onClick={(e) => { e.stopPropagation(); activateAccount(inv.id); }} className="text-xs font-medium force-black-bg hover:opacity-80 force-white-text px-3 py-1.5 rounded-lg transition-colors">
                   Ouvrir
                 </button>
               )}
@@ -2956,7 +2956,7 @@ function MajorInsurance({ userState, setUserState }: any) {
           return (
             <div key={type.id} className="bg-slate-900/50 border border-slate-800 rounded-3xl overflow-hidden shadow-lg">
               <div className="p-5 flex items-center gap-3 border-b border-slate-800/50">
-                <div className="w-10 h-10 rounded-xl bg-slate-800 bg-black-light flex items-center justify-center text-slate-400 text-white-light">
+                <div className="w-10 h-10 rounded-xl force-black-bg flex items-center justify-center force-white-text">
                   {type.icon}
                 </div>
                 <h3 className="font-bold text-white text-lg">{type.label}</h3>
@@ -3019,7 +3019,7 @@ function MajorInsurance({ userState, setUserState }: any) {
                             </div>
                             <button 
                               onClick={() => startEditing(userIns)}
-                              className="p-2 rounded-lg bg-black dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors flex items-center gap-1"
+                              className="p-2 rounded-lg force-black-bg force-white-text hover:opacity-80 transition-colors flex items-center gap-1"
                             >
                               <Pencil className="w-4 h-4" />
                               <span className="text-[10px] font-bold">Modifier</span>
@@ -3496,8 +3496,8 @@ function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamificat
                 >
                   <div className="flex items-center justify-between p-4 bg-red-500/10 border border-red-500/20 rounded-2xl">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isCardBlocked ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
-                        <CreditCard className="w-5 h-5" />
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center force-black-bg">
+                        <CreditCard className="w-5 h-5 force-white-text" />
                       </div>
                       <div>
                         <p className="text-sm font-bold text-white">{isCardBlocked ? 'Carte Bloquée' : 'Carte Active'}</p>
