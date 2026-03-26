@@ -29,6 +29,8 @@ export default function App() {
     social: false
   });
   const [isCustomizingCookies, setIsCustomizingCookies] = useState(false);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
+  const [showGlobalPrivacyModal, setShowGlobalPrivacyModal] = useState(false);
 
   const calculateAge = (dateString: string) => {
     if (!dateString) return 0;
@@ -84,6 +86,10 @@ export default function App() {
 
   const handleCreatePassword = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!acceptedPrivacy) {
+      setPasswordError("Vous devez accepter la politique de confidentialité");
+      return;
+    }
     const error = validateCode(password);
     if (error) {
       setPasswordError(error);
@@ -183,6 +189,12 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {showGlobalPrivacyModal && (
+          <PrivacyModal onClose={() => setShowGlobalPrivacyModal(false)} />
+        )}
+      </AnimatePresence>
+
       <AnimatePresence mode="wait">
         {view === 'landing' && (
           <LandingView 
@@ -219,6 +231,9 @@ export default function App() {
             setPassword={setPassword}
             confirmPassword={confirmPassword}
             setConfirmPassword={setConfirmPassword}
+            acceptedPrivacy={acceptedPrivacy}
+            setAcceptedPrivacy={setAcceptedPrivacy}
+            onShowPrivacy={() => setShowGlobalPrivacyModal(true)}
             error={passwordError}
             onSubmit={handleCreatePassword}
           />
@@ -234,7 +249,7 @@ export default function App() {
       {/* Global Footer for non-dashboard views */}
       {(view === 'landing' || view === 'register' || view === 'login' || view === 'create-password') && (
         <div className="relative z-10 pb-8">
-          <Footer />
+          <Footer onShowPrivacy={() => setShowGlobalPrivacyModal(true)} />
         </div>
       )}
 
@@ -513,12 +528,22 @@ function CookieConsent({ onAcceptAll, onRejectAll, onSave, isCustomizing, setIsC
   );
 }
 
-export function Footer() {
+export function Footer({ onShowPrivacy }: { onShowPrivacy?: () => void }) {
   return (
     <footer className="py-8 text-center border-t border-white/5 mt-auto">
-      <p className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.2em]">
-        © COPYRIGHT - TOUS DROITS RÉSERVÉS - GROUPE BPCE
+      <p className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.2em] px-6">
+        © COPYRIGHT - TOUS DROITS RÉSERVÉS - GROUPE BPCE - BANQUE POPULAIRE - CAISSE D'EPARGNE
       </p>
+      <div className="flex justify-center gap-4 mt-2">
+        <p className="text-[9px] text-slate-700 uppercase tracking-widest cursor-pointer hover:text-slate-500">Mentions Légales</p>
+        <p className="text-[9px] text-slate-700 uppercase tracking-widest cursor-pointer hover:text-slate-500">CGU</p>
+        <p 
+          onClick={onShowPrivacy}
+          className="text-[9px] text-slate-700 uppercase tracking-widest cursor-pointer hover:text-slate-500"
+        >
+          Protection des données
+        </p>
+      </div>
     </footer>
   );
 }
@@ -694,7 +719,7 @@ function RegisterView({ name, setName, birthDate, setBirthDate, phone, setPhone,
   );
 }
 
-function CreatePasswordView({ password, setPassword, confirmPassword, setConfirmPassword, error, onSubmit }: any) {
+function CreatePasswordView({ password, setPassword, confirmPassword, setConfirmPassword, acceptedPrivacy, setAcceptedPrivacy, onShowPrivacy, error, onSubmit }: any) {
   return (
     <motion.div 
       initial={{ opacity: 0, scale: 0.95 }}
@@ -760,14 +785,79 @@ function CreatePasswordView({ password, setPassword, confirmPassword, setConfirm
           </ul>
         </div>
 
+        <div className="flex items-start gap-3 px-2">
+          <input 
+            id="privacy"
+            type="checkbox"
+            required
+            checked={acceptedPrivacy}
+            onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+            className="mt-1 w-4 h-4 rounded border-slate-700 bg-slate-900/50 text-purple-600 focus:ring-purple-500/50"
+          />
+          <label htmlFor="privacy" className="text-xs text-slate-400 leading-relaxed">
+            J'ai lu et j'accepte la <span onClick={onShowPrivacy} className="text-purple-400 hover:text-purple-300 cursor-pointer underline underline-offset-2">politique de confidentialité</span> de Genesis.
+          </label>
+        </div>
+
         <button
           type="submit"
-          disabled={password.length < 6 || confirmPassword.length < 6}
+          disabled={password.length < 6 || confirmPassword.length < 6 || !acceptedPrivacy}
           className="w-full py-4 bg-white text-slate-950 rounded-2xl font-bold text-lg transition-all disabled:opacity-50 shadow-xl"
         >
           Valider mon code
         </button>
       </form>
+    </motion.div>
+  );
+}
+
+function PrivacyModal({ onClose }: { onClose: () => void }) {
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-sm"
+    >
+      <motion.div 
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        className="bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-lg w-full shadow-2xl relative"
+      >
+        <button 
+          onClick={onClose}
+          className="absolute top-6 right-6 p-2 hover:bg-slate-800 rounded-full text-slate-400 transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </button>
+        
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+            <Shield className="w-5 h-5 text-purple-400" />
+          </div>
+          <h3 className="text-xl font-bold text-white">Politique de confidentialité</h3>
+        </div>
+        
+        <div className="space-y-4 text-slate-300 text-sm leading-relaxed">
+          <p>
+            Les données personnelles recueillies dans le cadre des services Genesis sont traitées selon des protocoles sécurisés (Chiffrement AES-256 et TLS 1.3).
+          </p>
+          <p>
+            Elles permettent à Genesis et aux entités du Groupe BPCE concernées de gérer les demandes et d'assurer le suivi pédagogique.
+          </p>
+          <p>
+            En cas de transmission à des sous-traitants techniques (hébergement Render/IA), celle-ci est strictement encadrée par des clauses de confidentialité.
+          </p>
+        </div>
+        
+        <button 
+          onClick={onClose}
+          className="w-full mt-8 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-all"
+        >
+          Fermer
+        </button>
+      </motion.div>
     </motion.div>
   );
 }

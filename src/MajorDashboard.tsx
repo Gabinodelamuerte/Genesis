@@ -25,7 +25,20 @@ interface MajorState {
   userInsurances: { id: string; type: string; provider: string; monthlyPrice: number }[];
   completedChallenges: string[];
   beneficiaries: { id: string; name: string; iban: string; bank: string }[];
-  childAccount: { linked: boolean; id: string; name: string; balance: number; limits: { payment: number; withdrawal: number; onlinePurchase: boolean; atmWithdrawal: boolean } } | null;
+  isCardBlocked: boolean;
+  childAccount: { 
+    linked: boolean; 
+    id: string; 
+    name: string; 
+    balance: number; 
+    limits: { 
+      payment: number; 
+      withdrawal: number; 
+      onlinePurchase: boolean; 
+      atmWithdrawal: boolean 
+    };
+    isCardBlocked: boolean;
+  } | null;
   realTimePrices: Record<string, { price: number; trend: string; name: string }>;
 }
 
@@ -84,12 +97,14 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
       { id: 'b1', name: 'Marie Durand', iban: 'FR76 3000 4000 0001 2345 6789 012', bank: 'Caisse d\'Épargne' },
       { id: 'b2', name: 'Thomas Petit', iban: 'FR76 1020 3040 5006 7080 9010 112', bank: 'Banque Populaire' }
     ],
+    isCardBlocked: false,
     childAccount: {
       linked: false,
       id: "",
       name: "",
       balance: 0,
-      limits: { payment: 200, withdrawal: 50, onlinePurchase: true, atmWithdrawal: false }
+      limits: { payment: 200, withdrawal: 50, onlinePurchase: true, atmWithdrawal: false },
+      isCardBlocked: false
     },
     realTimePrices: {}
   });
@@ -279,6 +294,7 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
         )}
         {activeTab === 'account' && (
           <MajorAccount 
+            name={name}
             userState={userState} 
             setUserState={setUserState} 
           />
@@ -732,16 +748,25 @@ function MajorGestion({ userState, setUserState, onGoToInvest }: any) {
   );
 }
 
-function MajorAccount({ userState, setUserState }: any) {
+function MajorAccount({ name, userState, setUserState }: any) {
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [showRIBModal, setShowRIBModal] = useState(false);
   const [showOpenSavingsModal, setShowOpenSavingsModal] = useState(false);
   const [showAddBeneficiaryModal, setShowAddBeneficiaryModal] = useState(false);
   const [selectedSavingsAccountId, setSelectedSavingsAccountId] = useState<string | null>(null);
   const [showAllTransactions, setShowAllTransactions] = useState(false);
+  const [showCardDetails, setShowCardDetails] = useState(false);
+  const [showLimitsModal, setShowLimitsModal] = useState(false);
 
   const setCardType = (type: 'virtuelle' | 'physique') => {
     setUserState((prev: any) => ({ ...prev, cardType: type }));
+  };
+
+  const toggleCardBlock = () => {
+    setUserState((prev: any) => ({
+      ...prev,
+      isCardBlocked: !prev.isCardBlocked
+    }));
   };
 
   const [initialToId, setInitialToId] = useState('');
@@ -1035,34 +1060,84 @@ function MajorAccount({ userState, setUserState }: any) {
               </div>
             </div>
           ) : (
-            <div className="relative w-full max-w-sm mx-auto aspect-[1.586] rounded-2xl bg-gradient-to-br from-slate-800 to-slate-950 border border-slate-700 p-6 flex flex-col justify-between overflow-hidden shadow-2xl">
-              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay"></div>
-              <div className="absolute -right-10 -top-10 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl"></div>
-              
-              <div className="flex justify-between items-start relative z-10">
-                <div className="flex items-center gap-2">
-                  <GenesisLogo className="w-6 h-6" />
-                  <span className="font-display font-bold text-lg tracking-widest text-slate-300">GENESIS</span>
+            <div className="space-y-6">
+              <div className={`relative w-full max-w-sm mx-auto aspect-[1.586] rounded-2xl bg-gradient-to-br ${userState.isCardBlocked ? 'from-slate-900 to-slate-950 grayscale' : 'from-slate-800 to-slate-950'} border border-slate-700 p-6 flex flex-col justify-between overflow-hidden shadow-2xl transition-all duration-500`}>
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay"></div>
+                <div className={`absolute -right-10 -top-10 w-32 h-32 ${userState.isCardBlocked ? 'bg-slate-500/10' : 'bg-blue-500/20'} rounded-full blur-2xl`}></div>
+                
+                <div className="flex justify-between items-start relative z-10">
+                  <div className="flex items-center gap-2">
+                    <GenesisLogo className="w-6 h-6" />
+                    <span className="font-display font-bold text-lg tracking-widest text-slate-300">GENESIS</span>
+                  </div>
+                  <div className="flex gap-1">
+                    <div className="w-8 h-5 bg-slate-300/20 rounded-sm"></div>
+                  </div>
                 </div>
-                <div className="flex gap-1">
-                  <div className="w-8 h-5 bg-slate-300/20 rounded-sm"></div>
+                
+                <div className="relative z-10">
+                  <div className="font-mono text-lg tracking-widest text-slate-300 mb-2 flex items-center justify-between">
+                    <span>{showCardDetails ? '4532 8812 4456 4092' : '**** **** **** 4092'}</span>
+                    <button 
+                      onClick={() => setShowCardDetails(!showCardDetails)}
+                      className="p-1.5 bg-slate-800/50 rounded-lg text-slate-400 hover:text-white transition-colors"
+                    >
+                      {showCardDetails ? <Lock className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <div className="flex justify-between items-end">
+                    <div>
+                      <div className="text-[8px] text-slate-500 uppercase tracking-wider mb-0.5">Titulaire</div>
+                      <div className="text-sm font-medium text-slate-300 uppercase">{name}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-[8px] text-slate-500 uppercase tracking-wider mb-0.5">
+                        {showCardDetails ? 'CVV' : 'Type'}
+                      </div>
+                      <div className="text-xs font-medium text-blue-400">
+                        {showCardDetails ? '442' : (userState.cardType === 'virtuelle' ? 'Virtuelle' : 'Physique')}
+                      </div>
+                    </div>
+                  </div>
                 </div>
+
+                {userState.isCardBlocked && (
+                  <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-[2px] flex items-center justify-center z-20">
+                    <div className="bg-red-500/20 border border-red-500/50 px-4 py-2 rounded-full flex items-center gap-2">
+                      <XCircle className="w-4 h-4 text-red-400" />
+                      <span className="text-xs font-bold text-red-400 uppercase tracking-wider">Carte Bloquée</span>
+                    </div>
+                  </div>
+                )}
               </div>
-              
-              <div className="relative z-10">
-                <div className="font-mono text-lg tracking-widest text-slate-300 mb-2">
-                  **** **** **** 4092
-                </div>
-                <div className="flex justify-between items-end">
-                  <div>
-                    <div className="text-[8px] text-slate-500 uppercase tracking-wider mb-0.5">Titulaire</div>
-                    <div className="text-sm font-medium text-slate-300 uppercase">{userState.name || 'Utilisateur'}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-[8px] text-slate-500 uppercase tracking-wider mb-0.5">Type</div>
-                    <div className="text-xs font-medium text-blue-400">{userState.cardType === 'virtuelle' ? 'Virtuelle' : 'Physique'}</div>
-                  </div>
-                </div>
+
+              <div className="flex flex-col gap-3">
+                <button 
+                  onClick={toggleCardBlock}
+                  className={`w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+                    userState.isCardBlocked 
+                    ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600/30' 
+                    : 'bg-red-600/20 text-red-400 border border-red-500/30 hover:bg-red-600/30 underline underline-offset-4'
+                  }`}
+                >
+                  {userState.isCardBlocked ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      Débloquer ma carte
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="w-4 h-4" />
+                      Bloquer ma carte (Perte/Vol)
+                    </>
+                  )}
+                </button>
+                
+                {!userState.isCardBlocked && (
+                  <p className="text-[10px] text-slate-500 text-center italic">
+                    En cas de perte, bloque ta carte instantanément pour sécuriser tes fonds.
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -1323,6 +1398,7 @@ function LimitsModal({ isOpen, onClose, childAccount, onUpdateLimits }: any) {
   const [withdrawalLimit, setWithdrawalLimit] = useState(childAccount?.limits?.withdrawal || 50);
   const [onlinePurchase, setOnlinePurchase] = useState(childAccount?.limits?.onlinePurchase ?? true);
   const [atmWithdrawal, setAtmWithdrawal] = useState(childAccount?.limits?.atmWithdrawal ?? false);
+  const [isCardBlocked, setIsCardBlocked] = useState(childAccount?.isCardBlocked ?? false);
 
   if (!childAccount) return null;
 
@@ -1337,6 +1413,24 @@ function LimitsModal({ isOpen, onClose, childAccount, onUpdateLimits }: any) {
             </div>
 
             <div className="space-y-6">
+              <div className="flex items-center justify-between p-4 bg-red-500/10 border border-red-500/20 rounded-2xl">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isCardBlocked ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                    <CreditCard className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-white">{isCardBlocked ? 'Carte Bloquée' : 'Carte Active'}</p>
+                    <p className="text-[10px] text-slate-500">Bloquer en cas de perte/vol</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsCardBlocked(!isCardBlocked)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${isCardBlocked ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white underline underline-offset-4'}`}
+                >
+                  {isCardBlocked ? 'Débloquer' : 'Bloquer'}
+                </button>
+              </div>
+
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-sm font-medium text-slate-400">Plafond de paiement (30j)</label>
@@ -1403,7 +1497,7 @@ function LimitsModal({ isOpen, onClose, childAccount, onUpdateLimits }: any) {
               </div>
 
               <button 
-                onClick={() => onUpdateLimits({ payment: paymentLimit, withdrawal: withdrawalLimit, onlinePurchase, atmWithdrawal })}
+                onClick={() => onUpdateLimits({ payment: paymentLimit, withdrawal: withdrawalLimit, onlinePurchase, atmWithdrawal, isCardBlocked })}
                 className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all"
               >
                 Enregistrer les modifications
@@ -3473,7 +3567,7 @@ function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamificat
               <p className="text-sm font-mono font-bold text-white">{userState.childAccount.balance.toFixed(2)} €</p>
               <button 
                 onClick={() => setShowLimitsModal(true)}
-                className="text-[10px] text-blue-400 font-bold hover:underline"
+                className="mt-2 px-4 py-2 bg-blue-600/20 text-blue-400 border border-blue-500/30 rounded-xl text-[10px] font-bold hover:bg-blue-600/30 underline underline-offset-4 uppercase tracking-wider transition-all"
               >
                 Gérer les limites
               </button>
@@ -3486,12 +3580,14 @@ function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamificat
         isOpen={showLimitsModal} 
         onClose={() => setShowLimitsModal(false)} 
         childAccount={userState.childAccount}
-        onUpdateLimits={(limits: any) => {
+        onUpdateLimits={(limitsData: any) => {
+          const { isCardBlocked, ...limits } = limitsData;
           setUserState((prev: any) => ({
             ...prev,
             childAccount: {
               ...prev.childAccount,
-              limits
+              limits,
+              isCardBlocked
             }
           }));
           setShowLimitsModal(false);

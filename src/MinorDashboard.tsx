@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
-import { BookOpen, LineChart as ChartIcon, User, Home, Gift, Users, Link as LinkIcon, Lock, Sparkles, ChevronRight, Wallet, TrendingUp, Shield, Rocket, Target, CheckCircle2, XCircle, ArrowLeft, Share2, CreditCard, Sun, Moon } from 'lucide-react';
+import { BookOpen, LineChart as ChartIcon, User, Home, Gift, Users, Link as LinkIcon, Lock, Sparkles, ChevronRight, Wallet, TrendingUp, Shield, Rocket, Target, CheckCircle2, XCircle, ArrowLeft, Share2, CreditCard, Sun, Moon, Globe, Landmark } from 'lucide-react';
 import { MODULES, ASSETS_CATALOG, REWARDS, THEMES } from './data/minorData';
 import { GenesisLogo } from './components/GenesisLogo';
 import { Footer } from './App';

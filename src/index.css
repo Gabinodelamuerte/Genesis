@@ -25,6 +25,29 @@ html.light-mode .keep-colors {
   filter: invert(1) hue-rotate(180deg);
 }
 
+/* Make blue elements black in light mode */
+/* Since we use invert(1), setting them to white in CSS makes them black in the browser */
+html.light-mode .text-blue-400,
+html.light-mode .text-blue-500,
+html.light-mode .text-blue-600 {
+  color: #ffffff !important;
+}
+
+html.light-mode .bg-blue-400,
+html.light-mode .bg-blue-500,
+html.light-mode .bg-blue-600,
+html.light-mode .bg-blue-500\/20,
+html.light-mode .bg-blue-600\/20,
+html.light-mode .bg-blue-900\/40 {
+  background-color: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+html.light-mode .border-blue-500\/20,
+html.light-mode .border-blue-500\/30 {
+  border-color: #ffffff !important;
+}
+
 /* Hide scrollbar globally by default */
 *::-webkit-scrollbar {
   display: none;
