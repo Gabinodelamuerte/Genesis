@@ -53,7 +53,7 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
   const [userState, setUserState] = useState<MajorState>({
     xp: 150,
     realBalance: 1250.50,
-    accountId: "#QHG FUT",
+    accountId: "GNS-x9!K#2pL_7mQ*4vR",
     linkedBanks: [],
     linkedInsurances: [],
     linkedInvestments: [],
@@ -3386,10 +3386,10 @@ function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamificat
         </button>
       </header>
 
-      {/* Identifiant Personnel */}
+      {/* Clé Genesis Unique */}
       <section className={`border rounded-2xl p-4 flex items-center justify-between transition-colors ${isLightMode ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/50 border-slate-800'}`}>
         <div>
-          <p className="text-[10px] uppercase text-slate-500 font-bold mb-1 tracking-widest">Votre Identifiant Genesis</p>
+          <p className="text-[10px] uppercase text-slate-500 font-bold mb-1 tracking-widest">Votre Clé Genesis Unique</p>
           <p className={`font-mono text-lg font-bold ${isLightMode ? 'text-blue-600' : 'text-blue-400'}`}>{userState.accountId}</p>
         </div>
         <button className={`p-2 rounded-lg transition-colors ${isLightMode ? 'hover:bg-slate-100 text-slate-500' : 'hover:bg-slate-800 text-slate-400'}`}>
@@ -3450,7 +3450,7 @@ function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamificat
               <div className="relative">
                 <input 
                   type="text" 
-                  placeholder="Identifiant de l'enfant (ex: #ABC 123)" 
+                  placeholder="Clé Genesis de l'enfant (ex: GNS-x9!K#2pL_7mQ*4vR)" 
                   value={childIdInput}
                   onChange={(e) => setChildIdInput(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500 font-mono"
