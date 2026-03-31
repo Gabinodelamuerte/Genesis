@@ -4,6 +4,7 @@ import { Sparkles, ArrowRight, Wallet, TrendingUp, Shield, Rocket, Target, Chevr
 import MinorDashboard from './MinorDashboard';
 import MajorDashboard from './MajorDashboard';
 import { GenesisLogo } from './components/GenesisLogo';
+import CGU from './components/CGU';
 
 type ViewState = 'landing' | 'register' | 'login' | 'create-password' | 'minor-dashboard' | 'major-dashboard';
 
@@ -31,6 +32,8 @@ export default function App() {
   const [isCustomizingCookies, setIsCustomizingCookies] = useState(false);
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const [showGlobalPrivacyModal, setShowGlobalPrivacyModal] = useState(false);
+  const [showLegalModal, setShowLegalModal] = useState(false);
+  const [showCGUModal, setShowCGUModal] = useState(false);
 
   const calculateAge = (dateString: string) => {
     if (!dateString) return 0;
@@ -207,6 +210,18 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {showLegalModal && (
+          <LegalModal onClose={() => setShowLegalModal(false)} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showCGUModal && (
+          <CGU onClose={() => setShowCGUModal(false)} />
+        )}
+      </AnimatePresence>
+
       <AnimatePresence mode="wait">
         {view === 'landing' && (
           <LandingView 
@@ -251,17 +266,36 @@ export default function App() {
           />
         )}
         {view === 'minor-dashboard' && (
-          <MinorDashboard key="minor" name={name} age={calculateAge(birthDate).toString()} onLogout={() => setView('landing')} />
+          <MinorDashboard 
+            key="minor" 
+            name={name} 
+            age={calculateAge(birthDate).toString()} 
+            onLogout={() => setView('landing')} 
+            onShowPrivacy={() => setShowGlobalPrivacyModal(true)}
+            onShowLegal={() => setShowLegalModal(true)}
+            onShowCGU={() => setShowCGUModal(true)}
+          />
         )}
         {view === 'major-dashboard' && (
-          <MajorDashboard key="major" name={name} onLogout={() => setView('landing')} />
+          <MajorDashboard 
+            key="major" 
+            name={name} 
+            onLogout={() => setView('landing')} 
+            onShowPrivacy={() => setShowGlobalPrivacyModal(true)}
+            onShowLegal={() => setShowLegalModal(true)}
+            onShowCGU={() => setShowCGUModal(true)}
+          />
         )}
       </AnimatePresence>
 
       {/* Global Footer for non-dashboard views */}
       {(view === 'landing' || view === 'register' || view === 'login' || view === 'create-password') && (
         <div className="relative z-10 pb-8">
-          <Footer onShowPrivacy={() => setShowGlobalPrivacyModal(true)} />
+          <Footer 
+            onShowPrivacy={() => setShowGlobalPrivacyModal(true)} 
+            onShowLegal={() => setShowLegalModal(true)}
+            onShowCGU={() => setShowCGUModal(true)}
+          />
         </div>
       )}
 
@@ -540,15 +574,25 @@ function CookieConsent({ onAcceptAll, onRejectAll, onSave, isCustomizing, setIsC
   );
 }
 
-export function Footer({ onShowPrivacy }: { onShowPrivacy?: () => void }) {
+export function Footer({ onShowPrivacy, onShowLegal, onShowCGU }: { onShowPrivacy?: () => void, onShowLegal?: () => void, onShowCGU?: () => void }) {
   return (
     <footer className="py-8 text-center border-t border-white/5 mt-auto">
       <p className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.2em] px-6">
         © COPYRIGHT - TOUS DROITS RÉSERVÉS - GROUPE BPCE - BANQUE POPULAIRE - CAISSE D'EPARGNE
       </p>
       <div className="flex justify-center gap-4 mt-2">
-        <p className="text-[9px] text-slate-700 uppercase tracking-widest cursor-pointer hover:text-slate-500">Mentions Légales</p>
-        <p className="text-[9px] text-slate-700 uppercase tracking-widest cursor-pointer hover:text-slate-500">CGU</p>
+        <p 
+          onClick={onShowLegal}
+          className="text-[9px] text-slate-700 uppercase tracking-widest cursor-pointer hover:text-slate-500"
+        >
+          Mentions Légales
+        </p>
+        <p 
+          onClick={onShowCGU}
+          className="text-[9px] text-slate-700 uppercase tracking-widest cursor-pointer hover:text-slate-500"
+        >
+          CGU
+        </p>
         <p 
           onClick={onShowPrivacy}
           className="text-[9px] text-slate-700 uppercase tracking-widest cursor-pointer hover:text-slate-500"
@@ -557,6 +601,91 @@ export function Footer({ onShowPrivacy }: { onShowPrivacy?: () => void }) {
         </p>
       </div>
     </footer>
+  );
+}
+
+function LegalModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 md:p-6">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-slate-950/90 backdrop-blur-md"
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        className="relative w-full max-w-2xl bg-slate-900 border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+      >
+        <div className="p-8 md:p-10 overflow-y-auto custom-scrollbar">
+          <div className="flex justify-between items-start mb-8">
+            <div>
+              <h2 className="text-3xl font-display font-bold text-white mb-2">Mentions légales</h2>
+              <p className="text-slate-400 text-sm">Date de dernière mise à jour : le 03/09/2025</p>
+            </div>
+            <button 
+              onClick={onClose}
+              className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors"
+            >
+              <X className="w-6 h-6 text-slate-400" />
+            </button>
+          </div>
+
+          <div className="space-y-8 text-slate-300">
+            <section>
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <div className="w-1.5 h-6 bg-purple-500 rounded-full" />
+                Identification du responsable du site
+              </h3>
+              <div className="bg-white/5 rounded-2xl p-6 space-y-4 text-sm leading-relaxed">
+                <p>
+                  <span className="font-bold text-white">BPCE S.A.</span> au capital de 155 742 320 euros<br />
+                  RCS Paris : 493 455 042<br />
+                  N° TVA intracommunautaire : FR 24 493 455 042
+                </p>
+                <p>
+                  <span className="font-bold text-white">Siège social :</span><br />
+                  50, avenue Pierre Mendès France, 75201 Paris Cedex 13
+                </p>
+                <p>
+                  <span className="font-bold text-white">Directeur de la publication :</span><br />
+                  Nicolas Namias
+                </p>
+                <p className="pt-2 border-t border-white/5">
+                  Site édité par : <span className="text-purple-400 font-medium">Gabin Devos, Simon Morantin, Matthieu Delvalez, Florian Duhamel</span>
+                </p>
+              </div>
+            </section>
+
+            <section>
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <div className="w-1.5 h-6 bg-blue-500 rounded-full" />
+                Hébergeur du site
+              </h3>
+              <div className="bg-white/5 rounded-2xl p-6 space-y-4 text-sm leading-relaxed">
+                <p className="font-bold text-white text-base">ONRENDER</p>
+                <p>
+                  <span className="font-bold text-white">Siège social :</span><br />
+                  Render, Inc., 2261 Market Street #294, San Francisco, CA 94114, USA
+                </p>
+              </div>
+            </section>
+          </div>
+        </div>
+        
+        <div className="p-8 bg-slate-950/50 border-t border-white/5">
+          <button
+            onClick={onClose}
+            className="w-full py-4 bg-white text-slate-950 rounded-2xl font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
+          >
+            Fermer
+          </button>
+        </div>
+      </motion.div>
+    </div>
   );
 }
 

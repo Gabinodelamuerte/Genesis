@@ -49,7 +49,7 @@ const BANKS = ["Banque populaire", "Caisse d'épargne", "Casden", "Oney", "Palat
 const INSURANCES = ["Banques Populaires", "Caisse d'épargne", "Assurances IARD"];
 const INVESTMENTS = ["BPCE vie", "BPCE Life", "Banques populaires", "Palatine", "Caisse d'épargne"];
 
-export default function MajorDashboard({ name, onLogout }: { name: string, onLogout: () => void }) {
+export default function MajorDashboard({ name, onLogout, onShowPrivacy, onShowLegal, onShowCGU }: { name: string, onLogout: () => void, onShowPrivacy?: () => void, onShowLegal?: () => void, onShowCGU?: () => void }) {
   const [activeTab, setActiveTab] = useState<'home' | 'account' | 'gestion' | 'insurance' | 'invest' | 'profile' | 'gamification'>('home');
   const [pendingChildRequest, setPendingChildRequest] = useState<any>(null);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -421,7 +421,7 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
             isRequestSent={isRequestSent}
           />
         )}
-        <Footer />
+        <Footer onShowPrivacy={onShowPrivacy} onShowLegal={onShowLegal} onShowCGU={onShowCGU} />
       </div>
 
       <nav className="fixed bottom-0 left-0 right-0 bg-slate-900/80 backdrop-blur-md border-t border-slate-800 px-2 py-4 flex justify-between items-center z-50 max-w-3xl mx-auto nav-glass">

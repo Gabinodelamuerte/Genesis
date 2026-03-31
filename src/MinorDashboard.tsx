@@ -35,7 +35,7 @@ interface UserState {
   transactions: Transaction[];
 }
 
-export default function MinorDashboard({ name, age, onLogout }: { name: string, age: string, onLogout: () => void }) {
+export default function MinorDashboard({ name, age, onLogout, onShowPrivacy, onShowLegal, onShowCGU }: { name: string, age: string, onLogout: () => void, onShowPrivacy?: () => void, onShowLegal?: () => void, onShowCGU?: () => void }) {
   const [activeTab, setActiveTab] = useState<'home' | 'account' | 'learn' | 'invest' | 'profile'>('home');
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   
@@ -230,7 +230,7 @@ export default function MinorDashboard({ name, age, onLogout }: { name: string, 
             onLinkAccount={() => setUserState(prev => ({ ...prev, isLinked: true }))}
           />
         )}
-        <Footer />
+        <Footer onShowPrivacy={onShowPrivacy} onShowLegal={onShowLegal} onShowCGU={onShowCGU} />
       </div>
 
       <nav className="fixed bottom-0 left-0 right-0 bg-slate-900/80 backdrop-blur-md border-t border-slate-800 px-6 py-4 flex justify-between items-center z-50 max-w-3xl mx-auto nav-glass">
