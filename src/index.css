@@ -349,8 +349,7 @@ html.light-mode button[class*="bg-purple-600"],
 html.light-mode button[class*="bg-blue-200"],
 html.light-mode button[class*="bg-emerald-200"],
 html.light-mode button[class*="bg-purple-200"],
-html.light-mode button[class*="bg-white"],
-html.light-mode button[class*="bg-black"] {
+html.light-mode button[class*="bg-white"] {
   background-color: #ffffff !important;
   color: #000000 !important;
   border: 1px solid #000000 !important;
@@ -365,8 +364,7 @@ html.light-mode button[class*="bg-purple-600"] *,
 html.light-mode button[class*="bg-blue-200"] *,
 html.light-mode button[class*="bg-emerald-200"] *,
 html.light-mode button[class*="bg-purple-200"] *,
-html.light-mode button[class*="bg-white"] *,
-html.light-mode button[class*="bg-black"] * {
+html.light-mode button[class*="bg-white"] * {
   color: #000000 !important;
   transition: all 0.3s ease !important;
 }
@@ -379,8 +377,7 @@ html.light-mode button[class*="bg-purple-600"]:hover,
 html.light-mode button[class*="bg-blue-200"]:hover,
 html.light-mode button[class*="bg-emerald-200"]:hover,
 html.light-mode button[class*="bg-purple-200"]:hover,
-html.light-mode button[class*="bg-white"]:hover,
-html.light-mode button[class*="bg-black"]:hover {
+html.light-mode button[class*="bg-white"]:hover {
   background-color: #000000 !important;
   color: #ffffff !important;
 }
@@ -393,8 +390,7 @@ html.light-mode button[class*="bg-purple-600"]:hover *,
 html.light-mode button[class*="bg-blue-200"]:hover *,
 html.light-mode button[class*="bg-emerald-200"]:hover *,
 html.light-mode button[class*="bg-purple-200"]:hover *,
-html.light-mode button[class*="bg-white"]:hover *,
-html.light-mode button[class*="bg-black"]:hover * {
+html.light-mode button[class*="bg-white"]:hover * {
   color: #ffffff !important;
 }
 

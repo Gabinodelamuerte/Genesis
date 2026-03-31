@@ -1,6 +1,5 @@
 import express from "express";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import YahooFinance from 'yahoo-finance2';
 
@@ -12,19 +11,6 @@ async function startServer() {
   const yahooFinance = new YahooFinance();
 
   app.use(express.json());
-
-  let aiClient: GoogleGenAI | null = null;
-
-  function getAI() {
-    if (!aiClient) {
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        throw new Error("GEMINI_API_KEY environment variable is required");
-      }
-      aiClient = new GoogleGenAI({ apiKey });
-    }
-    return aiClient;
-  }
 
   // API Route for Stock Prices
   app.get("/api/stock/:symbol", async (req, res) => {
@@ -82,68 +68,6 @@ async function startServer() {
     } catch (error) {
       console.error(`Error fetching history for ${req.params.symbol}:`, error);
       res.status(500).json({ error: "Failed to fetch history" });
-    }
-  });
-
-  // API Route for Financial Advice
-  app.post("/api/advice", async (req, res) => {
-    try {
-      const { userContext } = req.body;
-      const ai = getAI();
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: `Tu es Genesis, un coach financier intelligent et bienveillant. 
-        
-        PRIORITÉ : Mets toujours en avant le programme de gamification (XP, niveaux, challenges) comme un levier majeur pour progresser et débloquer des avantages.
-        
-        Voici le contexte de l'utilisateur : ${JSON.stringify(userContext)}.
-        Donne-lui un message d'accueil très court (max 2 phrases) qui mentionne son niveau ou ses XP actuels, et propose-lui 3 pistes de réflexion ou questions rapides sous forme de liste à puces pour l'aider à démarrer (incluant au moins une piste liée aux challenges ou à l'XP).
-        Sois très aéré avec des sauts de ligne.
-        Réponds en français, avec un ton moderne. Utilise des emojis.`,
-        config: {
-          temperature: 0.7,
-        },
-      });
-      res.json({ text: response.text });
-    } catch (error) {
-      console.error("Error in /api/advice:", error);
-      res.status(500).json({ error: "Failed to get advice" });
-    }
-  });
-
-  // API Route for Financial Questions
-  app.post("/api/ask", async (req, res) => {
-    try {
-      const { question, userContext } = req.body;
-      const ai = getAI();
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: `Tu es Genesis, un coach financier expert, moderne et pédagogique.
-        
-        TON STYLE :
-        - Très aéré : utilise beaucoup de sauts de ligne pour ne pas faire de "blocs" de texte.
-        - Concis : ne donne pas tout d'un coup. Si une question est large, identifie les catégories et demande à l'utilisateur de préciser.
-        - Interactif : pose souvent des questions à la fin de tes messages.
-        - Humain : utilise des emojis et un ton complice.
-        
-        CONSIGNE CRITIQUE :
-        Le programme de gamification (XP, niveaux, badges, challenges) est au cœur de l'expérience. Tu DOIS toujours le mettre en avant comme l'un des principaux "avantages" de l'application. Si l'utilisateur parle d'avantages, commence par ou inclus systématiquement les avantages liés à sa progression (XP et Niveaux).
-        
-        CONSIGNE SPÉCIFIQUE :
-        Si l'utilisateur pose une question ambiguë ou vaste, réponds par une brève introduction suivie d'une liste de choix/catégories et demande-lui de préciser. Ne sors la "grande explication" que lorsqu'il a choisi son sujet.
-        
-        Contexte de l'utilisateur : ${JSON.stringify(userContext)}.
-        Question de l'utilisateur : ${question}
-        
-        Réponds en français.`,
-        config: {
-          temperature: 0.7,
-        },
-      });
-      res.json({ text: response.text });
-    } catch (error) {
-      console.error("Error in /api/ask:", error);
-      res.status(500).json({ error: "Failed to answer question" });
     }
   });
 

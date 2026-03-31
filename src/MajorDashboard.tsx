@@ -7,6 +7,21 @@ import { Footer } from './App';
 import { GenesisAI } from './components/GenesisAI';
 import { MAJOR_REWARDS, MAJOR_CHALLENGES } from './data/majorData';
 
+interface ChildAccount {
+  linked: boolean;
+  id: string;
+  name: string;
+  balance: number;
+  limits: {
+    payment: number;
+    withdrawal: number;
+    onlinePurchase: boolean;
+    atmWithdrawal: boolean;
+  };
+  isCardBlocked: boolean;
+  requireApproval: boolean;
+}
+
 interface MajorState {
   xp: number;
   realBalance: number;
@@ -26,19 +41,7 @@ interface MajorState {
   completedChallenges: string[];
   beneficiaries: { id: string; name: string; iban: string; bank: string }[];
   isCardBlocked: boolean;
-  childAccount: { 
-    linked: boolean; 
-    id: string; 
-    name: string; 
-    balance: number; 
-    limits: { 
-      payment: number; 
-      withdrawal: number; 
-      onlinePurchase: boolean; 
-      atmWithdrawal: boolean 
-    };
-    isCardBlocked: boolean;
-  } | null;
+  childAccounts: ChildAccount[];
   realTimePrices: Record<string, { price: number; trend: string; name: string }>;
 }
 
@@ -105,14 +108,7 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
       { id: 'b2', name: 'Thomas Petit', iban: 'FR76 1020 3040 5006 7080 9010 112', bank: 'Banque Populaire' }
     ],
     isCardBlocked: false,
-    childAccount: {
-      linked: false,
-      id: "",
-      name: "",
-      balance: 0,
-      limits: { payment: 200, withdrawal: 50, onlinePurchase: true, atmWithdrawal: false },
-      isCardBlocked: false
-    },
+    childAccounts: [],
     realTimePrices: {}
   });
 
@@ -164,12 +160,15 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
 
   useEffect(() => {
     // Simulate a child request after 60 seconds
-    // Only if a child account is linked
+    // Only if at least one child account is linked and requires approval
     const timer = setTimeout(() => {
-      if (userState.childAccount?.linked) {
+      const linkedChildren = userState.childAccounts.filter(c => c.linked && c.requireApproval);
+      if (linkedChildren.length > 0) {
+        const randomChild = linkedChildren[Math.floor(Math.random() * linkedChildren.length)];
         setPendingChildRequest({
           id: `req_${Date.now()}`,
-          childName: userState.childAccount.name || "Léo",
+          childId: randomChild.id,
+          childName: randomChild.name || "Enfant",
           type: Math.random() > 0.5 ? 'debit' : 'credit',
           amount: Math.floor(Math.random() * 50) + 10,
           label: Math.random() > 0.5 ? 'Achat Jeux Vidéo' : 'Argent de poche',
@@ -180,23 +179,23 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
     }, 60000);
 
     return () => clearTimeout(timer);
-  }, [userState.childAccount?.linked]);
+  }, [userState.childAccounts]);
 
   const handleApproveRequest = () => {
     if (!pendingChildRequest) return;
     
     setUserState(prev => {
-      if (!prev.childAccount) return prev;
       const amount = pendingChildRequest.amount;
       const isDebit = pendingChildRequest.type === 'debit';
       
       return {
         ...prev,
         realBalance: isDebit ? prev.realBalance : prev.realBalance - amount,
-        childAccount: {
-          ...prev.childAccount,
-          balance: isDebit ? prev.childAccount.balance - amount : prev.childAccount.balance + amount
-        },
+        childAccounts: prev.childAccounts.map(child => 
+          child.id === pendingChildRequest.childId 
+            ? { ...child, balance: isDebit ? child.balance - amount : child.balance + amount }
+            : child
+        ),
         transactions: [
           { 
             id: `tx_${Date.now()}`, 
@@ -243,14 +242,18 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
           setShowLinkSuccessPopin(true);
           setUserState((prev: any) => ({
             ...prev,
-            childAccount: {
-              linked: true,
-              id: item,
-              name: "Léo",
-              balance: 150.00,
-              limits: { payment: 500, withdrawal: 100, onlinePurchase: true, atmWithdrawal: false },
-              isCardBlocked: false
-            }
+            childAccounts: [
+              ...prev.childAccounts,
+              {
+                linked: true,
+                id: item,
+                name: prev.childAccounts.length === 0 ? "Léo" : prev.childAccounts.length === 1 ? "Emma" : `Enfant ${prev.childAccounts.length + 1}`,
+                balance: 150.00,
+                limits: { payment: 500, withdrawal: 100, onlinePurchase: true, atmWithdrawal: false },
+                isCardBlocked: false,
+                requireApproval: true
+              }
+            ]
           }));
         }, 30000);
       }, 2000);
@@ -949,14 +952,16 @@ function MajorAccount({ name, userState, setUserState }: any) {
       const date = "Aujourd'hui";
       const txId = `tx_${Date.now()}`;
       
-      // Deep copy childAccount if it exists
-      if (prev.childAccount) {
-        newState.childAccount = { ...prev.childAccount };
-      }
+      // Deep copy childAccounts
+      newState.childAccounts = prev.childAccounts.map((c: any) => ({ ...c }));
 
       const getAccountName = (id: string) => {
         if (id === 'main') return 'Compte Courant';
-        if (id === 'child') return `Compte de ${prev.childAccount?.name}`;
+        if (id.startsWith('child_')) {
+          const childId = id.replace('child_', '');
+          const child = prev.childAccounts.find((c: any) => c.id === childId);
+          return child ? `Compte de ${child.name}` : 'Compte Enfant';
+        }
         const savings = prev.savingsAccounts.find((a: any) => a.id === id);
         if (savings) return savings.name;
         const beneficiary = prev.beneficiaries.find((b: any) => b.id === id);
@@ -975,10 +980,11 @@ function MajorAccount({ name, userState, setUserState }: any) {
             { id: txId, date, label, amount: delta, type: 'transfer' },
             ...newState.transactions
           ];
-        } else if (id === 'child') {
-          if (newState.childAccount) {
-            newState.childAccount.balance = Number((newState.childAccount.balance + delta).toFixed(2));
-          }
+        } else if (id.startsWith('child_')) {
+          const childId = id.replace('child_', '');
+          newState.childAccounts = newState.childAccounts.map((c: any) => 
+            c.id === childId ? { ...c, balance: Number((c.balance + delta).toFixed(2)) } : c
+          );
         } else if (id.startsWith('sav_') || prev.savingsAccounts.some((a: any) => a.id === id)) {
           newState.savingsAccounts = newState.savingsAccounts.map((acc: any) => {
             if (acc.id === id) {
@@ -1438,7 +1444,7 @@ function TransferModal({ isOpen, onClose, onTransfer, userState, initialFromId =
   const accounts = [
     { id: 'main', name: 'Compte Courant', balance: userState.realBalance },
     ...userState.savingsAccounts.map((a: any) => ({ id: a.id, name: a.name, balance: a.balance })),
-    ...(userState.childAccount?.linked ? [{ id: 'child', name: `Compte de ${userState.childAccount.name}`, balance: userState.childAccount.balance }] : [])
+    ...userState.childAccounts.filter(c => c.linked).map(c => ({ id: `child_${c.id}`, name: `Compte de ${c.name}`, balance: c.balance }))
   ];
 
   const beneficiaries = userState.beneficiaries;
@@ -3475,6 +3481,205 @@ function MajorGamification({ userState, setUserState, onBack }: any) {
   );
 }
 
+function ChildAccountCard({ child, setUserState, isLightMode }: { child: any, setUserState: any, isLightMode: boolean }) {
+  const [isLimitsExpanded, setIsLimitsExpanded] = useState(false);
+  const [isConfirmingBlock, setIsConfirmingBlock] = useState(false);
+  
+  // Local state for limits
+  const [paymentLimit, setPaymentLimit] = useState(child.limits.payment);
+  const [withdrawalLimit, setWithdrawalLimit] = useState(child.limits.withdrawal);
+  const [onlinePurchase, setOnlinePurchase] = useState(child.limits.onlinePurchase);
+  const [atmWithdrawal, setAtmWithdrawal] = useState(child.limits.atmWithdrawal);
+  const [isCardBlocked, setIsCardBlocked] = useState(child.isCardBlocked);
+  const [requireApproval, setRequireApproval] = useState(child.requireApproval);
+
+  useEffect(() => {
+    setPaymentLimit(child.limits.payment);
+    setWithdrawalLimit(child.limits.withdrawal);
+    setOnlinePurchase(child.limits.onlinePurchase);
+    setAtmWithdrawal(child.limits.atmWithdrawal);
+    setIsCardBlocked(child.isCardBlocked);
+    setRequireApproval(child.requireApproval);
+  }, [child]);
+
+  const handleSave = () => {
+    setUserState((prev: any) => ({
+      ...prev,
+      childAccounts: prev.childAccounts.map((c: any) => 
+        c.id === child.id 
+          ? { 
+              ...c, 
+              limits: { payment: paymentLimit, withdrawal: withdrawalLimit, onlinePurchase, atmWithdrawal }, 
+              isCardBlocked,
+              requireApproval
+            } 
+          : c
+      )
+    }));
+    setIsLimitsExpanded(false);
+  };
+
+  return (
+    <div className={`border rounded-3xl p-6 transition-colors ${isLightMode ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/50 border-slate-800'}`}>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-4">
+          <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${isLightMode ? 'bg-emerald-100' : 'bg-emerald-500/20'}`}>
+            <User className={`w-6 h-6 ${isLightMode ? 'text-emerald-600' : 'text-emerald-400'}`} />
+          </div>
+          <div>
+            <h4 className={`font-bold ${isLightMode ? 'text-slate-900' : 'text-white'}`}>Compte de {child.name}</h4>
+            <p className={`text-xs ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>Affilié avec succès • {child.id}</p>
+          </div>
+        </div>
+        <div className="text-right">
+          <p className={`text-sm font-mono font-bold ${isLightMode ? 'text-slate-900' : 'text-white'}`}>{child.balance.toFixed(2)} €</p>
+          <button 
+            onClick={() => setIsLimitsExpanded(!isLimitsExpanded)}
+            className={`mt-2 text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-2 underline underline-offset-4 ${isLightMode ? 'text-blue-600 hover:text-blue-700' : 'text-blue-400 hover:text-blue-300'}`}
+          >
+            {isLimitsExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            Gérer les limites
+          </button>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {isLimitsExpanded && (
+          <motion.div 
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className={`overflow-hidden border-t pt-6 mt-2 space-y-6 ${isLightMode ? 'border-slate-100' : 'border-emerald-500/10'}`}
+          >
+            <div className={`flex items-center justify-between p-4 border rounded-2xl transition-colors ${isLightMode ? 'bg-slate-50 border-slate-200' : 'bg-red-500/10 border-red-500/20'}`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isLightMode ? 'bg-slate-900' : 'bg-slate-800'}`}>
+                  <CreditCard className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className={`text-sm font-bold ${isLightMode ? 'text-slate-900' : 'text-white'}`}>{isCardBlocked ? 'Carte Bloquée' : 'Carte Active'}</p>
+                  <p className={`text-[10px] ${isLightMode ? 'text-slate-600' : 'text-slate-500'}`}>Bloquer en cas de perte/vol</p>
+                </div>
+              </div>
+              
+              <div className="flex flex-col items-end gap-2">
+                {isConfirmingBlock ? (
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => setIsConfirmingBlock(false)}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${isLightMode ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' : 'bg-slate-800 text-white hover:bg-slate-700'}`}
+                    >
+                      Annuler
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setIsCardBlocked(!isCardBlocked);
+                        setIsConfirmingBlock(false);
+                      }}
+                      className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-red-600 text-white hover:bg-red-500 transition-all"
+                    >
+                      Confirmer
+                    </button>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => setIsConfirmingBlock(true)}
+                    className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all ${isLightMode ? (isCardBlocked ? 'bg-white border-emerald-200 text-emerald-600' : 'bg-white border-red-200 text-red-600 underline underline-offset-4') : (isCardBlocked ? 'bg-slate-800 border-slate-700 text-emerald-600' : 'bg-slate-800 border-slate-700 text-red-600 underline underline-offset-4')}`}
+                  >
+                    {isCardBlocked ? 'Débloquer' : 'Bloquer'}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className={`text-sm font-medium ${isLightMode ? 'text-slate-600' : 'text-slate-400'}`}>Plafond de paiement (30j)</label>
+                  <span className={`font-mono font-bold ${isLightMode ? 'text-slate-900' : 'text-blue-400'}`}>{paymentLimit} €</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="1000" 
+                  step="50"
+                  value={paymentLimit} 
+                  onChange={(e) => setPaymentLimit(parseInt(e.target.value))}
+                  className={`w-full h-2 rounded-lg appearance-none cursor-pointer transition-colors ${isLightMode ? 'bg-slate-200 accent-slate-950 border border-slate-300' : 'bg-slate-800 accent-blue-500 border border-slate-700'}`}
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className={`text-sm font-medium ${isLightMode ? 'text-slate-600' : 'text-slate-400'}`}>Plafond de retrait (30j)</label>
+                  <span className={`font-mono font-bold ${isLightMode ? 'text-slate-900' : 'text-blue-400'}`}>{withdrawalLimit} €</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="500" 
+                  step="10"
+                  value={withdrawalLimit} 
+                  onChange={(e) => setWithdrawalLimit(parseInt(e.target.value))}
+                  className={`w-full h-2 rounded-lg appearance-none cursor-pointer transition-colors ${isLightMode ? 'bg-slate-200 accent-slate-950 border border-slate-300' : 'bg-slate-800 accent-blue-500 border border-slate-700'}`}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${isLightMode ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/40 border-slate-800'}`}>
+                <div>
+                  <p className={`text-sm font-medium ${isLightMode ? 'text-slate-900' : 'text-white'}`}>Achat en ligne</p>
+                  <p className={`text-[10px] ${isLightMode ? 'text-slate-500' : 'text-slate-500'}`}>Autoriser les paiements internet</p>
+                </div>
+                <button 
+                  onClick={() => setOnlinePurchase(!onlinePurchase)}
+                  className={`w-12 h-6 rounded-full transition-colors relative ${onlinePurchase ? (isLightMode ? 'bg-black' : 'bg-emerald-600') : (isLightMode ? 'bg-slate-200' : 'bg-slate-800')}`}
+                >
+                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${onlinePurchase ? 'left-7' : 'left-1'}`}></div>
+                </button>
+              </div>
+
+              <div className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${isLightMode ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/40 border-slate-800'}`}>
+                <div>
+                  <p className={`text-sm font-medium ${isLightMode ? 'text-slate-900' : 'text-white'}`}>Retrait DAB</p>
+                  <p className={`text-[10px] ${isLightMode ? 'text-slate-500' : 'text-slate-500'}`}>Autoriser les retraits</p>
+                </div>
+                <button 
+                  onClick={() => setAtmWithdrawal(!atmWithdrawal)}
+                  className={`w-12 h-6 rounded-full transition-colors relative ${atmWithdrawal ? (isLightMode ? 'bg-black' : 'bg-emerald-600') : (isLightMode ? 'bg-slate-200' : 'bg-slate-800')}`}
+                >
+                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${atmWithdrawal ? 'left-7' : 'left-1'}`}></div>
+                </button>
+              </div>
+
+              <div className={`flex items-center justify-between p-3 rounded-xl border md:col-span-2 transition-colors ${isLightMode ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/40 border-slate-800'}`}>
+                <div>
+                  <p className={`text-sm font-medium ${isLightMode ? 'text-slate-900' : 'text-white'}`}>Demandes d'approbation</p>
+                  <p className={`text-[10px] ${isLightMode ? 'text-slate-500' : 'text-slate-500'}`}>Recevoir une notification pour chaque achat/virement</p>
+                </div>
+                <button 
+                  onClick={() => setRequireApproval(!requireApproval)}
+                  className={`w-12 h-6 rounded-full transition-colors relative ${requireApproval ? (isLightMode ? 'bg-black' : 'bg-blue-600') : (isLightMode ? 'bg-slate-200' : 'bg-slate-800')}`}
+                >
+                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${requireApproval ? 'left-7' : 'left-1'}`}></div>
+                </button>
+              </div>
+            </div>
+
+            <button 
+              onClick={handleSave}
+              className={`w-full py-4 rounded-xl font-bold transition-all shadow-lg ${isLightMode ? 'bg-white border border-slate-900 text-slate-900 hover:bg-black hover:text-white shadow-slate-100' : 'bg-blue-600 text-white hover:bg-blue-500 shadow-blue-600/20'}`}
+            >
+              Enregistrer les modifications
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 function MajorProfile({ 
   name, 
   userState, 
@@ -3489,26 +3694,7 @@ function MajorProfile({
   linkSuccess,
   isRequestSent
 }: any) {
-  const [isLimitsExpanded, setIsLimitsExpanded] = useState(false);
-  const [isConfirmingBlock, setIsConfirmingBlock] = useState(false);
   const [isLightMode, setIsLightMode] = useState(() => document.documentElement.classList.contains('light-mode'));
-
-  // Local state for limits when expanded
-  const [paymentLimit, setPaymentLimit] = useState(userState.childAccount?.limits?.payment ?? 500);
-  const [withdrawalLimit, setWithdrawalLimit] = useState(userState.childAccount?.limits?.withdrawal ?? 100);
-  const [onlinePurchase, setOnlinePurchase] = useState(userState.childAccount?.limits?.onlinePurchase ?? true);
-  const [atmWithdrawal, setAtmWithdrawal] = useState(userState.childAccount?.limits?.atmWithdrawal ?? false);
-  const [isCardBlocked, setIsCardBlocked] = useState(userState.childAccount?.isCardBlocked ?? false);
-
-  useEffect(() => {
-    if (userState.childAccount?.limits) {
-      setPaymentLimit(userState.childAccount.limits.payment);
-      setWithdrawalLimit(userState.childAccount.limits.withdrawal);
-      setOnlinePurchase(userState.childAccount.limits.onlinePurchase);
-      setAtmWithdrawal(userState.childAccount.limits.atmWithdrawal);
-      setIsCardBlocked(userState.childAccount.isCardBlocked);
-    }
-  }, [userState.childAccount]);
 
   const toggleTheme = () => {
     const html = document.documentElement;
@@ -3525,10 +3711,10 @@ function MajorProfile({
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-6 max-w-3xl mx-auto space-y-8 pb-32">
       <header className="flex justify-between items-center pt-2">
         <div>
-          <h1 className="font-display text-2xl font-bold text-white">Profil & Connexions</h1>
+          <h1 className={`font-display text-2xl font-bold transition-colors ${isLightMode ? 'text-slate-900' : 'text-white'}`}>Profil & Connexions</h1>
           <p className="text-slate-400 text-sm font-medium">Gérez vos informations et comptes externes.</p>
         </div>
-        <button onClick={onLogout} className="text-slate-400 hover:text-white text-sm font-medium px-4 py-2 bg-slate-900 rounded-xl">
+        <button onClick={onLogout} className={`text-sm font-medium px-4 py-2 rounded-xl transition-colors ${isLightMode ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' : 'bg-slate-900 text-slate-400 hover:text-white'}`}>
           Déconnexion
         </button>
       </header>
@@ -3551,13 +3737,13 @@ function MajorProfile({
             {isLightMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </div>
           <div>
-            <h3 className="font-bold text-slate-50">Apparence</h3>
+            <h3 className={`font-bold transition-colors ${isLightMode ? 'text-slate-900' : 'text-slate-50'}`}>Apparence</h3>
             <p className="text-sm text-slate-400">{isLightMode ? 'Mode Clair' : 'Mode Sombre'}</p>
           </div>
         </div>
         <button 
           onClick={toggleTheme}
-          className={`w-14 h-8 rounded-full p-1 transition-colors duration-300 ease-in-out ${isLightMode ? 'bg-blue-600' : 'bg-slate-700'}`}
+          className={`w-14 h-8 rounded-full p-1 transition-colors duration-300 ease-in-out ${isLightMode ? 'bg-slate-900' : 'bg-slate-700'}`}
         >
           <div className={`w-6 h-6 rounded-full bg-white shadow-md transform transition-transform duration-300 ease-in-out ${isLightMode ? 'translate-x-6' : 'translate-x-0'}`} />
         </button>
@@ -3567,230 +3753,82 @@ function MajorProfile({
       <section>
         <div 
           onClick={onGoToGamification}
-          className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 rounded-2xl p-5 flex items-center justify-between cursor-pointer hover:border-blue-500/50 transition-all group"
+          className={`border rounded-2xl p-5 flex items-center justify-between cursor-pointer transition-all group ${isLightMode ? 'bg-white border-slate-200 hover:bg-slate-50 shadow-sm' : 'bg-gradient-to-r from-blue-600/20 to-purple-600/20 border-blue-500/30 hover:border-blue-500/50'}`}
         >
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Trophy className="w-6 h-6 text-blue-400" />
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform ${isLightMode ? 'bg-blue-100' : 'bg-blue-500/20'}`}>
+              <Trophy className={`w-6 h-6 ${isLightMode ? 'text-blue-600' : 'text-blue-400'}`} />
             </div>
             <div>
-              <h3 className="font-bold text-white">Mes avantages</h3>
-              <p className="text-xs text-slate-400">Consultez vos privilèges et relevez des défis.</p>
+              <h3 className={`font-bold transition-colors ${isLightMode ? 'text-slate-900' : 'text-white'}`}>Mes avantages</h3>
+              <p className={`text-xs ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>Consultez vos privilèges et relevez des défis.</p>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-full bg-blue-200 dark:bg-slate-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors">
-            <ChevronRight className="w-5 h-5 text-blue-700 dark:text-slate-400 group-hover:text-white transition-colors" />
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isLightMode ? 'bg-slate-100 group-hover:bg-blue-600' : 'bg-slate-800 group-hover:bg-blue-600'}`}>
+            <ChevronRight className={`w-5 h-5 transition-colors ${isLightMode ? 'text-slate-400 group-hover:text-white' : 'text-slate-400 group-hover:text-white'}`} />
           </div>
         </div>
       </section>
 
       {/* Contrôle Parental / Compte Enfant */}
       <section id="parental-control" className="space-y-4">
-        <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
+        <h3 className={`font-display text-lg font-bold flex items-center gap-2 transition-colors ${isLightMode ? 'text-slate-900' : 'text-white'}`}>
           <Shield className="w-5 h-5 text-emerald-500" /> Contrôle Parental
         </h3>
+
+        {userState.childAccounts.map((child: any) => (
+          <ChildAccountCard 
+            key={child.id} 
+            child={child} 
+            setUserState={setUserState} 
+            isLightMode={isLightMode} 
+          />
+        ))}
         
-        {!userState.childAccount?.linked ? (
-          <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 space-y-4">
-            <p className="text-sm text-slate-400">Affiliez le compte Genesis de votre enfant pour gérer ses plafonds et effectuer des virements instantanés.</p>
-            <form onSubmit={handleLinkChild} className="space-y-3">
-              <div className="relative">
-                <input 
-                  type="text" 
-                  placeholder="Clé Genesis de l'enfant (ex: GNS-x9!K#2pL_7mQ*4vR)" 
-                  value={childIdInput}
-                  onChange={(e) => setChildIdInput(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500 font-mono"
-                />
-              </div>
-              <button 
-                type="submit" 
-                disabled={!childIdInput || isLinking || isRequestSent}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {isLinking ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    Demande en cours...
-                  </>
-                ) : isRequestSent ? "Demande envoyée" : "Lier le compte enfant"}
-              </button>
-            </form>
-            {isRequestSent && (
-              <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl space-y-2">
-                <p className="text-xs text-blue-400 font-medium flex items-center gap-2">
-                  <Info className="w-4 h-4" /> Demande envoyée
-                </p>
-                <p className="text-[10px] text-slate-400">
-                  Une demande d'affiliation a été envoyée sur le compte mineur. Une fois la demande validée, les comptes seront bien associés.
-                </p>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                  <User className="w-6 h-6 text-emerald-400" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-white">Compte de {userState.childAccount.name}</h4>
-                  <p className="text-xs text-slate-400">Affilié avec succès • {userState.childAccount.id}</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-mono font-bold text-white">{userState.childAccount.balance.toFixed(2)} €</p>
-                <button 
-                  onClick={() => setIsLimitsExpanded(!isLimitsExpanded)}
-                  className="mt-2 text-blue-400 text-[10px] font-bold hover:text-blue-300 uppercase tracking-wider transition-all flex items-center gap-2 underline underline-offset-4"
-                >
-                  {isLimitsExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                  Gérer les limites
-                </button>
-              </div>
+        <div className={`border rounded-3xl p-6 space-y-4 transition-colors ${isLightMode ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/50 border-slate-800'}`}>
+          <p className={`text-sm ${isLightMode ? 'text-slate-600' : 'text-slate-400'}`}>Affiliez un nouveau compte Genesis pour gérer ses plafonds et effectuer des virements instantanés.</p>
+          <form onSubmit={handleLinkChild} className="space-y-3">
+            <div className="relative">
+              <input 
+                type="text" 
+                placeholder="Clé Genesis de l'enfant (ex: GNS-x9!K#2pL_7mQ*4vR)" 
+                value={childIdInput}
+                onChange={(e) => setChildIdInput(e.target.value)}
+                className={`w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 font-mono transition-colors ${isLightMode ? 'bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400' : 'bg-slate-950 border-slate-800 text-white placeholder:text-slate-600'}`}
+              />
             </div>
-
-            <AnimatePresence>
-              {isLimitsExpanded && (
-                <motion.div 
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden border-t border-emerald-500/10 pt-6 mt-2 space-y-6"
-                >
-                  <div className={`flex items-center justify-between p-4 border border-red-500/20 rounded-2xl ${isLightMode ? 'bg-[#f8f8f8]' : 'bg-red-500/10'}`}>
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center force-black-bg">
-                        <CreditCard className="w-5 h-5 force-white-text" />
-                      </div>
-                      <div>
-                        <p className={`text-sm font-bold ${isLightMode ? 'text-slate-900' : 'text-white'}`}>{isCardBlocked ? 'Carte Bloquée' : 'Carte Active'}</p>
-                        <p className={`text-[10px] ${isLightMode ? 'text-slate-600' : 'text-slate-500'}`}>Bloquer en cas de perte/vol</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-col items-end gap-2">
-                      {isConfirmingBlock ? (
-                        <div className="flex gap-2">
-                          <button 
-                            onClick={() => setIsConfirmingBlock(false)}
-                            className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-slate-800 force-white hover:bg-slate-700 transition-all"
-                          >
-                            Annuler
-                          </button>
-                          <button 
-                            onClick={() => {
-                              setIsCardBlocked(!isCardBlocked);
-                              setIsConfirmingBlock(false);
-                            }}
-                            className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-red-600 text-white hover:bg-red-500 transition-all"
-                          >
-                            Confirmer
-                          </button>
-                        </div>
-                      ) : (
-                        <button 
-                          onClick={() => setIsConfirmingBlock(true)}
-                          className={`px-4 py-2 border border-slate-700 rounded-xl text-xs font-bold transition-all bg-[#ffffff] ${isCardBlocked ? 'text-emerald-600' : 'text-red-600 underline underline-offset-4'}`}
-                        >
-                          {isCardBlocked ? 'Débloquer' : 'Bloquer'}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <div className="flex justify-between items-center mb-2">
-                        <label className="text-sm font-medium text-slate-400">Plafond de paiement (30j)</label>
-                        <span className="text-blue-400 font-mono font-bold">{paymentLimit} €</span>
-                      </div>
-                      <input 
-                        type="range" 
-                        min="0" 
-                        max="1000" 
-                        step="50"
-                        value={paymentLimit} 
-                        onChange={(e) => setPaymentLimit(parseInt(e.target.value))}
-                        className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500 border border-slate-700"
-                      />
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between items-center mb-2">
-                        <label className="text-sm font-medium text-slate-400">Plafond de retrait (30j)</label>
-                        <span className="text-blue-400 font-mono font-bold">{withdrawalLimit} €</span>
-                      </div>
-                      <input 
-                        type="range" 
-                        min="0" 
-                        max="500" 
-                        step="10"
-                        value={withdrawalLimit} 
-                        onChange={(e) => setWithdrawalLimit(parseInt(e.target.value))}
-                        className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500 border border-slate-700"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center justify-between p-3 bg-slate-950/40 rounded-xl border border-slate-800">
-                      <div>
-                        <p className="text-sm font-medium text-white">Achat en ligne</p>
-                        <p className="text-[10px] text-slate-500">Autoriser les paiements internet</p>
-                      </div>
-                      <button 
-                        onClick={() => setOnlinePurchase(!onlinePurchase)}
-                        className={`w-12 h-6 rounded-full transition-colors relative ${onlinePurchase ? 'bg-emerald-600' : 'bg-slate-800'}`}
-                      >
-                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${onlinePurchase ? 'left-7' : 'left-1'}`}></div>
-                      </button>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 bg-slate-950/40 rounded-xl border border-slate-800">
-                      <div>
-                        <p className="text-sm font-medium text-white">Retrait DAB</p>
-                        <p className="text-[10px] text-slate-500">Autoriser les retraits</p>
-                      </div>
-                      <button 
-                        onClick={() => setAtmWithdrawal(!atmWithdrawal)}
-                        className={`w-12 h-6 rounded-full transition-colors relative ${atmWithdrawal ? 'bg-emerald-600' : 'bg-slate-800'}`}
-                      >
-                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${atmWithdrawal ? 'left-7' : 'left-1'}`}></div>
-                      </button>
-                    </div>
-                  </div>
-
-                  <button 
-                    onClick={() => {
-                      setUserState((prev: any) => ({
-                        ...prev,
-                        childAccount: {
-                          ...prev.childAccount,
-                          limits: { payment: paymentLimit, withdrawal: withdrawalLimit, onlinePurchase, atmWithdrawal },
-                          isCardBlocked
-                        }
-                      }));
-                      setIsLimitsExpanded(false);
-                    }}
-                    className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-blue-600/20"
-                  >
-                    Enregistrer les modifications
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
+            <button 
+              type="submit" 
+              disabled={!childIdInput || isLinking || isRequestSent}
+              className={`w-full py-3 rounded-xl font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2 ${isLightMode ? 'bg-white border border-slate-900 text-slate-900 hover:bg-black hover:text-white' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}
+            >
+              {isLinking ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Demande en cours...
+                </>
+              ) : isRequestSent ? "Demande envoyée" : "Lier un compte enfant"}
+            </button>
+          </form>
+          {isRequestSent && (
+            <div className={`p-4 border rounded-xl space-y-2 transition-colors ${isLightMode ? 'bg-blue-50 border-blue-100' : 'bg-blue-500/10 border-blue-500/20'}`}>
+              <p className={`text-xs font-medium flex items-center gap-2 ${isLightMode ? 'text-blue-700' : 'text-blue-400'}`}>
+                <Info className="w-4 h-4" /> Demande envoyée
+              </p>
+              <p className={`text-[10px] ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                Une demande d'affiliation a été envoyée sur le compte mineur. Une fois la demande validée, les comptes seront bien associés.
+              </p>
+            </div>
+          )}
+        </div>
       </section>
 
       <div className="space-y-6">
         {/* Banks */}
         <section>
           <div className="flex items-center gap-2 mb-4">
-            <Building2 className="w-5 h-5 text-blue-400" />
-            <h2 className="text-lg font-bold text-white">Mes Banques</h2>
+            <Building2 className={`w-5 h-5 ${isLightMode ? 'text-blue-600' : 'text-blue-400'}`} />
+            <h2 className={`text-lg font-bold transition-colors ${isLightMode ? 'text-slate-900' : 'text-white'}`}>Mes Banques</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {BANKS.map(bank => {
@@ -3799,10 +3837,22 @@ function MajorProfile({
                 <div 
                   key={bank}
                   onClick={() => toggleLink('bank', bank)}
-                  className={`border rounded-xl p-4 flex items-center justify-between cursor-pointer transition-colors ${isLinked ? 'bg-blue-900/20 border-blue-500/50' : 'bg-slate-900/50 border-slate-800 hover:bg-slate-800'}`}
+                  className={`border rounded-xl p-4 flex items-center justify-between cursor-pointer transition-all group ${
+                    isLinked 
+                      ? (isLightMode ? 'bg-blue-50 border-blue-200' : 'bg-blue-900/20 border-blue-500/50') 
+                      : (isLightMode ? 'bg-white border-slate-200 hover:bg-slate-50' : 'bg-slate-900/50 border-slate-800 hover:bg-slate-800')
+                  }`}
                 >
-                  <span className={`text-sm font-medium ${isLinked ? 'text-blue-400' : 'text-slate-300'}`}>{bank}</span>
-                  {isLinked ? <CheckCircle2 className="w-5 h-5 text-blue-500" /> : <Plus className="w-5 h-5 text-slate-500" />}
+                  <span className={`text-sm font-medium transition-colors ${
+                    isLinked 
+                      ? (isLightMode ? 'text-blue-700' : 'text-blue-400') 
+                      : (isLightMode ? 'text-slate-500 group-hover:text-blue-600' : 'text-slate-300')
+                  }`}>{bank}</span>
+                  {isLinked ? (
+                    <CheckCircle2 className={`w-5 h-5 ${isLightMode ? 'text-blue-600' : 'text-blue-500'}`} />
+                  ) : (
+                    <Plus className={`w-5 h-5 transition-colors ${isLightMode ? 'text-slate-300 group-hover:text-blue-600' : 'text-slate-500'}`} />
+                  )}
                 </div>
               )
             })}
@@ -3812,8 +3862,8 @@ function MajorProfile({
         {/* Insurances */}
         <section>
           <div className="flex items-center gap-2 mb-4">
-            <Shield className="w-5 h-5 text-emerald-400" />
-            <h2 className="text-lg font-bold text-white">Mes Assurances</h2>
+            <Shield className={`w-5 h-5 ${isLightMode ? 'text-emerald-600' : 'text-emerald-400'}`} />
+            <h2 className={`text-lg font-bold transition-colors ${isLightMode ? 'text-slate-900' : 'text-white'}`}>Mes Assurances</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {INSURANCES.map(ins => {
@@ -3822,10 +3872,22 @@ function MajorProfile({
                 <div 
                   key={ins}
                   onClick={() => toggleLink('insurance', ins)}
-                  className={`border rounded-xl p-4 flex items-center justify-between cursor-pointer transition-colors ${isLinked ? 'bg-emerald-900/20 border-emerald-500/50' : 'bg-slate-900/50 border-slate-800 hover:bg-slate-800'}`}
+                  className={`border rounded-xl p-4 flex items-center justify-between cursor-pointer transition-all group ${
+                    isLinked 
+                      ? (isLightMode ? 'bg-emerald-50 border-emerald-200' : 'bg-emerald-900/20 border-emerald-500/50') 
+                      : (isLightMode ? 'bg-white border-slate-200 hover:bg-slate-50' : 'bg-slate-900/50 border-slate-800 hover:bg-slate-800')
+                  }`}
                 >
-                  <span className={`text-sm font-medium ${isLinked ? 'text-emerald-400' : 'text-slate-300'}`}>{ins}</span>
-                  {isLinked ? <CheckCircle2 className="w-5 h-5 text-emerald-500" /> : <Plus className="w-5 h-5 text-slate-500" />}
+                  <span className={`text-sm font-medium transition-colors ${
+                    isLinked 
+                      ? (isLightMode ? 'text-emerald-700' : 'text-emerald-400') 
+                      : (isLightMode ? 'text-slate-500 group-hover:text-emerald-600' : 'text-slate-300')
+                  }`}>{ins}</span>
+                  {isLinked ? (
+                    <CheckCircle2 className={`w-5 h-5 ${isLightMode ? 'text-emerald-600' : 'text-emerald-500'}`} />
+                  ) : (
+                    <Plus className={`w-5 h-5 transition-colors ${isLightMode ? 'text-slate-300 group-hover:text-emerald-600' : 'text-slate-500'}`} />
+                  )}
                 </div>
               )
             })}
@@ -3835,8 +3897,8 @@ function MajorProfile({
         {/* Investments */}
         <section>
           <div className="flex items-center gap-2 mb-4">
-            <Briefcase className="w-5 h-5 text-purple-400" />
-            <h2 className="text-lg font-bold text-white">Mes Investissements</h2>
+            <Briefcase className={`w-5 h-5 ${isLightMode ? 'text-purple-600' : 'text-purple-400'}`} />
+            <h2 className={`text-lg font-bold transition-colors ${isLightMode ? 'text-slate-900' : 'text-white'}`}>Mes Investissements</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {INVESTMENTS.map(inv => {
@@ -3845,10 +3907,22 @@ function MajorProfile({
                 <div 
                   key={inv}
                   onClick={() => toggleLink('investment', inv)}
-                  className={`border rounded-xl p-4 flex items-center justify-between cursor-pointer transition-colors ${isLinked ? 'bg-purple-900/20 border-purple-500/50' : 'bg-slate-900/50 border-slate-800 hover:bg-slate-800'}`}
+                  className={`border rounded-xl p-4 flex items-center justify-between cursor-pointer transition-all group ${
+                    isLinked 
+                      ? (isLightMode ? 'bg-purple-50 border-purple-200' : 'bg-purple-900/20 border-purple-500/50') 
+                      : (isLightMode ? 'bg-white border-slate-200 hover:bg-slate-50' : 'bg-slate-900/50 border-slate-800 hover:bg-slate-800')
+                  }`}
                 >
-                  <span className={`text-sm font-medium ${isLinked ? 'text-purple-400' : 'text-slate-300'}`}>{inv}</span>
-                  {isLinked ? <CheckCircle2 className="w-5 h-5 text-purple-500" /> : <Plus className="w-5 h-5 text-slate-500" />}
+                  <span className={`text-sm font-medium transition-colors ${
+                    isLinked 
+                      ? (isLightMode ? 'text-purple-700' : 'text-purple-400') 
+                      : (isLightMode ? 'text-slate-500 group-hover:text-purple-600' : 'text-slate-300')
+                  }`}>{inv}</span>
+                  {isLinked ? (
+                    <CheckCircle2 className={`w-5 h-5 ${isLightMode ? 'text-purple-600' : 'text-purple-500'}`} />
+                  ) : (
+                    <Plus className={`w-5 h-5 transition-colors ${isLightMode ? 'text-slate-300 group-hover:text-purple-600' : 'text-slate-500'}`} />
+                  )}
                 </div>
               )
             })}
