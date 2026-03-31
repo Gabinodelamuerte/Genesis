@@ -50,7 +50,12 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
   const [activeTab, setActiveTab] = useState<'home' | 'account' | 'gestion' | 'insurance' | 'invest' | 'profile' | 'gamification'>('home');
   const [pendingChildRequest, setPendingChildRequest] = useState<any>(null);
   const [isSyncing, setIsSyncing] = useState(false);
-  const [confirmLink, setConfirmLink] = useState<{ type: 'bank' | 'insurance' | 'investment', item: string } | null>(null);
+  const [confirmLink, setConfirmLink] = useState<{ type: 'bank' | 'insurance' | 'investment' | 'child', item: string } | null>(null);
+  const [childIdInput, setChildIdInput] = useState('');
+  const [isLinking, setIsLinking] = useState(false);
+  const [linkSuccess, setLinkSuccess] = useState(false);
+  const [isRequestSent, setIsRequestSent] = useState(false);
+  const [showLinkSuccessPopin, setShowLinkSuccessPopin] = useState(false);
   
   const [userState, setUserState] = useState<MajorState>({
     xp: 150,
@@ -187,7 +192,7 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
       
       return {
         ...prev,
-        realBalance: isDebit ? prev.realBalance - amount : prev.realBalance - amount, // Assuming it comes from parent's main account
+        realBalance: isDebit ? prev.realBalance : prev.realBalance - amount,
         childAccount: {
           ...prev.childAccount,
           balance: isDebit ? prev.childAccount.balance - amount : prev.childAccount.balance + amount
@@ -197,7 +202,7 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
             id: `tx_${Date.now()}`, 
             date: 'Aujourd\'hui', 
             label: `${isDebit ? 'Débit' : 'Crédit'} approuvé pour ${pendingChildRequest.childName}`, 
-            amount: -amount, 
+            amount: isDebit ? 0 : -amount, 
             type: 'transfer' 
           },
           ...prev.transactions
@@ -224,6 +229,35 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
   const confirmToggleLink = () => {
     if (!confirmLink) return;
     const { type, item } = confirmLink;
+    
+    if (type === 'child') {
+      setIsLinking(true);
+      setTimeout(() => {
+        setIsLinking(false);
+        setIsRequestSent(true);
+        setChildIdInput('');
+        
+        // Simulate child accepting after 30 seconds
+        setTimeout(() => {
+          setIsRequestSent(false);
+          setShowLinkSuccessPopin(true);
+          setUserState((prev: any) => ({
+            ...prev,
+            childAccount: {
+              linked: true,
+              id: item,
+              name: "Léo",
+              balance: 150.00,
+              limits: { payment: 500, withdrawal: 100, onlinePurchase: true, atmWithdrawal: false },
+              isCardBlocked: false
+            }
+          }));
+        }, 30000);
+      }, 2000);
+      setConfirmLink(null);
+      return;
+    }
+
     const key = type === 'bank' ? 'linkedBanks' : type === 'insurance' ? 'linkedInsurances' : 'linkedInvestments';
     
     setUserState((prev: MajorState) => ({
@@ -231,6 +265,12 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
       [key]: [...prev[key], item]
     }));
     setConfirmLink(null);
+  };
+
+  const handleLinkChild = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!childIdInput) return;
+    setConfirmLink({ type: 'child', item: childIdInput });
   };
 
   const handleSync = () => {
@@ -370,6 +410,12 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
             onLogout={onLogout} 
             onGoToGamification={() => setActiveTab('gamification')}
             toggleLink={toggleLink}
+            handleLinkChild={handleLinkChild}
+            childIdInput={childIdInput}
+            setChildIdInput={setChildIdInput}
+            isLinking={isLinking}
+            linkSuccess={linkSuccess}
+            isRequestSent={isRequestSent}
           />
         )}
         <Footer />
@@ -398,9 +444,14 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
               <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mb-4">
                 <Link className="w-6 h-6 text-blue-400" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Confirmer la liaison</h3>
+              <h3 className="text-xl font-bold text-white mb-2">
+                {confirmLink.type === 'child' ? 'Affilier un compte enfant' : 'Confirmer la liaison'}
+              </h3>
               <p className="text-slate-400 text-sm mb-6">
-                Souhaitez-vous lier votre compte <span className="text-white font-bold">{confirmLink.item}</span> à votre espace Genesis ? Cela nous permettra de synchroniser vos données en temps réel.
+                {confirmLink.type === 'child' 
+                  ? `Êtes-vous sûr de vouloir envoyer une demande d'affiliation au compte ${confirmLink.item} ?`
+                  : `Souhaitez-vous lier votre compte ${confirmLink.item} à votre espace Genesis ? Cela nous permettra de synchroniser vos données en temps réel.`
+                }
               </p>
               <div className="flex gap-3">
                 <button 
@@ -416,6 +467,37 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
                   Confirmer
                 </button>
               </div>
+            </motion.div>
+          </div>
+        )}
+
+        {showLinkSuccessPopin && (
+          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl text-center"
+            >
+              <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mb-4 mx-auto">
+                <CheckCircle className="w-10 h-10 text-emerald-400" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Affiliation Réussie !</h3>
+              <p className="text-slate-400 text-sm mb-6">
+                Le compte de votre enfant a été affilié avec succès. Vous pouvez maintenant gérer ses limites et suivre ses dépenses.
+              </p>
+              <button 
+                onClick={() => {
+                  setShowLinkSuccessPopin(false);
+                  setActiveTab('profile');
+                  // Scroll to parental control section if needed
+                  const el = document.getElementById('parental-control');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="w-full py-3 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-600/20"
+              >
+                Accéder au Contrôle Parental
+              </button>
             </motion.div>
           </div>
         )}
@@ -3393,10 +3475,20 @@ function MajorGamification({ userState, setUserState, onBack }: any) {
   );
 }
 
-function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamification, toggleLink }: any) {
-  const [childIdInput, setChildIdInput] = useState('');
-  const [isLinking, setIsLinking] = useState(false);
-  const [linkSuccess, setLinkSuccess] = useState(false);
+function MajorProfile({ 
+  name, 
+  userState, 
+  setUserState, 
+  onLogout, 
+  onGoToGamification, 
+  toggleLink,
+  handleLinkChild,
+  childIdInput,
+  setChildIdInput,
+  isLinking,
+  linkSuccess,
+  isRequestSent
+}: any) {
   const [isLimitsExpanded, setIsLimitsExpanded] = useState(false);
   const [isConfirmingBlock, setIsConfirmingBlock] = useState(false);
   const [isLightMode, setIsLightMode] = useState(() => document.documentElement.classList.contains('light-mode'));
@@ -3427,29 +3519,6 @@ function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamificat
       html.classList.add('light-mode');
       setIsLightMode(true);
     }
-  };
-
-  const handleLinkChild = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!childIdInput) return;
-    setIsLinking(true);
-    
-    // Simulate API call and message sent to child
-    setTimeout(() => {
-      setIsLinking(false);
-      setLinkSuccess(true);
-      setUserState((prev: any) => ({
-        ...prev,
-        childAccount: {
-          linked: true,
-          id: childIdInput,
-          name: "Léo",
-          balance: 150.00,
-          limits: { payment: 500, withdrawal: 100, onlinePurchase: true, atmWithdrawal: false },
-          isCardBlocked: false
-        }
-      }));
-    }, 2000);
   };
 
   return (
@@ -3516,7 +3585,7 @@ function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamificat
       </section>
 
       {/* Contrôle Parental / Compte Enfant */}
-      <section className="space-y-4">
+      <section id="parental-control" className="space-y-4">
         <h3 className="font-display text-lg font-bold text-white flex items-center gap-2">
           <Shield className="w-5 h-5 text-emerald-500" /> Contrôle Parental
         </h3>
@@ -3536,7 +3605,7 @@ function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamificat
               </div>
               <button 
                 type="submit" 
-                disabled={!childIdInput || isLinking}
+                disabled={!childIdInput || isLinking || isRequestSent}
                 className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isLinking ? (
@@ -3544,11 +3613,18 @@ function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamificat
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                     Demande en cours...
                   </>
-                ) : "Lier le compte enfant"}
+                ) : isRequestSent ? "Demande envoyée" : "Lier le compte enfant"}
               </button>
             </form>
-            {linkSuccess && (
-              <p className="text-xs text-emerald-400 text-center font-medium">Une demande d'affiliation a été envoyée à l'enfant.</p>
+            {isRequestSent && (
+              <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl space-y-2">
+                <p className="text-xs text-blue-400 font-medium flex items-center gap-2">
+                  <Info className="w-4 h-4" /> Demande envoyée
+                </p>
+                <p className="text-[10px] text-slate-400">
+                  Une demande d'affiliation a été envoyée sur le compte mineur. Une fois la demande validée, les comptes seront bien associés.
+                </p>
+              </div>
             )}
           </div>
         ) : (
@@ -3583,14 +3659,14 @@ function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamificat
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden border-t border-emerald-500/10 pt-6 mt-2 space-y-6"
                 >
-                  <div className="flex items-center justify-between p-4 bg-red-500/10 border border-red-500/20 rounded-2xl">
+                  <div className={`flex items-center justify-between p-4 border border-red-500/20 rounded-2xl ${isLightMode ? 'bg-[#f8f8f8]' : 'bg-red-500/10'}`}>
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl flex items-center justify-center force-black-bg">
                         <CreditCard className="w-5 h-5 force-white-text" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-white">{isCardBlocked ? 'Carte Bloquée' : 'Carte Active'}</p>
-                        <p className="text-[10px] text-slate-500">Bloquer en cas de perte/vol</p>
+                        <p className={`text-sm font-bold ${isLightMode ? 'text-slate-900' : 'text-white'}`}>{isCardBlocked ? 'Carte Bloquée' : 'Carte Active'}</p>
+                        <p className={`text-[10px] ${isLightMode ? 'text-slate-600' : 'text-slate-500'}`}>Bloquer en cas de perte/vol</p>
                       </div>
                     </div>
                     
@@ -3616,7 +3692,7 @@ function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamificat
                       ) : (
                         <button 
                           onClick={() => setIsConfirmingBlock(true)}
-                          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${isCardBlocked ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white underline underline-offset-4'}`}
+                          className={`px-4 py-2 border border-slate-700 rounded-xl text-xs font-bold transition-all bg-[#ffffff] ${isCardBlocked ? 'text-emerald-600' : 'text-red-600 underline underline-offset-4'}`}
                         >
                           {isCardBlocked ? 'Débloquer' : 'Bloquer'}
                         </button>
@@ -3637,7 +3713,7 @@ function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamificat
                         step="50"
                         value={paymentLimit} 
                         onChange={(e) => setPaymentLimit(parseInt(e.target.value))}
-                        className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                        className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500 border border-slate-700"
                       />
                     </div>
 
@@ -3653,7 +3729,7 @@ function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamificat
                         step="10"
                         value={withdrawalLimit} 
                         onChange={(e) => setWithdrawalLimit(parseInt(e.target.value))}
-                        className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                        className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500 border border-slate-700"
                       />
                     </div>
                   </div>
