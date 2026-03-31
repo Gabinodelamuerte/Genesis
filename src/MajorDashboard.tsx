@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Home, CreditCard, Shield, TrendingUp, User, Wallet, ChevronRight, ChevronDown, ChevronUp, CheckCircle2, Lock, Sparkles, Building2, Briefcase, Plus, ArrowRight, PieChart as PieChartIcon, Trash2, History, ArrowUpRight, ArrowDownRight, ArrowLeft, Download, Search, Car, HeartPulse, Landmark, Dog, ArrowRightLeft, CheckCircle, Trophy, BookOpen, X, XCircle, Pencil, Users, Coins, RefreshCw, Globe, AlertCircle, Sun, Moon, Info } from 'lucide-react';
+import { Home, CreditCard, Shield, TrendingUp, User, Wallet, ChevronRight, ChevronDown, ChevronUp, CheckCircle2, Lock, Sparkles, Building2, Briefcase, Plus, ArrowRight, PieChart as PieChartIcon, Trash2, History, ArrowUpRight, ArrowDownRight, ArrowLeft, Download, Search, Car, HeartPulse, Landmark, Dog, ArrowRightLeft, CheckCircle, Trophy, BookOpen, X, XCircle, Pencil, Users, Coins, RefreshCw, Globe, AlertCircle, Sun, Moon, Info, Link } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, AreaChart, Area, XAxis, YAxis, CartesianGrid, LineChart, Line } from 'recharts';
 import { GenesisLogo } from './components/GenesisLogo';
 import { Footer } from './App';
@@ -49,6 +49,8 @@ const INVESTMENTS = ["BPCE vie", "BPCE Life", "Banques populaires", "Palatine", 
 export default function MajorDashboard({ name, onLogout }: { name: string, onLogout: () => void }) {
   const [activeTab, setActiveTab] = useState<'home' | 'account' | 'gestion' | 'insurance' | 'invest' | 'profile' | 'gamification'>('home');
   const [pendingChildRequest, setPendingChildRequest] = useState<any>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [confirmLink, setConfirmLink] = useState<{ type: 'bank' | 'insurance' | 'investment', item: string } | null>(null);
   
   const [userState, setUserState] = useState<MajorState>({
     xp: 150,
@@ -156,22 +158,24 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
   }, []);
 
   useEffect(() => {
-    // Simulate a child request after 45 seconds (shorter than 1-2 mins for demo purposes, but user asked for 1-2 mins)
-    // Let's go with 60 seconds as per request "1 ou 2 minutes"
+    // Simulate a child request after 60 seconds
+    // Only if a child account is linked
     const timer = setTimeout(() => {
-      setPendingChildRequest({
-        id: `req_${Date.now()}`,
-        childName: "Léo",
-        type: Math.random() > 0.5 ? 'debit' : 'credit',
-        amount: Math.floor(Math.random() * 50) + 10,
-        label: Math.random() > 0.5 ? 'Achat Jeux Vidéo' : 'Argent de poche',
-        message: "Salut ! Est-ce que je peux avoir un peu d'argent pour m'acheter le nouveau jeu avec mes copains ? Merci !",
-        timestamp: new Date().toLocaleTimeString()
-      });
+      if (userState.childAccount?.linked) {
+        setPendingChildRequest({
+          id: `req_${Date.now()}`,
+          childName: userState.childAccount.name || "Léo",
+          type: Math.random() > 0.5 ? 'debit' : 'credit',
+          amount: Math.floor(Math.random() * 50) + 10,
+          label: Math.random() > 0.5 ? 'Achat Jeux Vidéo' : 'Argent de poche',
+          message: "Salut ! Est-ce que je peux avoir un peu d'argent pour m'acheter le nouveau jeu avec mes copains ? Merci !",
+          timestamp: new Date().toLocaleTimeString()
+        });
+      }
     }, 60000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [userState.childAccount?.linked]);
 
   const handleApproveRequest = () => {
     if (!pendingChildRequest) return;
@@ -201,6 +205,44 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
       };
     });
     setPendingChildRequest(null);
+  };
+
+  const toggleLink = (type: 'bank' | 'insurance' | 'investment', item: string) => {
+    const key = type === 'bank' ? 'linkedBanks' : type === 'insurance' ? 'linkedInsurances' : 'linkedInvestments';
+    const isLinked = userState[key].includes(item);
+    
+    if (!isLinked) {
+      setConfirmLink({ type, item });
+    } else {
+      setUserState((prev: MajorState) => ({
+        ...prev,
+        [key]: prev[key].filter(i => i !== item)
+      }));
+    }
+  };
+
+  const confirmToggleLink = () => {
+    if (!confirmLink) return;
+    const { type, item } = confirmLink;
+    const key = type === 'bank' ? 'linkedBanks' : type === 'insurance' ? 'linkedInsurances' : 'linkedInvestments';
+    
+    setUserState((prev: MajorState) => ({
+      ...prev,
+      [key]: [...prev[key], item]
+    }));
+    setConfirmLink(null);
+  };
+
+  const handleSync = () => {
+    setIsSyncing(true);
+    setTimeout(() => {
+      setUserState((prev: MajorState) => ({
+        ...prev,
+        realBalance: prev.realBalance + (Math.random() * 100 - 50),
+        xp: prev.xp + 50
+      }));
+      setIsSyncing(false);
+    }, 2000);
   };
 
   return (
@@ -283,6 +325,8 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
             nextLevelXp={nextLevelXp}
             onGoToProfile={() => setActiveTab('profile')}
             onGoToGamification={() => setActiveTab('gamification')}
+            handleSync={handleSync}
+            isSyncing={isSyncing}
           />
         )}
         {activeTab === 'gamification' && (
@@ -322,9 +366,10 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
           <MajorProfile 
             name={name} 
             userState={userState} 
-            setUserState={setUserState}
+            setUserState={setUserState} 
             onLogout={onLogout} 
             onGoToGamification={() => setActiveTab('gamification')}
+            toggleLink={toggleLink}
           />
         )}
         <Footer />
@@ -340,6 +385,41 @@ export default function MajorDashboard({ name, onLogout }: { name: string, onLog
       </nav>
 
       <GenesisAI userContext={{ name, ...userState }} />
+
+      <AnimatePresence>
+        {confirmLink && (
+          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl"
+            >
+              <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mb-4">
+                <Link className="w-6 h-6 text-blue-400" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Confirmer la liaison</h3>
+              <p className="text-slate-400 text-sm mb-6">
+                Souhaitez-vous lier votre compte <span className="text-white font-bold">{confirmLink.item}</span> à votre espace Genesis ? Cela nous permettra de synchroniser vos données en temps réel.
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setConfirmLink(null)}
+                  className="flex-1 py-3 rounded-xl bg-slate-800 text-white font-bold hover:bg-slate-700 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button 
+                  onClick={confirmToggleLink}
+                  className="flex-1 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-500 transition-colors shadow-lg shadow-blue-600/20"
+                >
+                  Confirmer
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -353,7 +433,7 @@ function NavItem({ icon, label, active, onClick }: any) {
   );
 }
 
-function MajorHome({ name, userState, level, progressPercent, nextLevelXp, onGoToProfile, onGoToGamification }: any) {
+function MajorHome({ name, userState, level, progressPercent, nextLevelXp, onGoToProfile, onGoToGamification, handleSync, isSyncing }: any) {
   const nextReward = MAJOR_REWARDS.find(r => r.xpRequired > userState.xp) || MAJOR_REWARDS[MAJOR_REWARDS.length - 1];
   const savingsBalance = userState.savingsAccounts.reduce((acc: number, curr: any) => acc + curr.balance, 0);
   const investmentsBalance = userState.investments.reduce((acc: number, curr: any) => acc + curr.balance, 0);
@@ -382,7 +462,17 @@ function MajorHome({ name, userState, level, progressPercent, nextLevelXp, onGoT
       <div className="bg-gradient-to-br from-blue-900/40 to-slate-900/40 border border-blue-500/20 rounded-3xl p-6 relative overflow-hidden shadow-lg">
         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl"></div>
         <div className="relative z-10">
-          <p className="text-[17px] leading-[21px] font-bold text-white mb-[9px]">Patrimoine Global</p>
+          <div className="flex justify-between items-start mb-[9px]">
+            <p className="text-[17px] leading-[21px] font-bold text-white">Patrimoine Global</p>
+            <button 
+              onClick={handleSync}
+              disabled={isSyncing}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all ${isSyncing ? 'bg-blue-500/20 text-blue-400 animate-pulse' : 'bg-white/10 text-white/70 hover:bg-white/20'}`}
+            >
+              <RefreshCw className={`w-3 h-3 ${isSyncing ? 'animate-spin' : ''}`} />
+              {isSyncing ? 'Synchronisation...' : 'Synchroniser'}
+            </button>
+          </div>
           <h2 className="text-4xl font-mono font-bold text-white mb-6">{(totalAssets || 0).toFixed(2)} €</h2>
           
           <div className="grid grid-cols-3 gap-2">
@@ -3303,7 +3393,7 @@ function MajorGamification({ userState, setUserState, onBack }: any) {
   );
 }
 
-function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamification }: any) {
+function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamification, toggleLink }: any) {
   const [childIdInput, setChildIdInput] = useState('');
   const [isLinking, setIsLinking] = useState(false);
   const [linkSuccess, setLinkSuccess] = useState(false);
@@ -3337,18 +3427,6 @@ function MajorProfile({ name, userState, setUserState, onLogout, onGoToGamificat
       html.classList.add('light-mode');
       setIsLightMode(true);
     }
-  };
-
-  const toggleLink = (type: 'bank' | 'insurance' | 'investment', item: string) => {
-    setUserState((prev: MajorState) => {
-      const key = type === 'bank' ? 'linkedBanks' : type === 'insurance' ? 'linkedInsurances' : 'linkedInvestments';
-      const list = prev[key];
-      if (list.includes(item)) {
-        return { ...prev, [key]: list.filter(i => i !== item) };
-      } else {
-        return { ...prev, [key]: [...list, item] };
-      }
-    });
   };
 
   const handleLinkChild = (e: React.FormEvent) => {
