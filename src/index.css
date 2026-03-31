@@ -74,6 +74,11 @@ html.light-mode .bg-gradient-to-r:not(.force-white) {
 /* NO GRAY for wording - force dark colors in light mode */
 html.light-mode .text-slate-50:not(.force-white),
 html.light-mode .text-white:not(.force-white),
+html.light-mode .text-white\/90:not(.force-white),
+html.light-mode .text-white\/80:not(.force-white),
+html.light-mode .text-white\/70:not(.force-white),
+html.light-mode .text-white\/60:not(.force-white),
+html.light-mode .text-white\/50:not(.force-white),
 html.light-mode .text-slate-100:not(.force-white),
 html.light-mode .text-slate-200:not(.force-white),
 html.light-mode .text-slate-300:not(.force-white),
@@ -496,3 +501,22 @@ html.light-mode .catalogue-label {
 html.light-mode .catalogue-label * {
   color: #000000 !important;
 }
+
+/* FORCE UTILITIES - MUST BE AT THE END FOR HIGHEST PRIORITY */
+.force-white,
+.force-white * {
+  color: #ffffff !important;
+}
+
+html.light-mode .force-black-bg {
+  background-color: #000000 !important;
+  border-color: #000000 !important;
+}
+
+html.light-mode .force-white-text,
+html.light-mode .force-white-text * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.force-dark { color: #0f172a !important; }

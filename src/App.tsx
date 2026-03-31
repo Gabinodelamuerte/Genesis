@@ -280,7 +280,7 @@ export default function App() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-md bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 shadow-2xl overflow-hidden"
+              className="relative w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 shadow-2xl overflow-hidden"
             >
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-600 to-blue-600" />
               
@@ -373,17 +373,17 @@ function CookieConsent({ onAcceptAll, onRejectAll, onSave, isCustomizing, setIsC
         initial={{ opacity: 0, y: 40, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 40, scale: 0.95 }}
-        className="relative w-full max-w-3xl bg-slate-900/40 border border-white/10 rounded-[3rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden max-h-[90vh] flex flex-col backdrop-blur-2xl"
+        className="relative w-full max-w-2xl bg-slate-900/40 border border-white/10 rounded-3xl md:rounded-[3rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden max-h-[90vh] flex flex-col backdrop-blur-2xl"
       >
         {/* Header Section */}
-        <div className="p-8 md:p-12 pb-6 border-b border-white/5">
+        <div className="p-6 md:p-10 pb-6 border-b border-white/5">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-2xl shadow-lg shadow-purple-500/20">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-xl md:text-2xl shadow-lg shadow-purple-500/20 shrink-0">
               🍪
             </div>
             <div>
               <p className="text-[10px] font-bold text-purple-400 uppercase tracking-[0.2em] mb-1">Confidentialité</p>
-              <h3 className="text-2xl md:text-3xl font-display font-bold text-white tracking-tight">Gère tes données, contrôle ton aventure !</h3>
+              <h3 className="text-xl md:text-3xl font-display font-bold text-white tracking-tight">Gère tes données, contrôle ton aventure !</h3>
             </div>
           </div>
           <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-2xl">
@@ -392,7 +392,7 @@ function CookieConsent({ onAcceptAll, onRejectAll, onSave, isCustomizing, setIsC
         </div>
 
         {/* Content Section */}
-        <div className="flex-1 overflow-y-auto p-8 md:p-12 pt-6 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-6 md:p-10 pt-6 custom-scrollbar">
           <AnimatePresence mode="wait">
             {!isCustomizing ? (
               <motion.div
@@ -402,17 +402,17 @@ function CookieConsent({ onAcceptAll, onRejectAll, onSave, isCustomizing, setIsC
                 exit={{ opacity: 0, x: 20 }}
                 className="space-y-6"
               >
-                <div className="group bg-white/5 hover:bg-white/10 border border-white/10 rounded-3xl p-6 transition-all duration-300">
-                  <div className="flex items-start gap-5">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center shrink-0 border border-white/10 group-hover:border-purple-500/50 transition-colors">
-                      <Shield className="w-6 h-6 text-purple-400" />
+                <div className="group bg-white/5 hover:bg-white/10 border border-white/10 rounded-3xl p-4 md:p-6 transition-all duration-300">
+                  <div className="flex items-start gap-4 md:gap-5">
+                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-slate-800 flex items-center justify-center shrink-0 border border-white/10 group-hover:border-purple-500/50 transition-colors">
+                      <Shield className="w-5 h-5 md:w-6 md:h-6 text-purple-400" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <h4 className="font-bold text-lg text-white">🔒 Les Indispensables</h4>
-                        <span className="text-[9px] font-bold bg-white/10 px-2 py-0.5 rounded-full text-slate-400 uppercase tracking-widest">Toujours actifs</span>
+                      <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-2">
+                        <h4 className="font-bold text-base md:text-lg text-white">🔒 Les Indispensables</h4>
+                        <span className="text-[8px] md:text-[9px] font-bold bg-white/10 px-2 py-0.5 rounded-full text-slate-400 uppercase tracking-widest whitespace-nowrap">Toujours actifs</span>
                       </div>
-                      <p className="text-sm text-slate-400 leading-relaxed mb-3">
+                      <p className="text-xs md:text-sm text-slate-400 leading-relaxed mb-3">
                         Ceux-là, on ne peut pas s'en passer. Ils servent à te connecter de façon sécurisée et à vérifier que tu es bien un humain.
                       </p>
                       <div className="flex items-center gap-2">
@@ -429,8 +429,8 @@ function CookieConsent({ onAcceptAll, onRejectAll, onSave, isCustomizing, setIsC
                     { icon: "📊", label: "Analyse", desc: "Amélioration app" },
                     { icon: "📢", label: "Réseaux", desc: "Partage exploits", disabled: true }
                   ].map((item, i) => (
-                    <div key={i} className={`bg-white/5 border border-white/10 rounded-3xl p-5 flex flex-col items-center text-center ${item.disabled ? 'opacity-40' : 'hover:bg-white/10 transition-colors'}`}>
-                      <span className="text-3xl mb-3">{item.icon}</span>
+                    <div key={i} className={`bg-white/5 border border-white/10 rounded-3xl p-4 md:p-5 flex flex-col items-center text-center ${item.disabled ? 'opacity-40' : 'hover:bg-white/10 transition-colors'}`}>
+                      <span className="text-2xl md:text-3xl mb-3">{item.icon}</span>
                       <p className="text-[11px] font-bold text-white uppercase tracking-widest mb-1">{item.label}</p>
                       <p className="text-[10px] text-slate-500">{item.desc}</p>
                     </div>
@@ -469,21 +469,21 @@ function CookieConsent({ onAcceptAll, onRejectAll, onSave, isCustomizing, setIsC
                     disabled: true
                   }
                 ].map((item) => (
-                  <div key={item.id} className={`bg-white/5 border border-white/10 rounded-3xl p-6 flex items-center justify-between gap-6 ${item.disabled ? 'opacity-60' : ''}`}>
+                  <div key={item.id} className={`bg-white/5 border border-white/10 rounded-3xl p-4 md:p-6 flex items-center justify-between gap-4 md:gap-6 ${item.disabled ? 'opacity-60' : ''}`}>
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <span className="text-2xl">{item.icon}</span>
-                        <h4 className="font-bold text-white">{item.title}</h4>
+                        <span className="text-xl md:text-2xl">{item.icon}</span>
+                        <h4 className="font-bold text-sm md:text-base text-white">{item.title}</h4>
                       </div>
-                      <p className="text-xs text-slate-400 leading-relaxed mb-3">{item.desc}</p>
+                      <p className="text-[11px] md:text-xs text-slate-400 leading-relaxed mb-3">{item.desc}</p>
                       <p className="text-[10px] text-slate-500 italic">{item.note}</p>
                     </div>
                     <button 
                       onClick={() => !item.disabled && setSettings({...settings, [item.id]: !((settings as any)[item.id])})}
                       disabled={item.disabled}
-                      className={`w-14 h-7 rounded-full transition-all relative shrink-0 ${item.disabled ? 'bg-slate-800' : (settings as any)[item.id] ? 'bg-purple-600 shadow-[0_0_15px_rgba(147,51,234,0.5)]' : 'bg-slate-700'}`}
+                      className={`w-12 h-6 md:w-14 md:h-7 rounded-full transition-all relative shrink-0 ${item.disabled ? 'bg-slate-800' : (settings as any)[item.id] ? 'bg-purple-600 shadow-[0_0_15px_rgba(147,51,234,0.5)]' : 'bg-slate-700'}`}
                     >
-                      <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-all shadow-sm ${item.disabled ? 'left-1 bg-slate-600' : (settings as any)[item.id] ? 'left-8' : 'left-1'}`} />
+                      <div className={`absolute top-1 w-4 h-4 md:w-5 md:h-5 bg-white rounded-full transition-all shadow-sm ${item.disabled ? 'left-1 bg-slate-600' : (settings as any)[item.id] ? 'left-7 md:left-8' : 'left-1'}`} />
                     </button>
                   </div>
                 ))}
@@ -493,27 +493,27 @@ function CookieConsent({ onAcceptAll, onRejectAll, onSave, isCustomizing, setIsC
         </div>
 
         {/* Footer Section */}
-        <div className="p-8 md:p-12 pt-0">
+        <div className="p-6 md:p-10 pt-0">
           {!isCustomizing ? (
             <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                 <button
                   onClick={onAcceptAll}
-                  className="group relative py-5 bg-white text-slate-950 rounded-[2rem] font-bold text-base overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98] shadow-2xl"
+                  className="group relative py-4 md:py-5 bg-white text-slate-950 rounded-2xl md:rounded-[2rem] font-bold text-sm md:text-base overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98] shadow-2xl"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-100 to-blue-100 opacity-0 group-hover:opacity-100 transition-opacity" />
                   <span className="relative">Tout accepter</span>
                 </button>
                 <button
                   onClick={onRejectAll}
-                  className="py-5 bg-slate-800 text-white border border-white/10 rounded-[2rem] font-bold text-base hover:bg-slate-700 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  className="py-4 md:py-5 bg-slate-800 text-white border border-white/10 rounded-2xl md:rounded-[2rem] font-bold text-sm md:text-base hover:bg-slate-700 transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Tout refuser
                 </button>
               </div>
               <button
                 onClick={() => setIsCustomizing(true)}
-                className="py-2 text-slate-500 hover:text-purple-400 text-xs font-bold uppercase tracking-[0.2em] transition-colors"
+                className="py-2 text-slate-500 hover:text-purple-400 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] transition-colors"
               >
                 Personnaliser mes choix
               </button>
@@ -522,13 +522,13 @@ function CookieConsent({ onAcceptAll, onRejectAll, onSave, isCustomizing, setIsC
             <div className="flex flex-col gap-4">
               <button
                 onClick={() => onSave(settings)}
-                className="py-5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-[2rem] font-bold text-base hover:scale-[1.02] active:scale-[0.98] shadow-2xl shadow-purple-500/20 transition-all"
+                className="py-4 md:py-5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-2xl md:rounded-[2rem] font-bold text-sm md:text-base hover:scale-[1.02] active:scale-[0.98] shadow-2xl shadow-purple-500/20 transition-all"
               >
                 Enregistrer mes préférences
               </button>
               <button
                 onClick={() => setIsCustomizing(false)}
-                className="py-2 text-slate-500 hover:text-white text-xs font-bold uppercase tracking-[0.2em] transition-colors"
+                className="py-2 text-slate-500 hover:text-white text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] transition-colors"
               >
                 Retour à l'aperçu
               </button>
@@ -835,20 +835,20 @@ function PrivacyModal({ onClose }: { onClose: () => void }) {
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-lg w-full shadow-2xl relative"
+        className="bg-slate-900 border border-slate-800 rounded-2xl md:rounded-3xl p-6 md:p-8 max-w-md md:max-w-lg w-full shadow-2xl relative"
       >
         <button 
           onClick={onClose}
-          className="absolute top-6 right-6 p-2 hover:bg-slate-800 rounded-full text-slate-400 transition-colors"
+          className="absolute top-4 right-4 md:top-6 md:right-6 p-2 hover:bg-slate-800 rounded-full text-slate-400 transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
         
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center shrink-0">
             <Shield className="w-5 h-5 text-purple-400" />
           </div>
-          <h3 className="text-xl font-bold text-white">Politique de confidentialité</h3>
+          <h3 className="text-lg md:text-xl font-bold text-white">Politique de confidentialité</h3>
         </div>
         
         <div className="space-y-4 text-slate-300 text-sm leading-relaxed">

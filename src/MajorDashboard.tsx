@@ -382,7 +382,7 @@ function MajorHome({ name, userState, level, progressPercent, nextLevelXp, onGoT
       <div className="bg-gradient-to-br from-blue-900/40 to-slate-900/40 border border-blue-500/20 rounded-3xl p-6 relative overflow-hidden shadow-lg">
         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl"></div>
         <div className="relative z-10">
-          <p className="text-[17px] leading-[21px] font-bold text-black dark:text-slate-400 mb-[9px]">Patrimoine Global</p>
+          <p className="text-[17px] leading-[21px] font-bold text-white mb-[9px]">Patrimoine Global</p>
           <h2 className="text-4xl font-mono font-bold text-white mb-6">{(totalAssets || 0).toFixed(2)} €</h2>
           
           <div className="grid grid-cols-3 gap-2">
@@ -1074,30 +1074,30 @@ function MajorAccount({ name, userState, setUserState }: any) {
                 <div className="flex justify-between items-start relative z-10">
                   <div className="flex items-center gap-2">
                     <GenesisLogo className="w-6 h-6" />
-                    <span className="font-display font-bold text-lg tracking-widest text-slate-300 force-white">GENESIS</span>
+                    <span className="font-display font-bold text-lg tracking-widest text-white force-white">GENESIS</span>
                   </div>
                   <div className="flex gap-1">
-                    <div className="w-8 h-5 bg-slate-300/20 rounded-sm"></div>
+                    <div className="w-8 h-5 bg-white/20 rounded-sm force-white"></div>
                   </div>
                 </div>
                 
                 <div className="relative z-10">
-                  <div className="font-mono text-lg tracking-widest text-slate-300 mb-2 flex items-center justify-between force-white">
-                    <span>{showCardDetails ? '4532 8812 4456 4092' : '**** **** **** 4092'}</span>
+                  <div className="font-mono text-lg tracking-widest text-white mb-2 flex items-center justify-between force-white">
+                    <span className="force-white">{showCardDetails ? '4532 8812 4456 4092' : '**** **** **** 4092'}</span>
                     <button 
                       onClick={() => setShowCardDetails(!showCardDetails)}
-                      className="p-1.5 bg-slate-800/50 rounded-lg text-slate-400 hover:text-white transition-colors"
+                      className="p-1.5 bg-slate-800/50 rounded-lg text-slate-400 hover:text-white transition-colors force-white"
                     >
-                      {showCardDetails ? <Lock className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+                      {showCardDetails ? <Lock className="w-4 h-4 force-white" /> : <Sparkles className="w-4 h-4 force-white" />}
                     </button>
                   </div>
                   <div className="flex justify-between items-end">
                     <div>
-                      <div className="text-[8px] text-slate-500 uppercase tracking-wider mb-0.5 force-white opacity-60">Titulaire</div>
-                      <div className="text-sm font-medium text-slate-300 uppercase force-white">{name}</div>
+                      <div className="text-[8px] text-white uppercase tracking-wider mb-0.5 force-white opacity-60">Titulaire</div>
+                      <div className="text-sm font-medium text-white uppercase force-white">{name}</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-[8px] text-slate-500 uppercase tracking-wider mb-0.5 force-white opacity-60">
+                      <div className="text-[8px] text-white uppercase tracking-wider mb-0.5 force-white opacity-60">
                         {showCardDetails ? 'CVV' : 'Type'}
                       </div>
                       <div className="text-xs font-medium text-blue-400 force-white">
@@ -1957,14 +1957,14 @@ function MajorInvest({ userState, setUserState }: any) {
           </div>
           
           <div className="mt-8 flex gap-4">
-            <button onClick={() => setShowBuyModal(true)} className="flex-1 bg-white text-black hover:bg-slate-200 font-bold py-4 rounded-2xl transition-all transform active:scale-95 flex items-center justify-center gap-2 shadow-lg">
-              <Plus className="w-5 h-5" /> Investir
+            <button onClick={() => setShowBuyModal(true)} className="flex-1 bg-slate-900 text-white hover:bg-slate-800 font-bold py-4 rounded-2xl transition-all transform active:scale-95 flex items-center justify-center gap-2 shadow-lg force-black-bg force-white-text">
+              <Plus className="w-5 h-5 force-white-text" /> <span className="force-white-text">Investir</span>
             </button>
             <button 
               onClick={() => setShowBuyModal(true)}
-              className="w-14 h-14 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-center text-white hover:bg-slate-800 transition-colors"
+              className="w-14 h-14 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-center text-white hover:bg-slate-800 transition-colors force-black-bg force-white-text"
             >
-              <Search className="w-6 h-6" />
+              <Search className="w-6 h-6 force-white-text" />
             </button>
           </div>
         </div>
@@ -2721,13 +2721,19 @@ function MajorInvest({ userState, setUserState }: any) {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h2 className="font-display text-lg font-bold text-white">Vos Supports</h2>
-          <button 
-            onClick={() => setShowExchangeSimulator(!showExchangeSimulator)}
-            className="text-xs text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1 bg-blue-500/10 px-3 py-1.5 rounded-full border border-blue-500/20"
-          >
-            <RefreshCw className={`w-3 h-3 ${showExchangeSimulator ? 'rotate-180' : ''} transition-transform`} />
-            Simulateur de change
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setShowExchangeSimulator(!showExchangeSimulator)}
+              className="text-xs text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1 bg-blue-500/10 px-3 py-1.5 rounded-full border border-blue-500/20"
+            >
+              <RefreshCw className={`w-3 h-3 ${showExchangeSimulator ? 'rotate-180' : ''} transition-transform`} />
+              Simulateur
+            </button>
+            <button className="flex items-center gap-2 px-3 py-1.5 bg-slate-900/50 border border-slate-800 rounded-lg hover:bg-slate-900 transition-all group force-black-bg">
+              <Plus size={16} className="text-slate-400 group-hover:text-white transition-colors force-white-text" />
+              <span className="text-xs font-bold text-white force-white-text">Ajouter un compte</span>
+            </button>
+          </div>
         </div>
 
         <AnimatePresence>
@@ -2943,8 +2949,8 @@ function MajorInsurance({ userState, setUserState }: any) {
               <Sparkles className="w-6 h-6 text-emerald-400" />
             </div>
             <div>
-              <p className="text-sm text-black dark:text-emerald-100/70 mb-1">Économies potentielles avec BPCE</p>
-              <h2 className="text-3xl font-mono font-bold text-black dark:text-emerald-400">+{totalSavings.toFixed(0)} € <span className="text-lg text-black dark:text-emerald-400/70">/ an</span></h2>
+              <p className="text-sm text-white/70 mb-1">Économies potentielles avec BPCE</p>
+              <h2 className="text-3xl font-mono font-bold text-emerald-400">+{totalSavings.toFixed(0)} € <span className="text-lg text-emerald-400/70">/ an</span></h2>
             </div>
           </div>
         </div>
@@ -3004,8 +3010,8 @@ function MajorInsurance({ userState, setUserState }: any) {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <button type="button" onClick={() => setEditingId(null)} className="flex-1 py-2 bg-slate-800 text-white text-sm font-medium rounded-xl hover:bg-slate-700 transition-colors">Annuler</button>
-                          <button type="submit" disabled={!newProvider || !newPrice} className="flex-1 py-2 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-500 disabled:opacity-50 transition-colors">Valider</button>
+                          <button type="button" onClick={() => setEditingId(null)} className="flex-1 py-2 bg-slate-800 text-white text-sm font-medium rounded-xl hover:bg-slate-700 transition-colors force-black-bg force-white-text">Annuler</button>
+                          <button type="submit" disabled={!newProvider || !newPrice} className="flex-1 py-2 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-500 disabled:opacity-50 transition-colors force-black-bg force-white-text">Valider</button>
                         </div>
                       </form>
                     ) : (
@@ -3024,8 +3030,8 @@ function MajorInsurance({ userState, setUserState }: any) {
                               onClick={() => startEditing(userIns)}
                               className="p-2 rounded-lg force-black-bg force-white-text hover:opacity-80 transition-colors flex items-center gap-1"
                             >
-                              <Pencil className="w-4 h-4" />
-                              <span className="text-[10px] font-bold">Modifier</span>
+                              <Pencil className="w-4 h-4 force-white-text" />
+                              <span className="text-[10px] font-bold force-white-text">Modifier</span>
                             </button>
                           </div>
                         </div>
@@ -3043,25 +3049,25 @@ function MajorInsurance({ userState, setUserState }: any) {
                               <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl"></div>
                               <div className="relative z-10">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <p className="text-xs text-black dark:text-emerald-400/70 uppercase tracking-wider font-bold">Proposition BPCE</p>
+                                  <p className="text-xs text-white/70 uppercase tracking-wider font-bold">Proposition BPCE</p>
                                   <span className="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full font-bold">Mêmes garanties</span>
                                 </div>
                                 <p className="font-bold text-white flex items-center gap-2">
-                                  <GenesisLogo className="w-4 h-4" /> Genesis Assurances
+                                  <GenesisLogo className="w-4 h-4" /> <span>Genesis Assurances</span>
                                 </p>
                               </div>
                               <div className="text-right relative z-10">
-                                <p className="font-mono text-xl font-bold text-emerald-400">{bpcePrice.toFixed(2)} €<span className="text-xs text-[#0A976A] font-sans">/mois</span></p>
+                                <p className="font-mono text-xl font-bold text-emerald-400">{bpcePrice.toFixed(2)} €<span className="text-xs text-emerald-400/70 font-sans">/mois</span></p>
                                 <p className="text-xs font-bold text-emerald-400 mt-1 bg-emerald-500/20 inline-block px-2 py-0.5 rounded">-{yearlySavings.toFixed(0)}€ / an</p>
                               </div>
                             </div>
 
                             <button 
                               onClick={() => handleChangeProvider(userIns.id)}
-                              className={`w-full py-3 cta-inverted font-medium rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg`}
+                              className={`w-full py-3 force-black-bg font-medium rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg force-white-text`}
                             >
-                              <CheckCircle className="w-5 h-5" /> 
-                              {changingId === userIns.id ? 'Changer pour Genesis Assurances' : 'Changer pour BPCE'}
+                              <CheckCircle className="w-5 h-5 force-white-text" /> 
+                              <span className="force-white-text">{changingId === userIns.id ? 'Changer pour Genesis Assurances' : 'Changer pour BPCE'}</span>
                             </button>
                           </>
                         )}

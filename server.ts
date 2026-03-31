@@ -13,7 +13,18 @@ async function startServer() {
 
   app.use(express.json());
 
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+  let aiClient: GoogleGenAI | null = null;
+
+  function getAI() {
+    if (!aiClient) {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error("GEMINI_API_KEY environment variable is required");
+      }
+      aiClient = new GoogleGenAI({ apiKey });
+    }
+    return aiClient;
+  }
 
   // API Route for Stock Prices
   app.get("/api/stock/:symbol", async (req, res) => {
@@ -78,6 +89,7 @@ async function startServer() {
   app.post("/api/advice", async (req, res) => {
     try {
       const { userContext } = req.body;
+      const ai = getAI();
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: `Tu es Genesis, un coach financier intelligent et bienveillant. 
@@ -103,6 +115,7 @@ async function startServer() {
   app.post("/api/ask", async (req, res) => {
     try {
       const { question, userContext } = req.body;
+      const ai = getAI();
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: `Tu es Genesis, un coach financier expert, moderne et pédagogique.
