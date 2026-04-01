@@ -1902,11 +1902,14 @@ function MajorInvest({ userState, setUserState }: any) {
     const amount = parseFloat(buyAmount);
     if (!amount || amount <= 0 || !selectedAsset || !selectedAccount) return;
     
+    const fee = amount * 0.01;
+    const totalCost = amount + fee;
+
     const rtData = userState.realTimePrices[selectedAsset.ticker];
     const currentPrice = rtData?.price || selectedAsset.price;
 
-    if (amount > userState.realBalance) {
-      alert("Solde insuffisant sur le compte courant.");
+    if (totalCost > userState.realBalance) {
+      alert(`Solde insuffisant sur le compte courant pour couvrir le montant et les frais de 1% (${fee.toFixed(2)}€).`);
       return;
     }
 
@@ -1914,7 +1917,7 @@ function MajorInvest({ userState, setUserState }: any) {
 
     setUserState((prev: any) => {
       // Update real balance
-      const newRealBalance = prev.realBalance - amount;
+      const newRealBalance = prev.realBalance - totalCost;
 
       // Update investment balance
       const updatedInvestments = prev.investments.map((inv: any) => {
@@ -1929,8 +1932,8 @@ function MajorInvest({ userState, setUserState }: any) {
         id: `it_${Date.now()}`,
         accountId: selectedAccount,
         date: 'Aujourd\'hui',
-        label: `Achat ${selectedAsset.ticker}`,
-        amount: -amount,
+        label: `Achat ${selectedAsset.ticker} (Frais: ${fee.toFixed(2)}€)`,
+        amount: -totalCost,
         type: 'buy'
       };
 
@@ -1977,6 +1980,9 @@ function MajorInvest({ userState, setUserState }: any) {
     const amount = parseFloat(sellAmount);
     if (!amount || amount <= 0 || !selectedHolding) return;
     
+    const fee = amount * 0.01;
+    const netAmount = amount - fee;
+
     const rtData = userState.realTimePrices[selectedHolding.ticker];
     const currentPrice = rtData?.price || (selectedHolding.value / selectedHolding.shares);
     const currentMarketValue = selectedHolding.shares * currentPrice;
@@ -1992,7 +1998,7 @@ function MajorInvest({ userState, setUserState }: any) {
 
     setUserState((prev: any) => {
       // Update real balance
-      const newRealBalance = prev.realBalance + amount;
+      const newRealBalance = prev.realBalance + netAmount;
 
       // Update investment balance
       const updatedInvestments = prev.investments.map((inv: any) => {
@@ -2007,8 +2013,8 @@ function MajorInvest({ userState, setUserState }: any) {
         id: `it_${Date.now()}`,
         accountId: selectedHolding.accountId,
         date: 'Aujourd\'hui',
-        label: `Vente ${selectedHolding.ticker}`,
-        amount: amount,
+        label: `Vente ${selectedHolding.ticker} (Frais: ${fee.toFixed(2)}€)`,
+        amount: netAmount,
         type: 'sell'
       };
 
@@ -2461,16 +2467,21 @@ function MajorInvest({ userState, setUserState }: any) {
                           onChange={(e) => setBuyAmount(e.target.value)}
                           placeholder="0.00"
                           step="0.01"
-                          max={userState.realBalance}
+                          max={userState.realBalance / 1.01}
                           className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-2xl font-mono text-white placeholder:text-slate-600 focus:outline-none focus:border-purple-500"
                           autoFocus
                         />
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 font-mono text-xl">€</span>
                       </div>
                       {buyAmount && parseFloat(buyAmount) > 0 && (
-                        <p className="text-xs text-slate-500 mt-2 text-right">
-                          Soit environ {(parseFloat(buyAmount) / (userState.realTimePrices[selectedAsset.ticker]?.price || selectedAsset.price)).toFixed(4)} parts
-                        </p>
+                        <div className="flex justify-between items-center mt-2">
+                          <p className="text-xs text-purple-400">
+                            Frais (1%) : {(parseFloat(buyAmount) * 0.01).toFixed(2)} €
+                          </p>
+                          <p className="text-xs text-slate-500 text-right">
+                            Soit environ {(parseFloat(buyAmount) / (userState.realTimePrices[selectedAsset.ticker]?.price || selectedAsset.price)).toFixed(4)} parts
+                          </p>
+                        </div>
                       )}
                     </div>
 
@@ -2478,7 +2489,7 @@ function MajorInvest({ userState, setUserState }: any) {
                       <button type="button" onClick={() => setShowBuyModal(false)} className="flex-1 py-3 bg-slate-800 text-white font-medium rounded-xl hover:bg-slate-700 transition-colors">
                         Annuler
                       </button>
-                      <button type="submit" disabled={!buyAmount || parseFloat(buyAmount) <= 0 || parseFloat(buyAmount) > userState.realBalance} className="flex-1 py-3 bg-purple-600 text-white font-medium rounded-xl hover:bg-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                      <button type="submit" disabled={!buyAmount || parseFloat(buyAmount) <= 0 || parseFloat(buyAmount) * 1.01 > userState.realBalance} className="flex-1 py-3 bg-purple-600 text-white font-medium rounded-xl hover:bg-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                         Confirmer l'achat
                       </button>
                     </div>
@@ -2759,6 +2770,18 @@ function MajorInvest({ userState, setUserState }: any) {
                         <span className="text-slate-500">Prix actuel</span>
                         <span className="text-white font-mono">
                           {(userState.realTimePrices[selectedHolding.ticker]?.price || (selectedHolding.value / selectedHolding.shares)).toFixed(2)} €
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-slate-500">Frais (1%)</span>
+                        <span className="text-red-400 font-mono">
+                          -{(parseFloat(sellAmount) * 0.01 || 0).toFixed(2)} €
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm font-bold border-t border-slate-800 pt-2 mt-2">
+                        <span className="text-white">Montant net reçu</span>
+                        <span className="text-emerald-400 font-mono">
+                          {(parseFloat(sellAmount) * 0.99 || 0).toFixed(2)} €
                         </span>
                       </div>
                     </div>

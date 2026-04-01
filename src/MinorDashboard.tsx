@@ -130,20 +130,23 @@ export default function MinorDashboard({ name, age, onLogout, onShowPrivacy, onS
     const asset = ASSETS_CATALOG.find(a => a.id === assetId);
     const price = userState.realTimePrices[asset?.symbol || '']?.price || asset?.price || 0;
     
-    if (userState.virtualBalance >= amount && amount > 0 && price > 0) {
+    const fee = amount * 0.01;
+    const totalCost = amount + fee;
+
+    if (userState.virtualBalance >= totalCost && amount > 0 && price > 0) {
       const newTx: Transaction = {
         id: Date.now().toString(),
         date: new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }),
         type: 'buy',
-        title: `Achat ${asset?.name}`,
-        amount: amount,
+        title: `Achat ${asset?.name} (Frais: ${fee.toFixed(2)} ¤)`,
+        amount: totalCost,
         assetSymbol: asset?.symbol
       };
       setUserState(prev => {
         const currentInvest = prev.investments[assetId] || { amount: 0, shares: 0 };
         return {
           ...prev,
-          virtualBalance: prev.virtualBalance - amount,
+          virtualBalance: prev.virtualBalance - totalCost,
           investments: {
             ...prev.investments,
             [assetId]: {
@@ -154,6 +157,8 @@ export default function MinorDashboard({ name, age, onLogout, onShowPrivacy, onS
           transactions: [...(prev.transactions || []), newTx]
         };
       });
+    } else if (userState.virtualBalance < totalCost) {
+      alert(`Solde insuffisant pour couvrir le montant et les frais de 1% (${fee.toFixed(2)} ¤).`);
     }
   };
 
@@ -679,16 +684,19 @@ function MinorInvest({ userState, totalPortfolioValue, onInvest }: any) {
                   max={userState.virtualBalance}
                   className="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500"
                 />
-                <button onClick={() => setInvestAmount(userState.virtualBalance.toString())} className="px-4 py-3 bg-slate-800 rounded-xl text-sm font-medium hover:bg-slate-700">
+                <button onClick={() => setInvestAmount((userState.virtualBalance / 1.01).toFixed(2))} className="px-4 py-3 bg-slate-800 rounded-xl text-sm font-medium hover:bg-slate-700">
                   Max
                 </button>
               </div>
               <p className="text-xs text-slate-500 mt-2">Fonds disponibles : {(userState.virtualBalance || 0).toFixed(2)} ¤</p>
+              {investAmount && parseFloat(investAmount) > 0 && (
+                <p className="text-xs text-emerald-400 mt-1">Frais de transaction (1%) : {(parseFloat(investAmount) * 0.01).toFixed(2)} ¤</p>
+              )}
             </div>
 
             <button 
               onClick={handleBuy}
-              disabled={!investAmount || parseFloat(investAmount) <= 0 || parseFloat(investAmount) > userState.virtualBalance}
+              disabled={!investAmount || parseFloat(investAmount) <= 0 || parseFloat(investAmount) * 1.01 > userState.virtualBalance}
               className="w-full py-4 bg-emerald-600 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black disabled:bg-slate-800 disabled:text-slate-500 text-white rounded-xl font-bold transition-all border border-transparent hover:border-black dark:hover:border-white"
             >
               Acheter {selectedAsset.symbol}
