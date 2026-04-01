@@ -500,8 +500,11 @@ html.light-mode .catalogue-label * {
 
 /* FORCE UTILITIES - MUST BE AT THE END FOR HIGHEST PRIORITY */
 .force-white,
-.force-white * {
+.force-white *,
+html.light-mode .force-white,
+html.light-mode .force-white * {
   color: #ffffff !important;
+  stroke: #ffffff !important;
 }
 
 html.light-mode .force-black-bg {
