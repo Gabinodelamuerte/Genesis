@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
-import { BookOpen, LineChart as ChartIcon, User, Home, Gift, Users, Link as LinkIcon, Lock, Sparkles, ChevronRight, Wallet, TrendingUp, Shield, Rocket, Target, CheckCircle2, XCircle, ArrowLeft, Share2, CreditCard, Sun, Moon, Globe, Landmark } from 'lucide-react';
+import { BookOpen, LineChart as ChartIcon, User, Home, Gift, Users, Link as LinkIcon, Lock, Sparkles, ChevronRight, Wallet, TrendingUp, Shield, Rocket, Target, CheckCircle2, XCircle, ArrowLeft, Share2, CreditCard, Sun, Moon, Globe, Landmark, Download } from 'lucide-react';
 import { MODULES, ASSETS_CATALOG, REWARDS, THEMES } from './data/minorData';
 import { GenesisLogo } from './components/GenesisLogo';
 import { Footer } from './App';
@@ -791,6 +791,34 @@ function MinorProfile({ name, userState, level, onLogout, onLinkAccount }: any) 
           className={`w-14 h-8 rounded-full p-1 transition-colors duration-300 ease-in-out ${isLightMode ? 'bg-purple-500' : 'bg-slate-700'}`}
         >
           <div className={`w-6 h-6 rounded-full bg-white shadow-md transform transition-transform duration-300 ease-in-out ${isLightMode ? 'translate-x-6' : 'translate-x-0'}`} />
+        </button>
+      </div>
+
+      {/* Données personnelles */}
+      <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400">
+            <Download className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-50">Données personnelles</h3>
+            <p className="text-sm text-slate-400">Exportez vos informations Genesis.</p>
+          </div>
+        </div>
+        <button 
+          onClick={() => {
+            const data = JSON.stringify(userState, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `genesis-data-${name.toLowerCase()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+          }}
+          className="px-4 py-2 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition-all"
+        >
+          Télécharger mes données
         </button>
       </div>
 

@@ -3772,6 +3772,34 @@ function MajorProfile({
         </button>
       </section>
 
+      {/* Données personnelles */}
+      <section className={`border rounded-2xl p-4 flex items-center justify-between transition-colors ${isLightMode ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/50 border-slate-800'}`}>
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isLightMode ? 'bg-slate-100 text-slate-600' : 'bg-slate-800 text-slate-400'}`}>
+            <Download className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className={`font-bold transition-colors ${isLightMode ? 'text-slate-900' : 'text-slate-50'}`}>Données personnelles</h3>
+            <p className="text-sm text-slate-400">Exportez vos informations Genesis.</p>
+          </div>
+        </div>
+        <button 
+          onClick={() => {
+            const data = JSON.stringify(userState, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `genesis-data-${name.toLowerCase()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+          }}
+          className={`px-4 py-2 border rounded-xl text-xs font-bold transition-all ${isLightMode ? 'bg-white border-slate-200 text-slate-900 hover:bg-slate-50' : 'bg-slate-800 border-slate-700 text-white hover:bg-slate-700'}`}
+        >
+          Télécharger mes données
+        </button>
+      </section>
+
       {/* Gamification Entry */}
       <section>
         <div 

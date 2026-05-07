@@ -98,10 +98,13 @@ const CGU = ({ onClose }: { onClose: () => void }) => {
         
         <div className="p-8 bg-slate-950/50 border-t border-white/5">
           <button
-            onClick={onClose}
+            onClick={() => {
+              window.open('https://pdfhost.io/v/dmAznBgPc5_Challenge_Agorize', '_blank');
+              onClose();
+            }}
             className="w-full py-4 bg-white text-slate-950 rounded-2xl font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
           >
-            Fermer
+            Découvrir
           </button>
         </div>
       </motion.div>

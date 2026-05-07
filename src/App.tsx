@@ -582,12 +582,6 @@ export function Footer({ onShowPrivacy, onShowLegal, onShowCGU }: { onShowPrivac
       </p>
       <div className="flex justify-center gap-4 mt-2">
         <p 
-          onClick={onShowLegal}
-          className="text-[9px] text-slate-700 uppercase tracking-widest cursor-pointer hover:text-slate-500"
-        >
-          Mentions Légales
-        </p>
-        <p 
           onClick={onShowCGU}
           className="text-[9px] text-slate-700 uppercase tracking-widest cursor-pointer hover:text-slate-500"
         >
@@ -598,6 +592,12 @@ export function Footer({ onShowPrivacy, onShowLegal, onShowCGU }: { onShowPrivac
           className="text-[9px] text-slate-700 uppercase tracking-widest cursor-pointer hover:text-slate-500"
         >
           Protection des données
+        </p>
+        <p 
+          onClick={onShowLegal}
+          className="text-[9px] text-slate-700 uppercase tracking-widest cursor-pointer hover:text-slate-500"
+        >
+          Mentions Légales
         </p>
       </div>
     </footer>
@@ -678,10 +678,13 @@ function LegalModal({ onClose }: { onClose: () => void }) {
         
         <div className="p-8 bg-slate-950/50 border-t border-white/5">
           <button
-            onClick={onClose}
+            onClick={() => {
+              window.open('https://pdfhost.io/v/gAspAEnPnR_Challenge_Agorize-3', '_blank');
+              onClose();
+            }}
             className="w-full py-4 bg-white text-slate-950 rounded-2xl font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
           >
-            Fermer
+            Découvrir
           </button>
         </div>
       </motion.div>
@@ -993,10 +996,13 @@ function PrivacyModal({ onClose }: { onClose: () => void }) {
         </div>
         
         <button 
-          onClick={onClose}
+          onClick={() => {
+            window.open('https://pdfhost.io/v/CKtkRZN26R_Challenge_Agorize-2', '_blank');
+            onClose();
+          }}
           className="w-full mt-8 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-all"
         >
-          Fermer
+          Découvrir
         </button>
       </motion.div>
     </motion.div>
